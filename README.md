@@ -17,4 +17,11 @@ Ouvrir `index.html` dans un navigateur (une connexion internet est nécessaire p
 - 3 difficultés d'IA (Facile, Normal, Champion) ; l'IA change de Pokémon quand son duel est mauvais.
 - Changement de Pokémon en combat (4 s de recharge), mort subite après 3 minutes.
 
+## Crédits
+
+- Sprites animés en combat : [PMD SpriteCollab](https://sprites.pmdcollab.org), licence CC BY-NC 4.0 (crédits par sprite sur le site).
+- Portraits du menu et de la barre d'équipe : [PokéAPI](https://github.com/PokeAPI/sprites).
+
+## Code
+
 Tout le jeu tient dans `index.html` : données (`MOVES`, `MONS`, `TEAMS`, `DIFFS`), menu, simulation, IA et rendu.

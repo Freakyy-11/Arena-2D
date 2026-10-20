@@ -147,7 +147,8 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
     </div>
     <button class="go" id="start">Combattre</button>
     <p class="note kbd">Clavier : ZQSD, WASD ou flèches pour bouger · J K L M pour attaquer · 1 à 6 pour changer de Pokémon · Échap pour la pause. Garde une touche d'attaque enfoncée pour attaquer dès que possible.</p>
-    <p class="note">Sur téléphone : joystick à gauche, attaques à droite (garde le doigt appuyé pour enchaîner), et la barre d'équipe au-dessus pour changer de Pokémon. Sprites chargés depuis PokéAPI ; s'ils ne chargent pas, des jetons aux couleurs des types les remplacent.</p>
+    <p class="note">Sur téléphone : joystick à gauche, attaques à droite (garde le doigt appuyé pour enchaîner), et la barre d'équipe au-dessus pour changer de Pokémon. S'ils ne chargent pas, des jetons aux couleurs des types remplacent les sprites.</p>
+    <p class="note">Sprites animés en combat : <a href="https://sprites.pmdcollab.org" target="_blank" rel="noopener" style="color:var(--gold)">PMD SpriteCollab</a> (CC BY-NC 4.0, crédits par sprite sur le site). Portraits : PokéAPI. Projet de fan non officiel et non commercial.</p>
   </section>
 
   <section id="battle" hidden>
@@ -333,6 +334,53 @@ for (const k in MONS){ const m = MONS[k]; m.key = k; m.ab = m.ab || m.name.slice
 const SPR = {};
 for (const k in MONS){ const img = new Image(); SPR[k] = {img, ok:false}; img.onload = () => SPR[k].ok = true; img.src = SPRITE_URL(MONS[k].id); }
 
+// Sprites animés PMD SpriteCollab (Pokémon Donjon Mystère, 8 directions), même chargeur que Pokélite.
+// Licence CC BY-NC 4.0, crédits par sprite sur https://sprites.pmdcollab.org
+const PMD_BASE = 'https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/sprite/';
+const PMD_WANT = ['Idle','Walk','Attack','Shoot','Hurt','Charge','Sleep'];
+const PMD = {};
+function loadPmd(k){
+  const o = PMD[k] = {st:'load', a:{}}, id = String(MONS[k].id).padStart(4,'0');
+  fetch(PMD_BASE+id+'/AnimData.xml').then(r => { if (!r.ok) throw 0; return r.text(); }).then(txt => {
+    const doc = new DOMParser().parseFromString(txt,'text/xml'), raw = {};
+    for (const a of doc.querySelectorAll('Anim')){
+      const n = a.querySelector('Name').textContent, c = a.querySelector('CopyOf');
+      raw[n] = c ? {copy:c.textContent} : {fw:+a.querySelector('FrameWidth').textContent, fh:+a.querySelector('FrameHeight').textContent, d:[...a.querySelectorAll('Duration')].map(x=>+x.textContent)};
+    }
+    const res = n => { let r = raw[n], i = 0; while (r && r.copy && i++ < 5){ n = r.copy; r = raw[n]; } return r && r.d ? {...r, file:n} : null; };
+    let pending = 0;
+    const done = () => { if (--pending === 0) o.st = o.a.Idle || o.a.Walk ? 'ok' : 'fail'; };
+    for (const w of PMD_WANT){
+      const r = res(w); if (!r) continue;
+      r.total = r.d.reduce((a,b)=>a+b,0); r.img = new Image(); r.img.crossOrigin = 'anonymous'; pending++;
+      r.img.onload = () => { if (w === 'Attack') pmdDrift(r); o.a[w] = r; done(); };
+      r.img.onerror = done;
+      r.img.src = PMD_BASE+id+'/'+r.file+'-Anim.png';
+    }
+    if (!pending) o.st = 'fail';
+  }).catch(() => { o.st = 'fail'; });
+}
+for (const k in MONS) loadPmd(k);
+// déplacement du corps dans chaque image d'une animation (certaines attaques PMD font bondir le Pokémon) :
+// dr[ligne][image] = décalage {x,y} du centre des pixels par rapport à la 1re image, pour pouvoir le compenser
+function pmdDrift(A){ try{
+  const c = document.createElement('canvas'); c.width = A.img.width; c.height = A.img.height;
+  const x = c.getContext('2d',{willReadFrequently:true}); x.drawImage(A.img,0,0);
+  const D = x.getImageData(0,0,c.width,c.height).data, nf = Math.round(c.width/A.fw), nr = Math.round(c.height/A.fh); A.dr = [];
+  for (let r=0;r<nr;r++){ const row = [];
+    for (let f=0;f<nf;f++){ let sx=0, sy=0, n=0;
+      for (let py=r*A.fh;py<(r+1)*A.fh;py+=2) for (let px=f*A.fw;px<(f+1)*A.fw;px+=2) if (D[(py*c.width+px)*4+3] > 0){ sx += px-f*A.fw; sy += py-r*A.fh; n++; }
+      row.push(n ? {x:sx/n, y:sy/n} : null); }
+    const o = row[0] || {x:0,y:0}; A.dr.push(row.map(p => p ? {x:p.x-o.x, y:p.y-o.y} : {x:0,y:0})); }
+}catch(e){} }
+// octant de l'angle (0 = droite, sens horaire à l'écran) → ligne de la planche PMD (bas, bas-droite, droite…)
+const DIR_ROW = [2,1,0,7,6,5,4,3];
+function pmdFrame(A, tick, loop){
+  tick = loop ? tick % A.total : Math.min(tick, A.total-1);
+  let i = 0; while (i < A.d.length-1 && tick >= A.d[i]){ tick -= A.d[i]; i++; }
+  return i;
+}
+
 // =====================================================================
 // MENU
 // =====================================================================
@@ -403,6 +451,7 @@ function makeFighter(key, side){
     st:{atk:s(b[1]),def:s(b[2]),spa:s(b[3]),spd:s(b[4])},
     cds:[0,0,0,0], burn:0, poison:0, slow:0, stun:0, sleep:0, dot:0, mirror:0, ring:0, dash:null, recharge:0, inv:0,
     buff:{atk:1,spa:1,spe:1}, buffT:0, flash:0, face:1, bob:Math.random()*6, dead:0, koShown:false,
+    act:null, hurtT:0, aimA:0, seed:Math.random()*600,
     held:[false,false,false,false], ai:{think:1, strafe:1, strafeT:0, swT:2} };
 }
 // Vitesse de déplacement compressée : 160 (Vit 30) → 230 (Vit 143)
@@ -442,7 +491,7 @@ function sendIn(side, idx, announce=true){
   const old = side.team[side.active], f = side.team[idx];
   const alive = old.hp > 0;
   f.x = alive ? old.x : side.spawn.x; f.y = alive ? old.y : side.spawn.y;
-  f.vx = f.vy = f.kx = f.ky = 0; f.dash = null; f.stun = 0; f.recharge = 0; f.mirror = 0; f.ring = 0; f.slow = 0;
+  f.vx = f.vy = f.kx = f.ky = 0; f.dash = null; f.act = null; f.hurtT = 0; f.stun = 0; f.recharge = 0; f.mirror = 0; f.ring = 0; f.slow = 0;
   f.buff = {atk:1,spa:1,spe:1}; f.buffT = 0; f.inv = INV_ON_SWITCH; f.held.fill(false);
   if (alive){ old.dash = null; old.buff = {atk:1,spa:1,spe:1}; old.buffT = 0; old.mirror = 0; old.ring = 0; old.held.fill(false); }
   side.active = idx;
@@ -558,6 +607,10 @@ function popText(x, y, s, col, size=20, life=.9){ if (game) game.texts.push({x,y
 function shake(v){ game.shake = Math.max(game.shake, v); }
 
 // ---------- Attaques ----------
+// animation PMD jouée par type d'attaque, et sa durée (s)
+const ACT_ANIM = {melee:'Attack', dash:'Attack', quake:'Attack', proj:'Shoot', spread:'Shoot', homing:'Shoot', psy:'Shoot',
+  buff:'Charge', heal:'Charge', ring:'Charge', mirror:'Charge', blink:'Charge', rest:'Charge'};
+const ACT_DUR = {Attack:.45, Shoot:.4, Charge:.6};
 function canAct(f){ return f.hp > 0 && f.stun <= 0 && f.sleep <= 0 && f.recharge <= 0 && !f.dash; }
 function use(f, i){
   if (!game || game.state !== 'fight') return false;
@@ -569,6 +622,8 @@ function use(f, i){
   if (f.isAI && mv.k === 'psy'){ const t = mv.delay * game.diff.lead; tx += foe.vx*t; ty += foe.vy*t; }
   tx = Math.max(WALL, Math.min(W-WALL, tx)); ty = Math.max(WALL, Math.min(H-WALL, ty));
   const a = Math.atan2(ty - f.y, tx - f.x);
+  const an = ACT_ANIM[mv.k] || 'Attack';
+  f.aimA = a; f.act = {n:an, t:0, dur: mv.k === 'dash' ? mv.dur + .15 : ACT_DUR[an]};
   switch (mv.k){
     case 'proj': spawnProj(f, mv, a, 1); break;
     case 'spread': { const n = mv.cnt; for (let j=0;j<n;j++) spawnProj(f, mv, a + (j-(n-1)/2)*mv.ang, 1.35/n); break; }
@@ -622,7 +677,7 @@ function hit(att, def, mv, mult){
   if (att.burn > 0 && mv.c === 'ph') dmg *= .5;
   dmg = Math.max(1, Math.round(dmg));
   damage(def, dmg);
-  def.flash = .22;
+  def.flash = .22; def.hurtT = .3;
   if (def.sleep > 0){ def.sleep = 0; }
   popText(def.x + rand(-10,10), def.y - 30, '-' + dmg, '#fff', 22);
   if (e > 1) popText(def.x, def.y - 58, 'Super efficace !', '#e6b84c', 15, 1.1);
@@ -739,7 +794,8 @@ function aiPick(f, foe, d){
 function stepFighter(f, ix, iy, dt){
   const foe = foeOf(f);
   for (let i=0;i<4;i++) f.cds[i] = Math.max(0, f.cds[i]-dt);
-  for (const k of ['burn','poison','slow','stun','sleep','mirror','ring','recharge','flash','inv','buffT']) f[k] = Math.max(0, f[k]-dt);
+  for (const k of ['burn','poison','slow','stun','sleep','mirror','ring','recharge','flash','inv','buffT','hurtT']) f[k] = Math.max(0, f[k]-dt);
+  if (f.act && (f.act.t += dt) >= f.act.dur) f.act = null;
   if (f.buffT <= 0) f.buff = {atk:1,spa:1,spe:1};
   if (f.hp > 0 && (f.burn > 0 || f.poison > 0)){
     f.dot += dt;
@@ -921,12 +977,45 @@ function drawRock(rk){
     if (dmg > .6){ ctx.moveTo(rk.x, rk.y+2); ctx.lineTo(rk.x-rk.r*.1, rk.y+rk.r*.6); } ctx.stroke(); }
 }
 const FLOATERS = ['momartik','flamigator'];
+const PMD_SCALE = 2.5;
+// Animation PMD à jouer : [nom, avancement 0..1] (avancement null = en boucle)
+function pmdAnim(f){
+  if (f.hp <= 0) return ['Hurt', 1];
+  if (f.sleep > 0) return ['Sleep', null];
+  if (f.hurtT > 0) return ['Hurt', 1 - f.hurtT/.3];
+  if (f.act) return [f.act.n, f.act.t/f.act.dur];
+  if (f.stun > 0 || f.recharge > 0) return ['Hurt', 1];
+  return [Math.hypot(f.vx, f.vy) > 25 ? 'Walk' : 'Idle', null];
+}
+// Direction du regard : vers la cible pendant une attaque, vers où il marche sinon, vers l'adversaire à l'arrêt
+function pmdDir(f){
+  if (f.act || f.dash) return f.aimA;
+  if (Math.hypot(f.vx, f.vy) > 25) return Math.atan2(f.vy, f.vx);
+  const foe = foeOf(f); return Math.atan2(foe.y - f.y, foe.x - f.x);
+}
+// Dessine le sprite PMD, pieds en (x, fy) ; renvoie le haut approximatif du sprite
+function drawPmd(f, pm, fy){
+  const [name, prog] = pmdAnim(f);
+  const A = pm.a[name] || ((name === 'Shoot' || name === 'Charge') && pm.a.Attack) || pm.a.Idle || pm.a.Walk;
+  const loop = prog == null || A === pm.a.Idle || A === pm.a.Walk;
+  const i = pmdFrame(A, loop ? game.t*60 + f.seed : Math.max(0, Math.min(1, prog))*A.total, loop);
+  const oct = ((Math.round(pmdDir(f)/(Math.PI/4)) % 8) + 8) % 8, row = DIR_ROW[oct], S = PMD_SCALE;
+  ctx.save(); ctx.translate(f.x, fy);
+  // on retire l'essentiel du bond de l'animation (3 px d'élan gardés) pour que le sprite reste sur sa hitbox
+  if (A.dr && A.dr[row]){ const d = A.dr[row][i] || {x:0,y:0}, k = v => Math.sign(v)*Math.max(0, Math.abs(v)-3); ctx.translate(-k(d.x)*S, -k(d.y)*S); }
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(A.img, i*A.fw, row*A.fh, A.fw, A.fh, -A.fw/2*S, -(A.fh/2+4)*S, A.fw*S, A.fh*S);
+  ctx.restore();
+  const ref = pm.a.Idle || A;
+  return fy - (ref.fh*.5 + 4)*S;
+}
 function drawFighter(f){
   const alpha = f.hp > 0 ? 1 : Math.max(0, 1 - f.dead*1.2);
   if (alpha <= 0) return;
   const t = game.t;
   const flying = f.d.types.includes('Flying') || f.d.types.includes('Ghost') || FLOATERS.includes(f.key);
-  const lift = flying && f.key !== 'flamigator' ? 10 + Math.sin(f.bob)*4 : Math.abs(Math.sin(f.bob*.8))*2;
+  const pm = PMD[f.key], pmOk = pm.st === 'ok';
+  const lift = pmOk ? 0 : flying && f.key !== 'flamigator' ? 10 + Math.sin(f.bob)*4 : Math.abs(Math.sin(f.bob*.8))*2;
   ctx.globalAlpha = alpha * (f.inv > 0 ? (Math.floor(t*20)%2 ? .35 : .7) : 1);
   ctx.fillStyle = '#00000066'; ctx.beginPath(); ctx.ellipse(f.x, f.y+f.r*.75, f.r*.95, f.r*.35, 0, 0, Math.PI*2); ctx.fill();
   if (f.buffT > 0){ ctx.strokeStyle = `rgba(230,184,76,${.35+.25*Math.sin(t*8)})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(f.x, f.y+f.r*.75, f.r*1.2, f.r*.5, 0, 0, Math.PI*2); ctx.stroke(); }
@@ -935,7 +1024,9 @@ function drawFighter(f){
   if (f.mirror > 0){ ctx.strokeStyle = `rgba(249,85,135,${.5+.4*Math.sin(t*30)})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(f.x, y, f.r+14, 0, Math.PI*2); ctx.stroke(); ctx.fillStyle = '#F9558722'; ctx.fill(); }
   const blink = f.flash > 0 && Math.floor(f.flash*30)%2 === 0;
   const s = SPR[f.key];
-  if (!blink){
+  let top = y - (s.ok ? 50 : f.r+10);
+  if (pmOk){ if (blink) ctx.filter = 'brightness(4)'; top = drawPmd(f, pm, f.y + f.r*.75); ctx.filter = 'none'; }
+  if (!blink && !pmOk){
     if (s.ok){
       ctx.save(); ctx.translate(f.x, y - 10); if (f.face === 1) ctx.scale(-1,1);
       ctx.imageSmoothingEnabled = false; ctx.drawImage(s.img, -48, -52, 96, 96); ctx.restore();
@@ -950,7 +1041,7 @@ function drawFighter(f){
     }
   }
   ctx.fillStyle = f.isAI ? '#ef5050' : '#e6b84c';
-  const my = y - (s.ok ? 50 : f.r+10);
+  const my = top;
   ctx.beginPath(); ctx.moveTo(f.x-6, my-8); ctx.lineTo(f.x+6, my-8); ctx.lineTo(f.x, my); ctx.closePath(); ctx.fill();
   if (f.sleep > 0){ ctx.fillStyle = '#c9c3ef'; ctx.font = '700 14px "Chakra Petch", sans-serif'; ctx.textAlign = 'center'; ctx.fillText('Z', f.x+14+Math.sin(t*3)*3, my-14-((t*20)%12)); }
   else if (f.stun > 0 || f.recharge > 0){ ctx.fillStyle = '#F7D02C'; for (let i=0;i<3;i++){ const a = t*6 + i*2.09; ctx.beginPath(); ctx.arc(f.x+Math.cos(a)*16, my-16+Math.sin(a)*5, 3, 0, Math.PI*2); ctx.fill(); } }
