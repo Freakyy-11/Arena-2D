@@ -7,14 +7,17 @@ Projet de fan non officiel et non commercial.
 
 Ouvrir `index.html` dans un navigateur (une connexion internet est nécessaire pour les sprites PokéAPI ; sans eux, des jetons aux couleurs des types les remplacent).
 
-- **Clavier** : ZQSD / WASD / flèches pour bouger, J K L M pour attaquer, 1 à 6 pour changer de Pokémon, Échap pour la pause. Garder une touche d'attaque enfoncée attaque dès que possible.
-- **Téléphone** : joystick à gauche, attaques à droite, barre d'équipe au-dessus pour changer de Pokémon.
+- **Clavier + souris** : ZQSD pour bouger, la souris vise ; clic gauche, clic droit, A et E pour attaquer (Q et E en QWERTY), l'attaque part au relâchement ; Espace pour le Dash ; 1 à 6 pour changer de Pokémon ; Échap pour la pause.
+- **Clavier seul** : J K L M attaquent en visée automatique.
+- **Manette** : stick gauche pour bouger, stick droit pour viser (relâché = visée automatique) ; L1, L2, R1, R2 pour attaquer (l'attaque part au relâchement) ; ✕ pour le Dash ; flèches gauche/droite pour changer de Pokémon ; Options pour la pause.
+- **Téléphone** : joystick à gauche ; toucher une attaque = visée automatique, glisser depuis le bouton = visée manuelle (repère au sol), l'attaque part au relâchement ; bouton Dash à droite.
 
 ## Contenu
 
 - 24 Pokémon avec leurs stats officielles et 4 attaques chacun.
 - 4 équipes prêtes (Dracolosse, Carchacrok, Lanssorien, Naganadel) ou équipe composée.
 - 3 difficultés d'IA (Facile, Normal, Champion) ; l'IA change de Pokémon quand son duel est mauvais.
+- Dash : 3 charges partagées par l'équipe, une charge rendue toutes les 2 s, invulnérable pendant la ruée.
 - Changement de Pokémon en combat (4 s de recharge), mort subite après 3 minutes.
 
 ## Crédits

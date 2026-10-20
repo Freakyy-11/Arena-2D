@@ -84,6 +84,9 @@ button:disabled{cursor:default}
 .st{font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:1px 4px;border-radius:3px;color:#17122b}
 .pause{background:var(--panel);border:1px solid var(--line);border-radius:8px;width:36px;height:36px;display:grid;place-items:center;font-family:var(--font-d);font-weight:700}
 .stage{position:relative;min-height:0;touch-action:none}
+@media (pointer:fine){.stage{cursor:crosshair}}
+body.pad .mv em,body.pad .dashb em{display:block}
+.choose button.focus{border-color:var(--gold);background:var(--panel-2);box-shadow:0 0 0 1px var(--gold) inset}
 canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .bench{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px;position:relative}
 .bench button{position:relative;overflow:hidden;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:3px 3px 5px;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;touch-action:manipulation}
@@ -93,19 +96,27 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .bench button .hb i{display:block;height:100%;background:var(--hp);transform-origin:left}
 .bench button::after{content:"";position:absolute;inset:0;background:#000a;transform:scaleY(var(--cd,0));transform-origin:bottom;pointer-events:none}
 .bench button.on::after,.bench button.ko::after{display:none}
-.pad{display:grid;grid-template-columns:128px minmax(0,1fr);gap:12px;align-items:center;touch-action:none;padding-bottom:4px}
-.stick{width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,#ffffff10 0 40%,#ffffff08 41%);border:1px solid var(--line);position:relative;touch-action:none}
+.pad{display:grid;grid-template-columns:112px minmax(0,1fr) 54px;gap:10px;align-items:center;touch-action:none;padding-bottom:4px}
+.stick{width:112px;height:112px;border-radius:50%;background:radial-gradient(circle,#ffffff10 0 40%,#ffffff08 41%);border:1px solid var(--line);position:relative;touch-action:none}
 .knob{position:absolute;left:50%;top:50%;width:50px;height:50px;margin:-25px 0 0 -25px;border-radius:50%;background:var(--panel-2);border:2px solid var(--gold);will-change:transform}
 .moves{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .mv{position:relative;overflow:hidden;border:0;border-radius:10px;padding:9px 8px;min-height:52px;text-align:left;display:flex;flex-direction:column;justify-content:center;gap:1px;background:var(--panel-2);touch-action:none;box-shadow:inset 3px 0 0 var(--tc,#888)}
 .mv b{font-family:var(--font-d);font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative;z-index:1}
 .mv span{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);position:relative;z-index:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mv em{position:absolute;top:6px;right:8px;font-style:normal;font-size:10px;color:var(--mute);z-index:1;display:none}
-@media (pointer:fine){.mv em{display:block}}
+@media (pointer:fine){.mv em,.dashb em{display:block}}
 .mv::after{content:"";position:absolute;inset:0;background:#000a;transform:scaleY(var(--cd,0));transform-origin:bottom}
+.dashb{position:relative;overflow:hidden;align-self:stretch;border:0;border-radius:10px;background:var(--panel-2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;touch-action:none;box-shadow:inset 0 0 0 1px var(--line)}
+.dashb b{font-family:var(--font-d);font-size:13px;letter-spacing:.04em;text-transform:uppercase}
+.dashb .pips{display:flex;gap:4px}
+.dashb .pips i{width:10px;height:10px;border-radius:50%;background:conic-gradient(var(--gold) calc(var(--p,0)*1turn), #ffffff22 0)}
+.dashb .pips i.on{background:var(--gold)}
+.dashb em{position:absolute;top:5px;font-style:normal;font-size:10px;color:var(--mute);display:none}
+.dashb:active{filter:brightness(1.2)}
+@media (max-width:440px){.mv{padding:6px 5px 6px 7px}.mv b{white-space:normal;overflow-wrap:anywhere;font-size:12px;line-height:1.1;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}.mv span{font-size:9px}}
 .mv.ready{background:color-mix(in srgb,var(--tc) 22%,var(--panel-2))}
 .mv:active{filter:brightness(1.2)}
-@media (pointer:fine){.pad{grid-template-columns:minmax(0,1fr)} .stick{display:none} .moves{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (pointer:fine){.pad{grid-template-columns:minmax(0,1fr) 84px} .stick{display:none} .moves{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .overlay{position:absolute;inset:0;background:#0b0918d9;display:grid;place-items:center;z-index:5;backdrop-filter:blur(3px)}
 .box{display:flex;flex-direction:column;gap:12px;align-items:center;text-align:center;padding:24px 8px;max-width:420px;width:100%}
 .box h3{margin:0;font-family:var(--font-d);font-size:34px;line-height:1}
@@ -146,8 +157,9 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
       <div class="row" id="pickD"></div>
     </div>
     <button class="go" id="start">Combattre</button>
-    <p class="note kbd">Clavier : ZQSD, WASD ou flèches pour bouger · J K L M pour attaquer · 1 à 6 pour changer de Pokémon · Échap pour la pause. Garde une touche d'attaque enfoncée pour attaquer dès que possible.</p>
-    <p class="note">Sur téléphone : joystick à gauche, attaques à droite (garde le doigt appuyé pour enchaîner), et la barre d'équipe au-dessus pour changer de Pokémon. S'ils ne chargent pas, des jetons aux couleurs des types remplacent les sprites.</p>
+    <p class="note kbd">Clavier + souris : ZQSD pour bouger, la souris vise · clic gauche, clic droit, A et E pour attaquer · Espace pour le Dash · 1 à 6 pour changer de Pokémon · Échap pour la pause. Clavier seul : J K L M attaquent en visée automatique. Maintiens une attaque pour voir le repère : elle part quand tu relâches.</p>
+    <p class="note">Manette : stick gauche pour bouger, stick droit pour viser (relâché = visée automatique) · L1, L2, R1, R2 pour attaquer (l'attaque part au relâchement) · ✕ pour le Dash · flèches gauche/droite pour changer de Pokémon · Options pour la pause.</p>
+    <p class="note">Sur téléphone : joystick à gauche, attaques et Dash à droite. Touche une attaque pour viser automatiquement, ou fais glisser le doigt depuis le bouton pour viser toi-même puis relâche, et la barre d'équipe au-dessus pour changer de Pokémon. S'ils ne chargent pas, des jetons aux couleurs des types remplacent les sprites.</p>
     <p class="note">Sprites animés en combat : <a href="https://sprites.pmdcollab.org" target="_blank" rel="noopener" style="color:var(--gold)">PMD SpriteCollab</a> (CC BY-NC 4.0, crédits par sprite sur le site). Portraits : PokéAPI. Projet de fan non officiel et non commercial.</p>
   </section>
 
@@ -162,6 +174,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
     <div class="pad">
       <div class="stick" id="stick"><div class="knob" id="knob"></div></div>
       <div class="moves" id="moves"></div>
+      <button class="dashb" id="dashBtn" aria-label="Dash"><em>Espace</em><b>Dash</b><span class="pips" id="dashPips"><i></i><i></i><i></i></span></button>
     </div>
     <div class="overlay" id="ovPause" hidden>
       <div class="box"><h3>Pause</h3><div class="row"><button class="btn main" id="resume">Reprendre</button><button class="btn" id="quit">Abandonner</button></div></div>
@@ -320,12 +333,14 @@ const TEAMS = [
   {id:'naganadel',name:'Équipe Naganadel',mons:['naganadel','togekiss','tyranocif','leviator','minotaupe','alakazam']}
 ];
 const DIFFS = {
-  facile:{label:'Facile',react:.2,think:1.0,lead:0,noise:.6,mirror:false,sw:0},
-  normal:{label:'Normal',react:.5,think:.55,lead:.5,noise:.3,mirror:true,sw:.35},
-  champion:{label:'Champion',react:.85,think:.28,lead:.85,noise:.1,mirror:true,sw:.7}
+  facile:{label:'Facile',react:.1,think:1.1,lead:0,noise:.6,mirror:false,sw:0,dash:0,aimErr:.4,dmg:.65},
+  normal:{label:'Normal',react:.35,think:.6,lead:.25,noise:.35,mirror:true,sw:.25,dash:.2,aimErr:.25,dmg:.8},
+  champion:{label:'Champion',react:.7,think:.45,lead:.65,noise:.15,mirror:true,sw:.6,dash:.55,aimErr:.07,dmg:1}
 };
 const STATUS = {burn:['Brûlé','#EE8130'],poison:['Empois.','#A33EA1'],slow:['Ralenti','#96D9D6'],stun:['Étourdi','#F7D02C'],sleep:['Endormi','#a39bd0'],ring:['Anneau','#6390F0'],mirror:['Miroir','#F95587'],buffT:['Boost','#e6b84c']};
 const SWITCH_CD = 4, INV_ON_SWITCH = .8;
+// Dash : charges partagées par l'équipe, rechargées une par une
+const DASH_MAX = 3, DASH_REGEN = 2, DASH_SPD = 760, DASH_DUR = .17, DASH_INV = .2;
 
 const meleeCount = d => d.moves.filter(k => ['melee','dash'].includes(MOVES[k].k)).length;
 for (const k in MONS){ const m = MONS[k]; m.key = k; m.ab = m.ab || m.name.slice(0,3).toUpperCase(); m.bst = m.base.reduce((a,b)=>a+b,0); m.pref = Math.max(70, 260 - 60*meleeCount(m)); }
@@ -451,7 +466,7 @@ function makeFighter(key, side){
     st:{atk:s(b[1]),def:s(b[2]),spa:s(b[3]),spd:s(b[4])},
     cds:[0,0,0,0], burn:0, poison:0, slow:0, stun:0, sleep:0, dot:0, mirror:0, ring:0, dash:null, recharge:0, inv:0,
     buff:{atk:1,spa:1,spe:1}, buffT:0, flash:0, face:1, bob:Math.random()*6, dead:0, koShown:false,
-    act:null, hurtT:0, aimA:0, seed:Math.random()*600,
+    act:null, hurtT:0, aimA:0, seed:Math.random()*600, roll:null, lastDir:{x:0, y: side === 'p' ? -1 : 1},
     held:[false,false,false,false], ai:{think:1, strafe:1, strafeT:0, swT:2} };
 }
 // Vitesse de déplacement compressée : 160 (Vit 30) → 230 (Vit 143)
@@ -464,9 +479,9 @@ function resolveTeams(){
   return {pk, ek: TEAMS.find(t=>t.id===et).mons.slice(), eName: TEAMS.find(t=>t.id===et).name, dk: sel.d};
 }
 function startMatch(m){
-  lastMatch = m;
-  const ps = {team: m.pk.map(k => makeFighter(k,'p')), active:0, swCd:0, spawn:{x:300,y:480}};
-  const es = {team: m.ek.map(k => makeFighter(k,'e')), active:0, swCd:0, spawn:{x:300,y:120}, name:m.eName};
+  lastMatch = m; touchAim = null;
+  const ps = {team: m.pk.map(k => makeFighter(k,'p')), active:0, swCd:0, dashN:DASH_MAX, dashT:0, spawn:{x:300,y:480}};
+  const es = {team: m.ek.map(k => makeFighter(k,'e')), active:0, swCd:0, dashN:DASH_MAX, dashT:0, spawn:{x:300,y:120}, name:m.eName};
   game = { ps, es, p:ps.team[0], e:es.team[0], diff: DIFFS[m.dk],
     projs:[], zones:[], rings:[], parts:[], texts:[], slashes:[], shake:0, t:0, fightT:0,
     state:'intro', introT:2.6, introBig:true, koT:0, paused:false,
@@ -483,7 +498,7 @@ const toMenu = () => { game = null; $('battle').hidden = true; $('menu').hidden 
 $('toMenu').onclick = toMenu; $('quit').onclick = toMenu;
 $('pauseBtn').onclick = () => setPause(true);
 $('resume').onclick = () => setPause(false);
-function setPause(v){ if (!game || game.state === 'end' || game.state === 'choose') return; game.paused = v; $('ovPause').hidden = !v; if (v) game.p.held.fill(false); }
+function setPause(v){ if (!game || game.state === 'end' || game.state === 'choose') return; game.paused = v; $('ovPause').hidden = !v; if (v){ game.p.held.fill(false); touchAim = null; } }
 document.addEventListener('visibilitychange', () => { if (document.hidden && game && game.state === 'fight') setPause(true); });
 
 // ---------- Changements de Pokémon ----------
@@ -491,9 +506,9 @@ function sendIn(side, idx, announce=true){
   const old = side.team[side.active], f = side.team[idx];
   const alive = old.hp > 0;
   f.x = alive ? old.x : side.spawn.x; f.y = alive ? old.y : side.spawn.y;
-  f.vx = f.vy = f.kx = f.ky = 0; f.dash = null; f.act = null; f.hurtT = 0; f.stun = 0; f.recharge = 0; f.mirror = 0; f.ring = 0; f.slow = 0;
+  f.vx = f.vy = f.kx = f.ky = 0; f.dash = null; f.roll = null; f.act = null; f.hurtT = 0; f.stun = 0; f.recharge = 0; f.mirror = 0; f.ring = 0; f.slow = 0;
   f.buff = {atk:1,spa:1,spe:1}; f.buffT = 0; f.inv = INV_ON_SWITCH; f.held.fill(false);
-  if (alive){ old.dash = null; old.buff = {atk:1,spa:1,spe:1}; old.buffT = 0; old.mirror = 0; old.ring = 0; old.held.fill(false); }
+  if (alive){ old.dash = null; old.roll = null; old.buff = {atk:1,spa:1,spe:1}; old.buffT = 0; old.mirror = 0; old.ring = 0; old.held.fill(false); }
   side.active = idx;
   if (side === game.ps){ game.p = f; buildMoves(); } else game.e = f;
   for (const p of game.projs) if (p.target === old) p.target = f;
@@ -508,6 +523,19 @@ function trySwitch(side, idx){
   const cur = side.team[side.active]; if (cur.stun > 0 && cur.sleep <= 0) return false;
   sendIn(side, idx); side.swCd = SWITCH_CD; return true;
 }
+function tryRoll(f, dx, dy){
+  if (!game || game.state !== 'fight' || game.paused) return false;
+  const side = sideOf(f);
+  if (side.dashN < 1 || !canAct(f)) return false;
+  let m = Math.hypot(dx, dy);
+  if (m < .2){ dx = f.lastDir.x; dy = f.lastDir.y; m = 1; }
+  if (side.dashN === DASH_MAX) side.dashT = DASH_REGEN;
+  side.dashN--;
+  f.roll = {vx:dx/m*DASH_SPD, vy:dy/m*DASH_SPD, t:DASH_DUR};
+  f.inv = Math.max(f.inv, DASH_INV);
+  burst(f.x, f.y, '#ffffff', 8, 120, 3);
+  return true;
+}
 const aliveIdx = side => side.team.map((f,i)=>f.hp>0?i:-1).filter(i=>i>=0);
 
 // ---------- Affichage HUD ----------
@@ -520,17 +548,29 @@ function buildCard(s){
   side.hud = { bar: el.querySelector('.bar i'), hpn: el.querySelector('.hpn'), sts: el.querySelector('.sts'), balls: el.querySelector('.balls'), last:'', lastB:'' };
 }
 function buildMoves(){
-  const keys = ['J','K','L','M'];
   $('moves').innerHTML = game.p.d.moves.map((k,i) => { const mv = MOVES[k];
     const tag = mv.c === 'ph' ? 'Physique' : mv.c === 'sp' ? 'Spécial' : 'Statut';
-    return `<button class="mv" data-i="${i}" style="--tc:${TYPES[mv.t][1]}"><em>${keys[i]}</em><b>${mv.n}</b><span>${TYPES[mv.t][0]} · ${tag}</span></button>`; }).join('');
+    return `<button class="mv" data-i="${i}" style="--tc:${TYPES[mv.t][1]}"><em></em><b>${mv.n}</b><span>${TYPES[mv.t][0]} · ${tag}</span></button>`; }).join('');
   game.p.btns = [...$('moves').querySelectorAll('.mv')];
   game.p.btns.forEach((b,i) => {
-    b.addEventListener('pointerdown', e => { e.preventDefault(); try{ b.setPointerCapture(e.pointerId); }catch(_){} if (game) game.p.held[i] = true; });
-    const up = () => { if (game) game.p.held[i] = false; };
+    b.addEventListener('pointerdown', e => { e.preventDefault(); try{ b.setPointerCapture(e.pointerId); }catch(_){}
+      if (!game) return;
+      if (e.pointerType === 'mouse'){ press(i, 'auto'); return; }
+      setMode('touch');
+      touchAim = {i, id:e.pointerId, sx:e.clientX, sy:e.clientY, dx:0, dy:0, mag:0, active:false};
+    });
+    b.addEventListener('pointermove', e => { if (!touchAim || touchAim.id !== e.pointerId) return;
+      const dx = e.clientX - touchAim.sx, dy = e.clientY - touchAim.sy, m = Math.hypot(dx,dy);
+      touchAim.active = m > AIM_DEAD; touchAim.dx = dx; touchAim.dy = dy; touchAim.mag = Math.max(0, Math.min(1, (m - AIM_DEAD)/AIM_FULL)); });
+    const up = e => {
+      if (game && game.p.held[i] === 'auto'){ if (e.type === 'pointerup') release(i, 'auto'); else game.p.held[i] = false; }
+      if (touchAim && touchAim.id === e.pointerId){ const t = touchAim; touchAim = null;
+        if (game && e.type === 'pointerup') use(game.p, t.i, t.active ? aimPoint(t, t.i) : null); }
+    };
     b.addEventListener('pointerup', up); b.addEventListener('pointercancel', up); b.addEventListener('lostpointercapture', up);
     b.addEventListener('contextmenu', e => e.preventDefault());
   });
+  labelControls();
 }
 function buildBench(){
   $('bench').innerHTML = game.ps.team.map((f,i) => `<button data-i="${i}" aria-label="${f.d.name}">${pic(f.key,34)}<span class="hb"><i></i></span></button>`).join('');
@@ -551,6 +591,9 @@ function updateHUD(){
   }
   game.p.btns.forEach((b,i) => { const mv = MOVES[game.p.d.moves[i]]; const c = Math.max(0, game.p.cds[i] / mv.cd);
     b.style.setProperty('--cd', c.toFixed(3)); b.classList.toggle('ready', c === 0); });
+  const ps = game.ps;
+  $('dashPips').querySelectorAll('i').forEach((pip,i) => { pip.classList.toggle('on', i < ps.dashN);
+    pip.style.setProperty('--p', i === ps.dashN ? (1 - ps.dashT/DASH_REGEN).toFixed(3) : 0); });
   const cd = (game.ps.swCd / SWITCH_CD).toFixed(3);
   game.ps.benchBtns.forEach((b,i) => { const f = game.ps.team[i];
     b.classList.toggle('on', i === game.ps.active); b.classList.toggle('ko', f.hp <= 0);
@@ -562,21 +605,125 @@ function updateHUD(){
 const keys = new Set();
 const joy = {x:0, y:0, id:null};
 const MOVE_KEYS = {KeyW:[0,-1],ArrowUp:[0,-1],KeyS:[0,1],ArrowDown:[0,1],KeyA:[-1,0],ArrowLeft:[-1,0],KeyD:[1,0],ArrowRight:[1,0]};
-const ATK_KEYS = {KeyJ:0,KeyK:1,KeyL:2,Semicolon:3,KeyM:3};
+const ATK_KEYS = {KeyJ:0,KeyK:1,KeyL:2,Semicolon:3,KeyM:3};   // clavier seul : visée automatique
+const AIM_KEYS = {KeyQ:2, KeyE:3};                             // à côté de ZQSD (A et E en AZERTY) : visée à la souris
+// Visée : 'auto' (vers l'adversaire), 'mouse' (curseur), 'pad' (stick droit), ou un glissé tactile {dx,dy,mag}
+const AIM_DEAD = 18, AIM_FULL = 70;
+// Zones à distance (Psyko, Telluriforce, Chute Glace) : portée max et distance mini du lancer
+const PSY_RANGE = 380, PSY_MIN = 60;
+const clampRange = (f, x, y) => { const d = Math.hypot(x-f.x, y-f.y); return d <= PSY_RANGE ? {x, y} : {x: f.x + (x-f.x)/d*PSY_RANGE, y: f.y + (y-f.y)/d*PSY_RANGE}; };
+let touchAim = null, inputMode = matchMedia('(pointer:fine)').matches ? 'mouse' : 'touch', keyQLabel = 'A';
+try { navigator.keyboard.getLayoutMap().then(m => { const k = m.get('KeyQ'); if (k){ keyQLabel = k.toUpperCase(); labelControls(); } }).catch(()=>{}); } catch(e){}
+const mouse = {x:0, y:0, seen:false};
+const PAD_ATK = [4,6,5,7], PAD_LBL = ['L1','L2','R1','R2'];   // boutons standard : L1=4, L2=6, R1=5, R2=7
+const pad = {on:false, lx:0, ly:0, rx:0, ry:0, aimOn:false, aimA:0, aimMag:0, aimHold:0, t:0, prev:[]};
+// Sticks : zone morte circulaire (et non axe par axe), remise à l'échelle pour repartir de 0 au bord de la zone.
+// Visée : l'angle suit le stick avec un léger lissage, ne bouge que stick bien incliné,
+// et reste figé un court instant quand le stick revient au centre (pour ne pas tirer de travers en le relâchant).
+const PAD_DZ_MOVE = .15, PAD_DZ_AIM = .25, PAD_AIM_ON = .35, PAD_AIM_SMOOTH = 20, PAD_AIM_HOLD = .18;
+function padStick(x, y, dz){ const m = Math.hypot(x, y); if (m < dz) return [0,0,0]; const k = Math.min(1, (m-dz)/(1-dz)); return [x/m*k, y/m*k, k]; }
+// attaque maintenue : on vise ; au relâchement, l'attaque part vers le point visé
+function press(i, src){ if (game && !game.p.held[i]) game.p.held[i] = src; }
+function release(i, src){
+  if (!game) return; const h = game.p.held[i];
+  if (!h || (src && h !== src)) return;
+  game.p.held[i] = false; use(game.p, i, aimPoint(h, i));
+}
+function setMode(m){ if (m === inputMode) return; inputMode = m; document.body.classList.toggle('pad', m === 'pad'); labelControls(); }
+function labelControls(){
+  if (!game || !game.p.btns) return;
+  const L = inputMode === 'pad' ? PAD_LBL : inputMode === 'kb' ? ['J','K','L','M'] : ['Clic G','Clic D', keyQLabel, 'E'];
+  game.p.btns.forEach((b,i) => b.querySelector('em').textContent = L[i]);
+  $('dashBtn').querySelector('em').textContent = inputMode === 'pad' ? '✕' : 'Espace';
+}
+// point visé selon la source (null = visée automatique)
+function aimPoint(src, i){
+  const f = game.p;
+  if (src === 'mouse') return mouse.seen ? {x:mouse.x, y:mouse.y} : null;
+  if (src === 'pad') return pad.aimOn ? dirPoint(f, Math.cos(pad.aimA), Math.sin(pad.aimA), pad.aimMag, i) : null;
+  if (src && src.dx !== undefined) return dirPoint(f, src.dx, src.dy, src.mag, i);
+  return null;
+}
+// direction (dx,dy) → point visé ; pour une zone (Psyko…), la distance vient du glissé ou de l'inclinaison du stick (0..1)
+function dirPoint(f, dx, dy, mag, i){
+  const m = Math.hypot(dx,dy) || 1, mv = MOVES[f.d.moves[i]];
+  const d = mv.k === 'psy' ? PSY_MIN + (mag != null ? mag : 1)*(PSY_RANGE - PSY_MIN) : 200;
+  return {x: f.x + dx/m*d, y: f.y + dy/m*d};
+}
+
 const SW_KEYS = {Digit1:0,Digit2:1,Digit3:2,Digit4:3,Digit5:4,Digit6:5,Numpad1:0,Numpad2:1,Numpad3:2,Numpad4:3,Numpad5:4,Numpad6:5};
 addEventListener('keydown', e => {
   if (!game) return;
   if (e.code === 'Escape' || e.code === 'KeyP'){ setPause(!game.paused); return; }
   if (MOVE_KEYS[e.code]){ keys.add(e.code); e.preventDefault(); }
-  if (ATK_KEYS[e.code] !== undefined){ game.p.held[ATK_KEYS[e.code]] = true; e.preventDefault(); }
+  if (ATK_KEYS[e.code] !== undefined){ setMode('kb'); press(ATK_KEYS[e.code], 'auto'); e.preventDefault(); }
+  if (AIM_KEYS[e.code] !== undefined){ setMode('mouse'); press(AIM_KEYS[e.code], 'mouse'); e.preventDefault(); }
+  if (e.code === 'Space' || e.code === 'ShiftLeft' || e.code === 'ShiftRight'){ if (!e.repeat) tryRoll(game.p, ...playerInput()); e.preventDefault(); }
   if (SW_KEYS[e.code] !== undefined){
     if (game.state === 'choose') chooseNext(SW_KEYS[e.code]); else trySwitch(game.ps, SW_KEYS[e.code]);
     e.preventDefault();
   }
 });
-addEventListener('keyup', e => { keys.delete(e.code); if (game && ATK_KEYS[e.code] !== undefined) game.p.held[ATK_KEYS[e.code]] = false; });
+addEventListener('keyup', e => { keys.delete(e.code); if (!game) return;
+  if (ATK_KEYS[e.code] !== undefined) release(ATK_KEYS[e.code], 'auto');
+  if (AIM_KEYS[e.code] !== undefined) release(AIM_KEYS[e.code], 'mouse'); });
+// Souris sur l'arène : position visée, clic gauche = attaque 1, clic droit = attaque 2
+let lastTouch = 0;
+addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse') lastTouch = performance.now(); }, true);
+const stageEl = $('stage');
+function toWorld(e){ const r = cv.getBoundingClientRect(); return {x:(e.clientX - r.left - view.ox)/view.s, y:(e.clientY - r.top - view.oy)/view.s}; }
+stageEl.addEventListener('mousemove', e => { if (performance.now() - lastTouch < 800) return; Object.assign(mouse, toWorld(e)); mouse.seen = true; });
+stageEl.addEventListener('mousedown', e => {
+  if (!game || performance.now() - lastTouch < 800 || (e.button !== 0 && e.button !== 2)) return;
+  e.preventDefault(); Object.assign(mouse, toWorld(e)); mouse.seen = true; setMode('mouse');
+  press(e.button === 0 ? 0 : 1, 'mouse');
+});
+addEventListener('mouseup', e => { if (!game || (e.button !== 0 && e.button !== 2)) return; release(e.button === 0 ? 0 : 1, 'mouse'); });
+stageEl.addEventListener('contextmenu', e => e.preventDefault());
+
+// Manette (API Gamepad, disposition standard) : lue à chaque image
+function pollPad(){
+  let gp = null; try { for (const g of navigator.getGamepads ? navigator.getGamepads() : []) if (g && g.connected){ gp = g; break; } } catch(e){}
+  if (!gp){ if (pad.on && game) game.p.held.forEach((h,i) => { if (h === 'pad') game.p.held[i] = false; }); pad.on = false; return; }
+  pad.on = true;
+  const now = performance.now(), dt = Math.min(.05, (now - (pad.t || now))/1000); pad.t = now;
+  [pad.lx, pad.ly] = padStick(gp.axes[0] || 0, gp.axes[1] || 0, PAD_DZ_MOVE);
+  const [rx, ry, rk] = padStick(gp.axes[2] || 0, gp.axes[3] || 0, PAD_DZ_AIM); pad.rx = rx; pad.ry = ry;
+  if (rk > PAD_AIM_ON){
+    const want = Math.atan2(ry, rx);
+    const wantMag = Math.min(1, (rk - PAD_AIM_ON)/(.95 - PAD_AIM_ON));
+    if (!pad.aimOn){ pad.aimA = want; pad.aimMag = wantMag; }
+    else { const k = 1 - Math.exp(-dt*PAD_AIM_SMOOTH); let d = want - pad.aimA; d = Math.atan2(Math.sin(d), Math.cos(d)); pad.aimA += d*k; pad.aimMag += (wantMag - pad.aimMag)*k; }
+    pad.aimOn = true; pad.aimHold = PAD_AIM_HOLD;
+  } else if (pad.aimOn && rk < PAD_AIM_ON*.6 && (pad.aimHold -= dt) <= 0) pad.aimOn = false;
+  const b = gp.buttons.map(x => x.pressed || x.value > .5), down = i => b[i] && !pad.prev[i];
+  if (b.some(Boolean) || pad.lx || pad.ly || pad.aimOn) setMode('pad');
+  if (!game){ if (down(0) || down(9)) $('start').click(); pad.prev = b; return; }
+  const g = game;
+  if (g.state === 'end'){ if (down(0)) $('again').click(); else if (down(1)) toMenu(); pad.prev = b; return; }
+  if (g.paused){ if (down(9) || down(0) || down(1)) setPause(false); pad.prev = b; return; }
+  if (down(9)) setPause(true);
+  if (g.state === 'choose'){
+    const al = aliveIdx(g.ps); let k = al.indexOf(chooseFocus); if (k < 0) k = 0;
+    if (down(14) || down(12)) k = (k + al.length - 1) % al.length;
+    if (down(15) || down(13)) k = (k + 1) % al.length;
+    if (al[k] !== chooseFocus){ chooseFocus = al[k]; focusChoose(); }
+    if (down(0)) chooseNext(chooseFocus);
+    pad.prev = b; return;
+  }
+  PAD_ATK.forEach((bi,i) => { if (down(bi)) press(i, 'pad'); else if (!b[bi]) release(i, 'pad'); });
+  if (down(0)) tryRoll(g.p, ...playerInput());
+  if (down(14) || down(15)){ const al = aliveIdx(g.ps).filter(i => i !== g.ps.active);
+    if (al.length){ const a = g.ps.active, n = g.ps.team.length;
+      const next = down(15) ? al.reduce((best,i) => ((i-a+n)%n) < ((best-a+n)%n) ? i : best)
+                            : al.reduce((best,i) => ((a-i+n)%n) < ((a-best+n)%n) ? i : best);
+      trySwitch(g.ps, next); } }
+  pad.prev = b;
+}
 addEventListener('blur', () => { keys.clear(); if (game) game.p.held.fill(false); });
 
+$('dashBtn').addEventListener('pointerdown', e => { e.preventDefault(); if (game) tryRoll(game.p, ...playerInput()); });
+$('dashBtn').addEventListener('contextmenu', e => e.preventDefault());
 const stick = $('stick'), knob = $('knob');
 function joyUpdate(e){
   const r = stick.getBoundingClientRect(), R = 44;
@@ -591,7 +738,7 @@ stick.addEventListener('pointermove', e => { if (e.pointerId === joy.id) joyUpda
 const joyEnd = e => { if (e.pointerId !== joy.id) return; joy.id = null; joy.x = joy.y = 0; knob.style.transform = ''; };
 stick.addEventListener('pointerup', joyEnd); stick.addEventListener('pointercancel', joyEnd);
 function playerInput(){
-  let x = joy.x, y = joy.y;
+  let x = joy.x + pad.lx, y = joy.y + pad.ly;
   for (const k of keys){ const v = MOVE_KEYS[k]; if (v){ x += v[0]; y += v[1]; } }
   const m = Math.hypot(x,y); if (m > 1){ x /= m; y /= m; }
   return [x,y];
@@ -611,15 +758,24 @@ function shake(v){ game.shake = Math.max(game.shake, v); }
 const ACT_ANIM = {melee:'Attack', dash:'Attack', quake:'Attack', proj:'Shoot', spread:'Shoot', homing:'Shoot', psy:'Shoot',
   buff:'Charge', heal:'Charge', ring:'Charge', mirror:'Charge', blink:'Charge', rest:'Charge'};
 const ACT_DUR = {Attack:.45, Shoot:.4, Charge:.6};
-function canAct(f){ return f.hp > 0 && f.stun <= 0 && f.sleep <= 0 && f.recharge <= 0 && !f.dash; }
-function use(f, i){
+const BLINK_DIST = 220;
+function canAct(f){ return f.hp > 0 && f.stun <= 0 && f.sleep <= 0 && f.recharge <= 0 && !f.dash && !f.roll; }
+// aim : point visé {x,y} ; absent = visée automatique sur l'adversaire (avec anticipation pour l'IA)
+function use(f, i, aim){
   if (!game || game.state !== 'fight') return false;
   const mv = MOVES[f.d.moves[i]], foe = foeOf(f);
   if (f.cds[i] > 0 || !canAct(f)) return false;
   f.cds[i] = mv.cd;
   let tx = foe.x, ty = foe.y;
-  if (f.isAI && mv.spd && mv.k !== 'dash'){ const t = dist(f,foe)/mv.spd * game.diff.lead; tx += foe.vx*t; ty += foe.vy*t; }
-  if (f.isAI && mv.k === 'psy'){ const t = mv.delay * game.diff.lead; tx += foe.vx*t; ty += foe.vy*t; }
+  if (aim){ tx = aim.x; ty = aim.y; if (Math.hypot(tx-f.x, ty-f.y) < 1) tx = f.x + 1; }
+  else {
+    if (f.isAI && mv.spd && mv.k !== 'dash'){ const t = dist(f,foe)/mv.spd * game.diff.lead; tx += foe.vx*t; ty += foe.vy*t; }
+    if (f.isAI && mv.k === 'psy'){ const t = mv.delay * game.diff.lead; tx += foe.vx*t; ty += foe.vy*t; }
+    // l'IA ne vise pas parfaitement
+    if (f.isAI){ const e = game.diff.aimErr;
+      if (mv.k === 'psy'){ const a = Math.random()*Math.PI*2, r = Math.random()*e*150; tx += Math.cos(a)*r; ty += Math.sin(a)*r; }
+      else { const a = (Math.random()*2-1)*e, dx = tx-f.x, dy = ty-f.y; tx = f.x + dx*Math.cos(a) - dy*Math.sin(a); ty = f.y + dx*Math.sin(a) + dy*Math.cos(a); } }
+  }
   tx = Math.max(WALL, Math.min(W-WALL, tx)); ty = Math.max(WALL, Math.min(H-WALL, ty));
   const a = Math.atan2(ty - f.y, tx - f.x);
   const an = ACT_ANIM[mv.k] || 'Attack';
@@ -628,13 +784,15 @@ function use(f, i){
     case 'proj': spawnProj(f, mv, a, 1); break;
     case 'spread': { const n = mv.cnt; for (let j=0;j<n;j++) spawnProj(f, mv, a + (j-(n-1)/2)*mv.ang, 1.35/n); break; }
     case 'homing': { const n = mv.cnt || 1; for (let j=0;j<n;j++) spawnProj(f, mv, a + (n>1 ? (j-(n-1)/2)*.5 : 0), 1, foe); break; }
-    case 'psy': game.zones.push({x:tx, y:ty, r:mv.r, t:0, owner:f, mv}); break;
+    case 'psy': { const z = clampRange(f, tx, ty); game.zones.push({x:z.x, y:z.y, r:mv.r, t:0, owner:f, mv}); break; }
     case 'quake': game.rings.push({x:f.x, y:f.y, r:0, t:0, owner:f, mv, hit:false, rocks:new Set()}); if (mv.t === 'Ground') shake(7); break;
     case 'dash': f.dash = {vx:Math.cos(a)*mv.spd, vy:Math.sin(a)*mv.spd, t:mv.dur, mv}; if (mv.inv) f.inv = mv.dur + .05; break;
     case 'melee': {
       f.kx += Math.cos(a)*240; f.ky += Math.sin(a)*240;
       game.slashes.push({x:f.x+Math.cos(a)*(f.r+20), y:f.y+Math.sin(a)*(f.r+20), a, t:0, col:TYPES[mv.t][1], r:mv.reach});
-      if (dist(f,foe) <= f.r + foe.r + mv.reach) hit(f, foe, mv, 1);
+      // il faut être à portée ET viser à peu près l'adversaire
+      const da = Math.abs(((Math.atan2(foe.y-f.y, foe.x-f.x) - a) % (Math.PI*2) + Math.PI*3) % (Math.PI*2) - Math.PI);
+      if (dist(f,foe) <= f.r + foe.r + mv.reach && (da < 1.2 || dist(f,foe) < f.r + foe.r + 4)) hit(f, foe, mv, 1);
       else popText(f.x, f.y - 30, 'Raté', '#a39bd0', 13, .6);
       break; }
     case 'buff': f.buff = {atk:1,spa:1,spe:1,...mv.buff}; f.buffT = mv.dur; burst(f.x, f.y, '#e6b84c', 14, 120, 4); break;
@@ -644,10 +802,14 @@ function use(f, i){
     case 'mirror': f.mirror = mv.dur; break;
     case 'blink': {
       burst(f.x, f.y, TYPES.Psychic[1], 14, 140, 4);
-      const away = Math.atan2(f.y - foe.y, f.x - foe.x) + rand(-.6,.6);
-      let nx = foe.x + Math.cos(away)*240, ny = foe.y + Math.sin(away)*240;
+      let nx, ny;
+      if (aim){ nx = f.x + Math.cos(a)*BLINK_DIST; ny = f.y + Math.sin(a)*BLINK_DIST; }
+      else {
+        const away = Math.atan2(f.y - foe.y, f.x - foe.x) + rand(-.6,.6);
+        nx = foe.x + Math.cos(away)*240; ny = foe.y + Math.sin(away)*240;
+      }
       nx = Math.max(WALL+f.r, Math.min(W-WALL-f.r, nx)); ny = Math.max(WALL+f.r, Math.min(H-WALL-f.r, ny));
-      if (Math.hypot(nx-foe.x, ny-foe.y) < 150){ nx = W - foe.x; ny = H - foe.y; }
+      if (!aim && Math.hypot(nx-foe.x, ny-foe.y) < 150){ nx = W - foe.x; ny = H - foe.y; }
       f.x = nx; f.y = ny; f.vx = f.vy = f.kx = f.ky = 0; f.inv = .6;
       burst(f.x, f.y, TYPES.Psychic[1], 14, 140, 4); break; }
   }
@@ -675,6 +837,7 @@ function hit(att, def, mv, mult){
   const A = mv.c === 'ph' ? att.st.atk*att.buff.atk : att.st.spa*att.buff.spa, D = mv.c === 'ph' ? def.st.def : def.st.spd;
   let dmg = ((22*mv.p*A/D)/50 + 2) * (att.d.types.includes(mv.t) ? 1.5 : 1) * e * rand(.88,1) * .3 * mult * suddenDeath();
   if (att.burn > 0 && mv.c === 'ph') dmg *= .5;
+  if (att.isAI) dmg *= game.diff.dmg;   // force de l'IA selon la difficulté
   dmg = Math.max(1, Math.round(dmg));
   damage(def, dmg);
   def.flash = .22; def.hurtT = .3;
@@ -738,16 +901,22 @@ function aiInput(f, dt){
     if (!p.roll) continue;
     const s = lat === 0 ? ai.strafe : Math.sign(lat);
     ix += -hy*s*2.4; iy += hx*s*2.4;
+    if (along < 150){ if (p.dodge === undefined) p.dodge = Math.random() < D.dash;
+      if (p.dodge && tryRoll(f, -hy*s, hx*s)) p.dodge = false; }
   }
   for (const z of game.zones){ if (z.owner.side === f.side) continue;
     const zd = Math.hypot(f.x-z.x, f.y-z.y);
     if (zd < z.r + f.r + 8){ if (z.roll === undefined) z.roll = Math.random() < D.react + .1;
-      if (z.roll){ ix += (f.x-z.x)/(zd||1)*2.5; iy += (f.y-z.y)/(zd||1)*2.5; } } }
+      if (z.roll){ ix += (f.x-z.x)/(zd||1)*2.5; iy += (f.y-z.y)/(zd||1)*2.5;
+        if (z.t > z.mv.delay - .3){ if (z.dodge === undefined) z.dodge = Math.random() < D.dash;
+          if (z.dodge && tryRoll(f, f.x-z.x, f.y-z.y)) z.dodge = false; } } } }
   for (const g of game.rings){ if (g.owner.side === f.side || g.hit) continue;
     if (g.roll === undefined) g.roll = Math.random() < D.react;
     if (g.roll){ ix -= ux*2; iy -= uy*2; } }
   if (foe.dash){ if (ai.dashRoll === undefined) ai.dashRoll = Math.random() < D.react;
-    if (ai.dashRoll){ ix += -uy*ai.strafe*2.6; iy += ux*ai.strafe*2.6; } } else ai.dashRoll = undefined;
+    if (ai.dashRoll){ ix += -uy*ai.strafe*2.6; iy += ux*ai.strafe*2.6;
+      if (d < 170){ if (ai.dashDodge === undefined) ai.dashDodge = Math.random() < D.dash;
+        if (ai.dashDodge && tryRoll(f, -uy*ai.strafe, ux*ai.strafe)) ai.dashDodge = false; } } } else { ai.dashRoll = undefined; ai.dashDodge = undefined; }
   for (const rk of game.rocks){ const rx = rk.x-f.x, ry = rk.y-f.y, rd = Math.hypot(rx,ry) || 1;
     if (rd < rk.r + f.r + 28){ ix -= rx/rd*1.2; iy -= ry/rd*1.2; } }
   const m = Math.hypot(ix,iy); if (m > 1){ ix /= m; iy /= m; }
@@ -777,6 +946,7 @@ function aiPick(f, foe, d){
         const st = mv.c === 'ph' ? f.st.atk*f.buff.atk : f.st.spa*f.buff.spa;
         s = mv.p/90 * e * (f.d.types.includes(mv.t) ? 1.5 : 1) * st/120;
         if (mv.k === 'quake' && d > mv.max*.85) s *= .1;
+        if (mv.k === 'psy' && d > PSY_RANGE + mv.r*.5) s *= .1;
         if (mv.k === 'dash' && d > mv.spd*mv.dur + 40) s *= .15;
         if (mv.k === 'melee' && d > f.r + foe.r + mv.reach + 10) s *= .05;
         if ((mv.k === 'proj' || mv.k === 'spread') && mv.spd*mv.life < d) s *= .25;
@@ -805,7 +975,11 @@ function stepFighter(f, ix, iy, dt){
   if (f.ring > 0 && f.hp > 0){ f.hp = Math.min(f.max, f.hp + f.max*.22/6*dt); if (Math.random() < dt*10) burst(f.x+rand(-18,18), f.y+rand(-18,18), '#8fb4ff', 1, 30, 3); }
   f.bob += dt*6;
   if (f.hp <= 0){ f.dead += dt; return; }
-  if (f.dash){
+  if (f.roll){
+    f.x += f.roll.vx*dt; f.y += f.roll.vy*dt; f.roll.t -= dt;
+    game.parts.push({x:f.x,y:f.y,vx:0,vy:0,life:.2,max:.2,col:'#ffffff',size:14,ghost:true});
+    if (f.roll.t <= 0){ f.vx = f.roll.vx*.3; f.vy = f.roll.vy*.3; f.roll = null; } else { f.vx = f.roll.vx; f.vy = f.roll.vy; }
+  } else if (f.dash){
     f.x += f.dash.vx*dt; f.y += f.dash.vy*dt; f.dash.t -= dt;
     if (Math.random() < .8) game.parts.push({x:f.x,y:f.y,vx:0,vy:0,life:.25,max:.25,col:TYPES[f.dash.mv.t][1],size:16,ghost:true});
     const mv = f.dash.mv;
@@ -821,6 +995,7 @@ function stepFighter(f, ix, iy, dt){
     f.vx = 0; f.vy = 0;
   } else {
     if (!canAct(f) || game.state !== 'fight'){ ix = 0; iy = 0; }
+    const im = Math.hypot(ix, iy); if (im > .2){ f.lastDir = {x:ix/im, y:iy/im}; }
     const sp = moveSpeed(f), k = Math.min(1, dt*12);
     f.vx += (ix*sp - f.vx)*k; f.vy += (iy*sp - f.vy)*k;
     f.x += f.vx*dt; f.y += f.vy*dt;
@@ -843,7 +1018,8 @@ function update(dt){
   if (g.state === 'ko'){ g.koT -= dt; if (g.koT <= 0) resolveKO(); }
   g.ps.swCd = Math.max(0, g.ps.swCd - (g.state === 'fight' ? dt : 0));
   g.es.swCd = Math.max(0, g.es.swCd - (g.state === 'fight' ? dt : 0));
-  if (g.state === 'fight') g.p.held.forEach((h,i) => { if (h) use(g.p, i); });
+  if (g.state === 'fight') for (const side of [g.ps, g.es]) if (side.dashN < DASH_MAX && (side.dashT -= dt) <= 0){
+    side.dashN++; side.dashT = side.dashN < DASH_MAX ? DASH_REGEN : 0; }
   const [px,py] = playerInput();
   const [ax,ay] = aiInput(g.e, dt);
   stepFighter(g.p, px, py, dt);
@@ -918,8 +1094,11 @@ function showChoose(){
   $('chooseT').textContent = `${g.p.d.name} est K.O. !`;
   $('chooseList').innerHTML = g.ps.team.map((f,i) => f.hp > 0 ? `<button data-i="${i}">${pic(f.key,52)}<b>${f.d.name}</b><small>${Math.ceil(f.hp)}/${f.max} PV</small><div class="types">${chips(f.d.types)}</div></button>` : '').join('');
   hydrate($('chooseList'));
+  chooseFocus = aliveIdx(g.ps)[0]; focusChoose();
   $('ovChoose').hidden = false;
 }
+let chooseFocus = 0;
+function focusChoose(){ $('chooseList').querySelectorAll('button').forEach(b => b.classList.toggle('focus', inputMode === 'pad' && +b.dataset.i === chooseFocus)); }
 $('chooseList').addEventListener('click', e => { const b = e.target.closest('button'); if (b) chooseNext(+b.dataset.i); });
 function chooseNext(i){
   const g = game; if (!g || g.state !== 'choose') return;
@@ -989,6 +1168,7 @@ function pmdAnim(f){
 }
 // Direction du regard : vers la cible pendant une attaque, vers où il marche sinon, vers l'adversaire à l'arrêt
 function pmdDir(f){
+  if (f.roll) return Math.atan2(f.roll.vy, f.roll.vx);
   if (f.act || f.dash) return f.aimA;
   if (Math.hypot(f.vx, f.vy) > 25) return Math.atan2(f.vy, f.vx);
   const foe = foeOf(f); return Math.atan2(foe.y - f.y, foe.x - f.x);
@@ -1049,6 +1229,42 @@ function drawFighter(f){
   ctx.globalAlpha = 1;
 }
 
+// Repère au sol : forme de l'attaque en cours de visée (glissé tactile, souris ou manette maintenue)
+function drawAim(){
+  const g = game, f = g.p;
+  if (f.hp <= 0 || (g.state !== 'fight' && g.state !== 'intro')) return;
+  let i = -1, aim = null;
+  if (touchAim && touchAim.active){ i = touchAim.i; aim = aimPoint(touchAim, i); }
+  else { const h = f.held.findIndex(x => x); if (h >= 0){ i = h; aim = aimPoint(f.held[h], h); } }
+  ctx.save();
+  if (i < 0){
+    // stick droit sans attaque : simple ligne de visée
+    if (inputMode === 'pad' && pad.aimOn){ const a = pad.aimA;
+      ctx.strokeStyle = '#e6b84c'; ctx.globalAlpha = .5; ctx.lineWidth = 3; ctx.setLineDash([8,8]);
+      ctx.beginPath(); ctx.moveTo(f.x + Math.cos(a)*f.r, f.y + Math.sin(a)*f.r); ctx.lineTo(f.x + Math.cos(a)*170, f.y + Math.sin(a)*170); ctx.stroke(); }
+    ctx.restore(); return;
+  }
+  const mv = MOVES[f.d.moves[i]], foe = foeOf(f);
+  const tx = aim ? aim.x : foe.x, ty = aim ? aim.y : foe.y, a = Math.atan2(ty - f.y, tx - f.x);
+  const col = TYPES[mv.t][1], ready = f.cds[i] <= 0;
+  ctx.fillStyle = col; ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.globalAlpha = ready ? .3 : .12;
+  const wedge = (R, half) => { ctx.beginPath(); ctx.moveTo(f.x, f.y); ctx.arc(f.x, f.y, R, a - half, a + half); ctx.closePath(); ctx.fill(); ctx.globalAlpha *= 2; ctx.stroke(); };
+  const disc = (x, y, R) => { ctx.beginPath(); ctx.arc(x, y, R, 0, Math.PI*2); ctx.fill(); ctx.globalAlpha *= 2; ctx.stroke(); };
+  const lane = (L, half) => { ctx.translate(f.x, f.y); ctx.rotate(a); ctx.fillRect(0, -half, L, half*2); ctx.globalAlpha *= 2; ctx.strokeRect(0, -half, L, half*2); };
+  switch (mv.k){
+    case 'proj': case 'homing': lane(Math.min(mv.spd*mv.life, 700), mv.r); break;
+    case 'spread': wedge(Math.min(mv.spd*mv.life, 700), (mv.cnt-1)/2*mv.ang + .06); break;
+    case 'psy': { const z = clampRange(f, tx, ty);
+      ctx.save(); ctx.globalAlpha = .35; ctx.setLineDash([6,8]); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(f.x, f.y, PSY_RANGE, 0, Math.PI*2); ctx.stroke(); ctx.restore();
+      disc(z.x, z.y, mv.r); break; }
+    case 'quake': disc(f.x, f.y, mv.max); break;
+    case 'dash': lane(mv.spd*mv.dur, f.r); break;
+    case 'melee': wedge(f.r + mv.reach, 1.2); break;
+    case 'blink': disc(f.x + Math.cos(a)*BLINK_DIST, f.y + Math.sin(a)*BLINK_DIST, f.r); break;
+    default: disc(f.x, f.y, f.r + 16);
+  }
+  ctx.restore();
+}
 function render(){
   const g = game;
   ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,cv.width,cv.height);
@@ -1062,6 +1278,7 @@ function render(){
   for (const rg of g.rings){ const k = Math.min(1, rg.t/rg.mv.dur);
     ctx.globalAlpha = 1 - k*.6; ctx.strokeStyle = TYPES[rg.mv.t][1]; ctx.lineWidth = 14*(1-k)+3;
     ctx.beginPath(); ctx.arc(rg.x, rg.y, Math.max(1,rg.r), 0, Math.PI*2); ctx.stroke(); ctx.globalAlpha = 1; }
+  drawAim();
   for (const rk of g.rocks) drawRock(rk);
   for (const q of g.parts) if (q.ghost){ ctx.globalAlpha = q.life/q.max*.35; ctx.fillStyle = q.col; ctx.beginPath(); ctx.arc(q.x, q.y, q.size, 0, Math.PI*2); ctx.fill(); }
   ctx.globalAlpha = 1;
@@ -1099,6 +1316,7 @@ function render(){
 let last = performance.now();
 function loop(now){
   const dt = Math.min(.033, (now - last)/1000); last = now;
+  pollPad();
   if (game){ if (!game.paused && game.state !== 'end') update(dt); render(); updateHUD(); }
   requestAnimationFrame(loop);
 }
