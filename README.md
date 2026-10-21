@@ -9,7 +9,7 @@ Ouvrir `index.html` dans un navigateur (une connexion internet est nécessaire p
 
 - **Clavier + souris** : ZQSD pour bouger, la souris vise ; clic gauche, clic droit, A et E pour attaquer (Q et E en QWERTY), l'attaque part au relâchement ; Espace pour le Dash ; 1 à 6 pour changer de Pokémon ; Échap pour la pause.
 - **Clavier seul** : J K L M attaquent en visée automatique.
-- **Manette** : stick gauche pour bouger, stick droit pour viser (relâché = visée automatique) ; L1, L2, R1, R2 pour attaquer (l'attaque part au relâchement) ; ✕ pour le Dash ; flèches gauche/droite pour changer de Pokémon ; Options pour la pause.
+- **Manette** : stick gauche pour bouger, stick droit pour viser (relâché = visée automatique) ; L1, L2, R1, R2 pour attaquer (l'attaque part au relâchement) ; ✕ pour le Dash ; flèches gauche/droite pour choisir un Pokémon, Triangle pour l'envoyer ; Options pour la pause.
 - **Téléphone** : joystick à gauche ; toucher une attaque = visée automatique, glisser depuis le bouton = visée manuelle (repère au sol), l'attaque part au relâchement ; bouton Dash à droite.
 
 ## Contenu

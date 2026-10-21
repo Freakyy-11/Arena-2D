@@ -110,6 +110,9 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .bench button{position:relative;overflow:hidden;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:3px 3px 5px;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;touch-action:manipulation}
 .bench button.on{border-color:var(--gold);background:var(--panel-2)}
 .bench button.ko{opacity:.3}
+.bench button.pick{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold);transform:translateY(-3px)}
+.bench button .tri{display:none;position:absolute;top:2px;right:4px;font-style:normal;font-size:11px;font-weight:700;color:var(--gold);z-index:1}
+.bench button.pick .tri{display:block}
 .bench button .hb{width:100%;height:3px;border-radius:2px;background:#0007;overflow:hidden}
 .bench button .hb i{display:block;height:100%;background:var(--hp);transform-origin:left}
 .bench button::after{content:"";position:absolute;inset:0;background:#000a;transform:scaleY(var(--cd,0));transform-origin:bottom;pointer-events:none}
@@ -132,6 +135,8 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .dashb em{position:absolute;top:5px;font-style:normal;font-size:10px;color:var(--mute);display:none}
 .dashb:active{filter:brightness(1.2)}
 @media (max-width:440px){.mv{padding:6px 5px 6px 7px}.mv b{white-space:normal;overflow-wrap:anywhere;font-size:12px;line-height:1.1;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}.mv span{font-size:9px}}
+.mv.recast{animation:recast .5s ease-in-out infinite alternate}
+@keyframes recast{from{box-shadow:inset 0 0 0 2px var(--gold)}to{box-shadow:inset 0 0 0 2px transparent}}
 .mv.ready{background:color-mix(in srgb,var(--tc) 22%,var(--panel-2))}
 .mv:active{filter:brightness(1.2)}
 @media (pointer:fine){.pad{grid-template-columns:minmax(0,1fr) 84px} .stick{display:none} .moves{grid-template-columns:repeat(4,minmax(0,1fr))}}
@@ -177,7 +182,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
     <button class="btn" id="openDex">Attaques des Pokémon</button>
     <button class="go" id="start">Combattre</button>
     <p class="note kbd">Clavier + souris : ZQSD pour bouger, la souris vise · clic gauche, clic droit, A et E pour attaquer · Espace pour le Dash · 1 à 6 pour changer de Pokémon · Échap pour la pause. Clavier seul : J K L M attaquent en visée automatique. Maintiens une attaque pour voir le repère : elle part quand tu relâches.</p>
-    <p class="note">Manette : stick gauche pour bouger, stick droit pour viser (relâché = visée automatique) · L1, L2, R1, R2 pour attaquer (l'attaque part au relâchement) · ✕ pour le Dash · flèches gauche/droite pour changer de Pokémon · Options pour la pause.</p>
+    <p class="note">Manette : stick gauche pour bouger, stick droit pour viser (relâché = visée automatique) · L1, L2, R1, R2 pour attaquer (l'attaque part au relâchement) · ✕ pour le Dash · flèches gauche/droite pour choisir un Pokémon, Triangle pour l'envoyer · Options pour la pause.</p>
     <p class="note">Sur téléphone : joystick à gauche, attaques et Dash à droite. Touche une attaque pour viser automatiquement, ou fais glisser le doigt depuis le bouton pour viser toi-même puis relâche, et la barre d'équipe au-dessus pour changer de Pokémon. S'ils ne chargent pas, des jetons aux couleurs des types remplacent les sprites.</p>
     <p class="note">Sprites animés en combat : <a href="https://sprites.pmdcollab.org" target="_blank" rel="noopener" style="color:var(--gold)">PMD SpriteCollab</a> (CC BY-NC 4.0, crédits par sprite sur le site). Portraits : PokéAPI. Projet de fan non officiel et non commercial.</p>
   </section>
@@ -254,25 +259,27 @@ const effMult = (t, defs) => defs.reduce((m,d)=> m * ((CHART[t]||{})[d] ?? 1), 1
    melee   coup au corps à corps        buff    boost (atk/spa/spe)       heal    soin immédiat (pct)
    ring    soin sur la durée            mirror  renvoie les projectiles   rest    soin total puis sommeil
    blink   téléportation                sig     ★ attaque emblématique : comportement propre dans SIG[sig]
+   spec    attaque spéciale (non emblématique) avec un comportement propre, aussi dans SIG[sig]
+   ring : rendu de l'onde (cracks, sound, stars) · selfDown : baisse les défenses du lanceur (s) · spdDown/defDown : chance de baisser la défense visée
    fx : burn, poison, slow, stun (chances) · drain, recoil (part des dégâts) · self (boost du lanceur)
    ★ : range = portée pour l'IA · shape = repère de visée · anim = animation PMD · close = corps à corps · aiP = puissance estimée pour l'IA */
 const MOVES = {
   // Feu
-  lanceflammes:{n:'Lance-Flammes',t:'Fire',c:'sp',p:100,k:'proj',spd:420,r:15,life:.7,cd:3,fx:{burn:.3},flame:1},
+  lanceflammes:{n:'Lance-Flammes',t:'Fire',c:'sp',p:80,k:'spec',sig:'lanceflammes',beam:1,cd:4,range:560,shape:['lane',560,18],anim:'Shoot',fx:{burn:.3},desc:"Après 0,2 s de visée, jet de flammes à longue portée. 30 % de chance de brûler. Laisse une traînée de flammes au sol pendant 3 s qui peut brûler."},
   deflagration:{n:'Déflagration',t:'Fire',c:'sp',p:120,k:'proj',spd:290,r:22,life:1.6,cd:4.5,fx:{burn:.3},flame:1},
   feufollet:{n:'Feu Follet',t:'Fire',c:'st',p:0,k:'proj',spd:300,r:12,life:1.6,cd:6,fx:{burn:1}},
   rafalefeu:{n:'Rafale Feu',t:'Fire',c:'sp',p:140,k:'sig',sig:'rafalefeu',cd:6,range:230,shape:['wedge',240,.55],anim:'Shoot',desc:"Après une courte préparation, énorme cône de feu. Le sol reste en flammes 3 s et brûle ceux qui s'y trouvent."},
   dansedufeu:{n:'Danse du Feu',t:'Fire',c:'sp',p:32,k:'sig',sig:'dansedufeu',cd:5,range:380,shape:['lane',360,32],anim:'Charge',aiP:110,desc:"Tornade de flammes qui suit l'ennemi et le touche plusieurs fois (5 coups max). 50 % de chance d'augmenter l'Atq. Spé. pendant 6 s.",per:1},
   chantflamboyant:{n:'Chant Flamboyant',t:'Fire',c:'sp',p:100,k:'sig',sig:'chantflamboyant',cd:4.5,range:300,shape:['self',320],anim:'Charge',desc:"Onde de flammes en cercle qui part du lanceur et s'éloigne (grande portée). Si elle touche : Atq. Spé. augmentée pendant 6 s."},
   // Vol
-  ventviolent:{n:'Vent Violent',t:'Flying',c:'sp',p:110,k:'proj',spd:340,r:18,life:1.4,cd:4,fx:{stun:.3}},
+  ventviolent:{n:'Vent Violent',t:'Flying',c:'sp',p:50,k:'spec',sig:'ventviolent',cd:6,range:380,shape:['wedge',380,.58],anim:'Shoot',per:1,aiP:110,fx:{stun:.2},desc:"3 tornades : deux partent en V, une au centre. Chacune touche une fois (20 % de chance d'étourdir)."},
   atterrissage:{n:'Atterrissage',t:'Flying',c:'st',k:'heal',pct:.3,cd:16},
   lamedair:{n:"Lame d'Air",t:'Flying',c:'sp',p:45,k:'sig',sig:'lamedair',cd:3.6,range:260,shape:['wedge',260,.4],anim:'Shoot',aiP:110,desc:"3 lames de vent qui reviennent comme des boomerangs. Chacune touche à l'aller et au retour.",per:1},
   // Dragon
-  dracochoc:{n:'Draco-Choc',t:'Dragon',c:'sp',p:95,k:'proj',spd:450,r:12,life:1.4,cd:3},
+  dracochoc:{n:'Draco-Choc',t:'Dragon',c:'sp',p:95,k:'proj',spd:430,r:22,life:1.4,cd:3,look:'dragonpulse',fx:{spdDown:.2}},
   dracocharge:{n:'Draco-Charge',t:'Dragon',c:'ph',p:100,k:'dash',spd:740,dur:.42,cd:4,fx:{stun:.25}},
   dansedraco:{n:'Danse Draco',t:'Dragon',c:'st',k:'buff',buff:{atk:1.4,spe:1.25},dur:10,cd:15},
-  dracofleches:{n:'Draco-Flèches',t:'Dragon',c:'ph',p:44,k:'sig',sig:'dracofleches',cd:4,range:450,shape:['lane',450,12],anim:'Shoot',aiP:105,desc:"Lance deux Fantyrm qui poursuivent l'ennemi.",per:1},
+  dracofleches:{n:'Draco-Flèches',t:'Dragon',c:'ph',p:50,k:'sig',sig:'dracofleches',cd:4,range:450,shape:['lane',450,12],anim:'Shoot',aiP:105,desc:"Lance deux Fantyrm qui poursuivent l'ennemi.",per:1},
   colere:{n:'Colère',t:'Dragon',c:'ph',p:58,k:'sig',sig:'colere',cd:6,range:130,shape:['wedge',130,1],anim:'Attack',close:1,aiP:170,desc:"4 coups enchaînés, redirigeables entre chaque, de plus en plus larges. Le dernier frappe plus fort. Le lanceur ne se déplace pas pendant l'enchaînement.",per:1},
   // Eau
   vibraqua:{n:'Vibraqua',t:'Water',c:'sp',p:75,k:'proj',spd:430,r:11,life:1.3,cd:2.8,fx:{stun:.2}},
@@ -284,44 +291,45 @@ const MOVES = {
   // Ténèbres
   vibrobscur:{n:'Vibrobscur',t:'Dark',c:'sp',p:90,k:'proj',spd:460,r:11,life:1.4,cd:2.8,fx:{stun:.2}},
   machouille:{n:'Mâchouille',t:'Dark',c:'ph',p:85,k:'melee',reach:60,cd:2.2,fx:{stun:.2}},
-  sabotage:{n:'Sabotage',t:'Dark',c:'ph',p:70,k:'melee',reach:60,cd:1.9},
+  sabotage:{n:'Sabotage',t:'Dark',c:'ph',p:70,k:'spec',sig:'sabotage',cd:2.8,range:170,shape:['lane',170,20],anim:'Attack',close:1,desc:"Claque sur une bande longue et étroite devant le lanceur."},
   genusection:{n:'Génusection',t:'Dark',c:'ph',p:125,k:'sig',sig:'genusection',cd:6.5,range:470,shape:['lane',470,24],anim:'Attack',close:1,desc:"L'écran s'assombrit, puis longue charge. Attaque en X à l'impact, ou au bout de la course si elle ne touche personne."},
   // Spectre
-  ballombre:{n:"Ball'Ombre",t:'Ghost',c:'sp',p:90,k:'proj',spd:360,r:15,life:1.8,cd:3},
-  hantise:{n:'Hantise',t:'Ghost',c:'ph',p:80,k:'dash',spd:600,dur:.5,inv:1,cd:5},
+  ballombre:{n:"Ball'Ombre",t:'Ghost',c:'sp',p:90,k:'proj',spd:340,r:22,life:1.8,cd:3,look:'shadowball',fx:{spdDown:.2}},
+  hantise:{n:'Hantise',t:'Ghost',c:'ph',p:80,k:'spec',sig:'hantise',cd:5,range:300,shape:['lane',300,24],anim:'Attack',close:1,desc:"Charge invulnérable. Si elle touche, le lanceur traverse l'ennemi et redevient vulnérable derrière lui."},
+  demitour:{n:'Demi-Tour',t:'Bug',c:'ph',p:80,k:'spec',sig:'demitour',cd:4,range:290,shape:['lane',260,24],anim:'Attack',close:1,desc:"Charge. Si elle touche, le lanceur bondit en arrière et se replace à distance (il évite les attaques pendant le saut)."},
   // Psy
-  chocpsy:{n:'Choc Psy',t:'Psychic',c:'sp',p:95,k:'proj',spd:560,r:11,life:1.1,cd:2.6},
+  chocpsy:{n:'Choc Psy',t:'Psychic',c:'sp',p:60,k:'spec',sig:'chocpsy',cd:5.5,range:380,shape:['zone',54],anim:'Shoot',per:1,aiP:110,desc:"3 zones psychiques, une toutes les 0,3 s. Chacune se place là où tu vises à ce moment-là (sur l'ennemi en visée automatique)."},
   psykoudboul:{n:"Psykoud'Boul",t:'Psychic',c:'ph',p:75,k:'melee',reach:60,cd:2.8,fx:{stun:.2}},
   voilemiroir:{n:'Voile Miroir',t:'Psychic',c:'st',k:'mirror',dur:.9,cd:5.5},
   teleport:{n:'Téléport',t:'Psychic',c:'st',k:'blink',cd:4},
   repos:{n:'Repos',t:'Psychic',c:'st',k:'rest',cd:28},
   psyko:{n:'Psyko',t:'Psychic',c:'sp',p:135,k:'sig',sig:'psyko',cd:5,range:380,shape:['zone',64],anim:'Shoot',desc:"Zone visée : si l'ennemi est dedans quand elle se déclenche, il est soulevé (immobilisé) puis écrasé au sol."},
   // Fée
-  eclatmagique:{n:'Éclat Magique',t:'Fairy',c:'sp',p:85,k:'quake',max:140,dur:.35,cd:4},
+  eclatmagique:{n:'Éclat Magique',t:'Fairy',c:'sp',p:85,k:'quake',max:140,dur:.35,cd:4,ring:'stars'},
   pouvoirlunaire:{n:'Pouvoir Lunaire',t:'Fairy',c:'sp',p:130,k:'sig',sig:'pouvoirlunaire',cd:5,range:380,shape:['zone',72],anim:'Shoot',desc:"Une lune descend sur la zone visée et explose."},
   // Combat
-  closecombat:{n:'Close Combat',t:'Fighting',c:'ph',p:120,k:'melee',reach:64,cd:4.5},
+  closecombat:{n:'Close Combat',t:'Fighting',c:'ph',p:120,k:'melee',reach:64,cd:4.5,selfDown:3},
   exploforce:{n:'Exploforce',t:'Fighting',c:'sp',p:120,k:'proj',spd:270,r:20,life:2,cd:4.5},
   aurasphere:{n:'Aurasphère',t:'Fighting',c:'sp',p:65,k:'sig',sig:'aurasphere',cd:4,range:500,shape:['lane',520,14],anim:'Shoot',aiP:105,desc:"Maintenir la touche pour charger : la sphère grossit et frappe plus fort (jusqu'à +50). Elle suit l'ennemi."},
   // Acier
-  luminocanon:{n:'Luminocanon',t:'Steel',c:'sp',p:90,k:'proj',spd:520,r:10,life:1.2,cd:2.8},
+  luminocanon:{n:'Luminocanon',t:'Steel',c:'sp',p:80,k:'spec',sig:'luminocanon',beam:1,cd:4,range:560,shape:['lane',560,18],anim:'Shoot',fx:{spdDown:.3},desc:"Après 0,2 s de visée, rayon d'acier à longue portée. 30 % de chance de baisser la Déf. Spé. pendant 4 s."},
   tetedefer:{n:'Tête de Fer',t:'Steel',c:'ph',p:85,k:'melee',reach:60,cd:2.3,fx:{stun:.3}},
   pistopoing:{n:'Pisto-Poing',t:'Steel',c:'ph',p:55,k:'dash',spd:900,dur:.2,cd:2.6},
   poingmeteore:{n:'Poing Météore',t:'Steel',c:'ph',p:80,k:'sig',sig:'poingmeteore',cd:5.5,range:320,shape:['lane',320,26],anim:'Attack',close:1,desc:"Charge comme un météore, cratère à l'impact. 30 % de chance d'augmenter l'Attaque pendant 8 s."},
-  ancrage:{n:'Ancrage',t:'Steel',c:'ph',p:95,k:'sig',sig:'ancrage',cd:4,range:360,shape:['lane',360,14],anim:'Attack',desc:"Lance l'ancre au bout de sa chaîne : si elle touche, l'ennemi est attiré vers le lanceur et immobilisé un instant."},
+  ancrage:{n:'Ancrage',t:'Steel',c:'ph',p:95,k:'sig',sig:'ancrage',cd:4.5,range:360,shape:['lane',360,14],anim:'Attack',desc:"Lance l'ancre au bout de sa chaîne : si elle touche, l'ennemi est attiré jusqu'au corps à corps et immobilisé 0,5 s."},
   // Sol
-  seisme:{n:'Séisme',t:'Ground',c:'ph',p:90,k:'quake',max:175,dur:.5,cd:5},
+  seisme:{n:'Séisme',t:'Ground',c:'ph',p:90,k:'quake',max:175,dur:.5,cd:5,ring:'cracks'},
   tunnelier:{n:'Tunnelier',t:'Ground',c:'ph',p:80,k:'dash',spd:760,dur:.4,cd:3.4},
   telluriforce:{n:'Telluriforce',t:'Ground',c:'sp',p:95,k:'psy',r:60,delay:.65,cd:3.6},
   tunnel:{n:'Tunnel',t:'Ground',c:'ph',p:120,k:'sig',sig:'tunnel',cd:5,range:320,shape:['leap',320,80],anim:'Attack',close:1,desc:"S'enterre (invulnérable) et avance sous terre, puis ressort sous la zone visée en projetant l'ennemi en l'air."},
   // Roche
-  eboulement:{n:'Éboulement',t:'Rock',c:'ph',p:75,k:'spread',cnt:3,ang:.3,spd:360,r:14,life:1,cd:3.4,fx:{stun:.25}},
+  eboulement:{n:'Éboulement',t:'Rock',c:'ph',p:75,k:'spec',sig:'eboulement',cd:3.4,range:380,shape:['zone3',42],anim:'Shoot',fx:{stun:.25},desc:"3 zones en même temps autour du point visé : des rochers tombent du ciel. 25 % de chance d'étourdir."},
   lamederoc:{n:'Lame de Roc',t:'Rock',c:'ph',p:130,k:'sig',sig:'lamederoc',cd:5.5,range:300,shape:['lane',310,26],anim:'Attack',desc:"Ligne de piliers de roche qui jaillissent du sol les uns après les autres. Ils restent 3 s comme obstacles."},
   // Glace
   poingglace:{n:'Poing Glace',t:'Ice',c:'ph',p:80,k:'melee',reach:60,cd:2.3,fx:{slow:.3}},
   crocsgivre:{n:'Crocs Givre',t:'Ice',c:'ph',p:70,k:'melee',reach:58,cd:2,fx:{slow:.3}},
-  eclatsglace:{n:'Éclats Glace',t:'Ice',c:'ph',p:55,k:'proj',spd:700,r:8,life:.8,cd:2.2},
-  laserglace:{n:'Laser Glace',t:'Ice',c:'sp',p:95,k:'proj',spd:640,r:8,life:.9,cd:3.2,fx:{slow:.3}},
+  eclatsglace:{n:'Éclats Glace',t:'Ice',c:'ph',p:55,k:'homing',cnt:1,spd:360,turn:2.6,r:11,life:1.7,cd:3,look:'diamond',fx:{slow:1,slowT:.5}},
+  laserglace:{n:'Laser Glace',t:'Ice',c:'sp',p:80,k:'spec',sig:'laserglace',beam:1,cd:4,range:560,shape:['lane',560,18],anim:'Shoot',fx:{slow:1},desc:"Après 0,2 s de visée, laser à longue portée. Ralentit à coup sûr, 10 % de chance d'immobiliser 1 s. Laisse une traînée de givre au sol pendant 3 s qui ralentit."},
   chuteglace:{n:'Chute Glace',t:'Ice',c:'ph',p:40,k:'sig',sig:'chuteglace',cd:5,range:380,shape:['zone',80],anim:'Shoot',aiP:135,desc:"Pluie de 5 stalactites sur la zone. La dernière ralentit très fortement et reste plantée : la prochaine attaque du lanceur la fait exploser.",per:1},
   blizzard:{n:'Blizzard',t:'Ice',c:'sp',p:40,k:'sig',sig:'blizzard',cd:6,range:230,shape:['wedge',235,.7],anim:'Shoot',aiP:115,desc:"Tempête de neige en cône pendant 1 s (4 coups, ralentit). Le lanceur ne se déplace pas pendant ce temps.",per:1},
   // Normal
@@ -332,15 +340,17 @@ const MOVES = {
   plaquage:{n:'Plaquage',t:'Normal',c:'ph',p:130,k:'sig',sig:'plaquage',cd:3.5,range:330,shape:['leap',330,110],anim:'Attack',close:1,desc:"Saute sur la zone visée (en l'air, passe au-dessus des attaques) et retombe avec une onde de choc qui étourdit."},
   // Plante
   martobois:{n:'Martobois',t:'Grass',c:'ph',p:120,k:'melee',reach:64,cd:4,fx:{recoil:.33}},
-  megafouet:{n:'Mégafouet',t:'Grass',c:'ph',p:120,k:'melee',reach:88,cd:3.6},
-  tambourbattant:{n:'Tambour Battant',t:'Grass',c:'ph',p:85,k:'sig',sig:'tambourbattant',cd:4.5,range:260,shape:['tambour'],anim:'Attack',aiP:130,desc:"3 coups de tambour : 1 zone, puis 2, puis 3 zones de racines, de plus en plus loin. Ralentit.",per:1},
+  megafouet:{n:'Mégafouet',t:'Grass',c:'ph',p:120,k:'spec',sig:'megafouet',cd:4.2,range:170,shape:['lane',170,20],anim:'Attack',close:1,desc:"Une liane s'abat du haut vers le sol, sur une bande longue et étroite."},
+  tambourbattant:{n:'Tambour Battant',t:'Grass',c:'ph',p:110,k:'sig',sig:'tambourbattant',cd:4.5,range:260,shape:['tambour'],anim:'Attack',aiP:150,desc:"3 coups de tambour : 1 zone, puis 2, puis 3 zones de racines, de plus en plus loin. Immobilise 1 s.",per:1},
   // Électrik
   eclairfou:{n:'Éclair Fou',t:'Electric',c:'ph',p:90,k:'dash',spd:800,dur:.35,cd:4,fx:{recoil:.25}},
+  changeeclair:{n:'Change Éclair',t:'Electric',c:'ph',p:40,k:'spec',sig:'changeeclair',cd:5,range:290,shape:['lane',270,24],anim:'Attack',close:1,per:1,aiP:95,desc:"Charge électrique qui traverse l'ennemi. Après la 1re charge, 2 s pour en lancer une 2e."},
   tonnerre:{n:'Tonnerre',t:'Electric',c:'sp',p:100,k:'proj',spd:560,r:10,life:1.1,cd:3,fx:{stun:.1}},
-  poingplasma:{n:'Poing Plasma',t:'Electric',c:'ph',p:52,k:'sig',sig:'poingplasma',cd:5.5,range:300,shape:['plasma',300],anim:'Attack',close:1,hitsImmune:1,aiP:150,desc:"Charge. À l'impact, ou au bout de la course, des éclairs tombent sur 3 zones en V. Touche aussi les types Sol.",per:1},
+  coupdjus:{n:"Coup d'Jus",t:'Electric',c:'sp',p:33,k:'spec',sig:'coupdjus',cd:5,range:120,shape:['self',115],anim:'Charge',per:1,aiP:85,desc:"3 décharges d'éclairs tout autour du lanceur, l'une après l'autre. Ralentit les ennemis touchés."},
+  poingplasma:{n:'Poing Plasma',t:'Electric',c:'ph',p:52,k:'sig',sig:'poingplasma',cd:5,range:300,shape:['plasma',300],anim:'Attack',close:1,hitsImmune:1,aiP:150,desc:"Charge. À l'impact, ou au bout de la course, des éclairs tombent sur 3 zones en V. Touche aussi les types Sol.",per:1},
   // Insecte
   papillodanse:{n:'Papillodanse',t:'Bug',c:'st',k:'buff',buff:{spa:1.4,spe:1.2},dur:10,cd:15},
-  bourdon:{n:'Bourdon',t:'Bug',c:'sp',p:90,k:'quake',max:160,dur:.45,cd:4.2},
+  bourdon:{n:'Bourdon',t:'Bug',c:'sp',p:90,k:'quake',max:160,dur:.45,cd:5,ring:'sound',fx:{spdDown:.2}},
   // Poison
   doubledard:{n:'Double Dard',t:'Poison',c:'sp',p:55,k:'sig',sig:'doubledard',cd:4,range:320,shape:['lane',340,14],anim:'Attack',aiP:120,desc:"Lance un dard (empoisonne à coup sûr) et charge en même temps (vole la moitié des dégâts en PV).",per:1}
 };
@@ -355,11 +365,11 @@ const MONS = {
   metalosse:{name:'Métalosse',id:376,types:['Steel','Psychic'],base:[80,135,130,95,90,70],moves:['poingmeteore','psykoudboul','seisme','poingglace']},
   ronflex:{name:'Ronflex',id:143,types:['Normal'],base:[160,110,65,65,110,30],moves:['plaquage','gigaimpact','seisme','repos']},
   gorythmic:{name:'Gorythmic',id:812,types:['Grass'],base:[100,125,90,60,70,85],moves:['tambourbattant','megafouet','sabotage','closecombat']},
-  zeraora:{name:'Zeraora',id:807,types:['Electric'],base:[88,112,75,102,80,143],moves:['poingplasma','eclairfou','closecombat','tonnerre']},
+  zeraora:{name:'Zeraora',id:807,types:['Electric'],base:[88,112,75,102,80,143],moves:['poingplasma','changeeclair','closecombat','coupdjus']},
   togekiss:{name:'Togekiss',id:468,types:['Fairy','Flying'],base:[85,50,95,120,115,80],moves:['lamedair','vibraqua','eclatmagique','atterrissage']},
   pyrax:{name:'Pyrax',id:637,types:['Bug','Fire'],base:[85,60,65,135,105,100],moves:['papillodanse','dansedufeu','bourdon','ventviolent']},
   milobellus:{name:'Milobellus',id:350,types:['Water'],base:[95,60,79,100,125,81],moves:['surf','laserglace','voilemiroir','anneauhydro']},
-  lanssorien:{name:'Lanssorien',id:887,types:['Dragon','Ghost'],base:[88,120,75,100,75,142],moves:['dracofleches','hantise','lanceflammes','ballombre']},
+  lanssorien:{name:'Lanssorien',id:887,types:['Dragon','Ghost'],base:[88,120,75,100,75,142],moves:['dracofleches','hantise','lanceflammes','demitour']},
   alakazam:{name:'Alakazam',id:65,types:['Psychic'],base:[55,50,45,135,95,120],moves:['psyko','ballombre','chocpsy','teleport']},
   scalpereur:{name:'Scalpereur',id:983,types:['Dark','Steel'],base:[100,135,120,60,85,50],moves:['tetedefer','genusection','danselames','machouille']},
   minotaupe:{name:'Minotaupe',id:530,types:['Ground','Steel'],base:[110,135,60,50,65,88],moves:['seisme','tunnel','tetedefer','eboulement']},
@@ -383,7 +393,7 @@ const DIFFS = {
   normal:{label:'Normal',react:.35,think:.6,lead:.25,noise:.35,mirror:true,sw:.25,dash:.2,aimErr:.25,dmg:.8},
   champion:{label:'Champion',react:.7,think:.45,lead:.65,noise:.15,mirror:true,sw:.6,dash:.55,aimErr:.07,dmg:1}
 };
-const STATUS = {burn:['Brûlé','#EE8130'],poison:['Empois.','#A33EA1'],slow:['Ralenti','#96D9D6'],stun:['Étourdi','#F7D02C'],sleep:['Endormi','#a39bd0'],ring:['Anneau','#6390F0'],mirror:['Miroir','#F95587'],buffT:['Boost','#e6b84c']};
+const STATUS = {defDown:['Déf −','#c98a8a'],spdDown:['D.Spé −','#8a9ac9'],burn:['Brûlé','#EE8130'],poison:['Empois.','#A33EA1'],slow:['Ralenti','#96D9D6'],stun:['Étourdi','#F7D02C'],sleep:['Endormi','#a39bd0'],ring:['Anneau','#6390F0'],mirror:['Miroir','#F95587'],buffT:['Boost','#e6b84c']};
 const SWITCH_CD = 4, INV_ON_SWITCH = .8;
 // Dash : charges partagées par l'équipe, rechargées une par une
 const DASH_MAX = 3, DASH_REGEN = 2, DASH_SPD = 760, DASH_DUR = .17, DASH_INV = .2;
@@ -508,15 +518,18 @@ function moveDesc(mv){
     dash:'Charge.' + (mv.inv ? ' Invulnérable pendant la charge.' : '') + (mv.recharge ? ' Le lanceur doit ensuite récupérer un instant.' : ''),
     buff: mv.buff ? Object.entries(mv.buff).map(([k,v]) => STAT_FR[k] + ' ×' + fr(v)).join(', ') + ` pendant ${mv.dur} s.` : '',
     heal:`Soigne ${pct(mv.pct)} des PV.`, ring:`Soigne peu à peu pendant ${mv.dur} s.`, mirror:'Renvoie les projectiles pendant un court instant (×1,5).',
-    rest:'Soigne tous les PV et les statuts, puis s\'endort un moment.', blink:'Téléportation dans la direction visée.'
+    rest:'Soigne tous les PV et les statuts, puis s\'endort 4 s.', blink:'Téléportation dans la direction visée.'
   }[mv.k] || '';
   const fx = mv.fx || {}, extra = [];
   if (fx.burn) extra.push(fx.burn >= 1 ? 'Brûle.' : pct(fx.burn) + ' de chance de brûler.');
   if (fx.poison) extra.push(fx.poison >= 1 ? 'Empoisonne.' : pct(fx.poison) + ' de chance d\'empoisonner.');
-  if (fx.slow) extra.push(pct(fx.slow) + ' de chance de ralentir.');
+  if (fx.slow) extra.push((fx.slow >= 1 ? 'Ralentit' : pct(fx.slow) + ' de chance de ralentir') + (fx.slowT ? ` ${fr(fx.slowT)} s.` : '.'));
   if (fx.stun) extra.push(pct(fx.stun) + ' de chance d\'étourdir.');
   if (fx.drain) extra.push('Vole ' + pct(fx.drain) + ' des dégâts en PV.');
   if (fx.recoil) extra.push('Le lanceur subit ' + pct(fx.recoil) + ' des dégâts.');
+  if (fx.spdDown) extra.push(pct(fx.spdDown) + ' de chance de baisser la Déf. Spé. pendant 4 s.');
+  if (fx.defDown) extra.push(pct(fx.defDown) + ' de chance de baisser la Défense pendant 4 s.');
+  if (mv.selfDown) extra.push(`Baisse les défenses du lanceur pendant ${mv.selfDown} s.`);
   if (fx.self) extra.push(Object.entries(fx.self).map(([k,v]) => STAT_FR[k] + ' ×' + fr(v)).join(', ') + ' quand ça touche.');
   if (mv.kb) extra.push('Repousse.');
   return [base, ...extra].join(' ');
@@ -566,7 +579,7 @@ function makeFighter(key, side){
     st:{atk:s(b[1]),def:s(b[2]),spa:s(b[3]),spd:s(b[4])},
     cds:[0,0,0,0], burn:0, poison:0, slow:0, stun:0, sleep:0, dot:0, mirror:0, ring:0, dash:null, recharge:0, inv:0,
     buff:{atk:1,spa:1,spe:1}, buffT:0, flash:0, face:1, bob:Math.random()*6, dead:0, koShown:false,
-    act:null, hurtT:0, aimA:0, seed:Math.random()*600, roll:null, script:null, air:null, h:0, buried:false, root:0, slowF:.55, ghosts:[], ghT:0, holdT:[0,0,0,0], iceSpike:null, lastDir:{x:0, y: side === 'p' ? -1 : 1},
+    act:null, hurtT:0, aimA:0, seed:Math.random()*600, roll:null, script:null, air:null, h:0, buried:false, root:0, slowF:.55, ghosts:[], ghT:0, holdT:[0,0,0,0], iceSpike:null, defDown:0, spdDown:0, recast:[0,0,0,0], lastDir:{x:0, y: side === 'p' ? -1 : 1},
     held:[false,false,false,false], ai:{think:1, strafe:1, strafeT:0, swT:2} };
 }
 // Vitesse de déplacement compressée : 160 (Vit 30) → 230 (Vit 143)
@@ -608,7 +621,7 @@ function sendIn(side, idx, announce=true){
   const alive = old.hp > 0;
   f.x = alive ? old.x : side.spawn.x; f.y = alive ? old.y : side.spawn.y;
   f.vx = f.vy = f.kx = f.ky = 0; f.dash = null; f.roll = null; f.script = null; f.air = null; f.h = 0; f.buried = false; f.root = 0; f.act = null; f.hurtT = 0; f.stun = 0; f.recharge = 0; f.mirror = 0; f.ring = 0; f.slow = 0;
-  f.buff = {atk:1,spa:1,spe:1}; f.buffT = 0; f.inv = INV_ON_SWITCH; f.held.fill(false);
+  f.buff = {atk:1,spa:1,spe:1}; f.buffT = 0; f.inv = INV_ON_SWITCH; f.held.fill(false); f.defDown = f.spdDown = 0; f.recast.fill(0);
   if (alive){ old.dash = null; old.roll = null; old.script = null; old.air = null; old.h = 0; old.buried = false; old.buff = {atk:1,spa:1,spe:1}; old.buffT = 0; old.mirror = 0; old.ring = 0; old.held.fill(false); }
   side.active = idx;
   if (side === game.ps){ game.p = f; buildMoves(); } else game.e = f;
@@ -674,13 +687,14 @@ function buildMoves(){
   labelControls();
 }
 function buildBench(){
-  $('bench').innerHTML = game.ps.team.map((f,i) => `<button data-i="${i}" aria-label="${f.d.name}">${pic(f.key,34)}<span class="hb"><i></i></span></button>`).join('');
+  $('bench').innerHTML = game.ps.team.map((f,i) => `<button data-i="${i}" aria-label="${f.d.name}">${pic(f.key,34)}<span class="hb"><i></i></span><em class="tri">△</em></button>`).join('');
   hydrate($('bench'));
   game.ps.benchBtns = [...$('bench').querySelectorAll('button')];
 }
 $('bench').addEventListener('click', e => { const b = e.target.closest('button'); if (b && game) trySwitch(game.ps, +b.dataset.i); });
 function hpColor(r){ return r > .5 ? 'var(--hp)' : r > .2 ? 'var(--hp-mid)' : 'var(--hp-low)'; }
 function updateHUD(){
+  const ps0 = game.ps; if (ps0.swSel != null && ((ps0.swSelT -= 1/60) <= 0 || ps0.swSel === ps0.active || ps0.team[ps0.swSel].hp <= 0)) ps0.swSel = null;
   for (const side of [game.ps, game.es]){
     const f = side.team[side.active], r = f.hp / f.max, h = side.hud;
     h.bar.style.transform = `scaleX(${r})`; h.bar.style.background = hpColor(r);
@@ -691,12 +705,12 @@ function updateHUD(){
     if (b !== h.lastB){ h.balls.innerHTML = side.team.map(x => `<i class="${x.hp>0?'':'ko'}"></i>`).join(''); h.lastB = b; }
   }
   game.p.btns.forEach((b,i) => { const mv = MOVES[game.p.d.moves[i]]; const c = Math.max(0, game.p.cds[i] / mv.cd);
-    b.style.setProperty('--cd', c.toFixed(3)); b.classList.toggle('ready', c === 0); });
+    b.style.setProperty('--cd', c.toFixed(3)); b.classList.toggle('ready', c === 0); b.classList.toggle('recast', game.p.recast[i] > 0); });
   const ps = game.ps;
   $('dashPips').querySelectorAll('i').forEach((pip,i) => { pip.classList.toggle('on', i < ps.dashN);
     pip.style.setProperty('--p', i === ps.dashN ? (1 - ps.dashT/DASH_REGEN).toFixed(3) : 0); });
   const cd = (game.ps.swCd / SWITCH_CD).toFixed(3);
-  game.ps.benchBtns.forEach((b,i) => { const f = game.ps.team[i];
+  game.ps.benchBtns.forEach((b,i) => { const f = game.ps.team[i]; b.classList.toggle('pick', i === game.ps.swSel);
     b.classList.toggle('on', i === game.ps.active); b.classList.toggle('ko', f.hp <= 0);
     b.style.setProperty('--cd', cd);
     const hb = b.querySelector('.hb i'); hb.style.transform = `scaleX(${f.hp/f.max})`; hb.style.background = hpColor(f.hp/f.max); });
@@ -748,7 +762,7 @@ function aimPoint(src, i){
 // direction (dx,dy) → point visé ; pour une zone (Psyko…), la distance vient du glissé ou de l'inclinaison du stick (0..1)
 function dirPoint(f, dx, dy, mag, i){
   const m = Math.hypot(dx,dy) || 1, mv = MOVES[f.d.moves[i]];
-  const zone = mv.k === 'psy' || (mv.shape && (mv.shape[0] === 'zone' || mv.shape[0] === 'leap')), R = mv.shape && mv.shape[0] === 'leap' ? mv.range : PSY_RANGE;
+  const zone = mv.k === 'psy' || (mv.shape && ['zone','zone3','leap'].includes(mv.shape[0])), R = mv.shape && mv.shape[0] === 'leap' ? mv.range : PSY_RANGE;
   const d = zone ? PSY_MIN + (mag != null ? mag : 1)*(R - PSY_MIN) : 200;
   return {x: f.x + dx/m*d, y: f.y + dy/m*d};
 }
@@ -810,16 +824,18 @@ function pollPad(){
     if (down(14) || down(12)) k = (k + al.length - 1) % al.length;
     if (down(15) || down(13)) k = (k + 1) % al.length;
     if (al[k] !== chooseFocus){ chooseFocus = al[k]; focusChoose(); }
-    if (down(0)) chooseNext(chooseFocus);
+    if (down(0) || down(3)) chooseNext(chooseFocus);
     pad.prev = b; return;
   }
   PAD_ATK.forEach((bi,i) => { if (down(bi)) press(i, 'pad'); else if (!b[bi]) release(i, 'pad'); });
   if (down(0)) tryRoll(g.p, ...playerInput());
+  // flèches gauche/droite : présélection d'un Pokémon de la barre d'équipe ; Triangle : changement
   if (down(14) || down(15)){ const al = aliveIdx(g.ps).filter(i => i !== g.ps.active);
-    if (al.length){ const a = g.ps.active, n = g.ps.team.length;
-      const next = down(15) ? al.reduce((best,i) => ((i-a+n)%n) < ((best-a+n)%n) ? i : best)
-                            : al.reduce((best,i) => ((a-i+n)%n) < ((a-best+n)%n) ? i : best);
-      trySwitch(g.ps, next); } }
+    if (al.length){ const from = g.ps.swSel != null ? g.ps.swSel : g.ps.active, n = g.ps.team.length;
+      g.ps.swSel = down(15) ? al.reduce((best,i) => ((i-from+n)%n || n) < ((best-from+n)%n || n) ? i : best)
+                            : al.reduce((best,i) => ((from-i+n)%n || n) < ((from-best+n)%n || n) ? i : best);
+      g.ps.swSelT = 3; } }
+  if (down(3) && g.ps.swSel != null && trySwitch(g.ps, g.ps.swSel)) g.ps.swSel = null;
   pad.prev = b;
 }
 addEventListener('blur', () => { keys.clear(); if (game) game.p.held.fill(false); });
@@ -869,12 +885,13 @@ function use(f, i, aim, opts){
   if (f.cds[i] > 0 || !canAct(f)) return false;
   f.cds[i] = mv.cd;
   if (f.iceSpike) f.iceSpike.explode();   // Mammochon : sa prochaine attaque fait exploser la stalactite plantée
-  const zoneLike = mv.k === 'psy' || (mv.shape && (mv.shape[0] === 'zone' || mv.shape[0] === 'leap'));
+  const zoneLike = mv.k === 'psy' || (mv.shape && ['zone','zone3','leap'].includes(mv.shape[0]));
   let tx = foe.x, ty = foe.y;
   if (aim){ tx = aim.x; ty = aim.y; if (Math.hypot(tx-f.x, ty-f.y) < 1) tx = f.x + 1; }
   else {
     if (f.isAI && mv.spd && mv.k !== 'dash'){ const t = dist(f,foe)/mv.spd * game.diff.lead; tx += foe.vx*t; ty += foe.vy*t; }
     if (f.isAI && zoneLike){ const t = (mv.delay || .7) * game.diff.lead; tx += foe.vx*t; ty += foe.vy*t; }
+    if (f.isAI && mv.beam){ const t = .2 * game.diff.lead; tx += foe.vx*t; ty += foe.vy*t; }   // rayons : 0,3 s de visée avant le tir
     // l'IA ne vise pas parfaitement
     if (f.isAI){ const e = game.diff.aimErr;
       if (zoneLike){ const a = Math.random()*Math.PI*2, r = Math.random()*e*150; tx += Math.cos(a)*r; ty += Math.sin(a)*r; }
@@ -882,16 +899,19 @@ function use(f, i, aim, opts){
   }
   tx = Math.max(WALL, Math.min(W-WALL, tx)); ty = Math.max(WALL, Math.min(H-WALL, ty));
   const a = Math.atan2(ty - f.y, tx - f.x);
-  const an = mv.k === 'sig' ? (mv.anim || 'Attack') : (ACT_ANIM[mv.k] || 'Attack');
+  const an = mv.sig ? (mv.anim || 'Attack') : (ACT_ANIM[mv.k] || 'Attack');
   f.aimA = a; f.act = {n:an, t:0, dur: mv.k === 'dash' ? mv.dur + .15 : ACT_DUR[an]};
   switch (mv.k){
-    case 'sig': SIG[mv.sig](f, mv, a, tx, ty, opts || {}); break;
+    case 'sig': case 'spec': SIG[mv.sig](f, mv, a, tx, ty, {...(opts || {}), slot:i, manual:!!aim}); break;
     case 'proj': spawnProj(f, mv, a, 1); break;
     case 'spread': { const n = mv.cnt; for (let j=0;j<n;j++) spawnProj(f, mv, a + (j-(n-1)/2)*mv.ang, 1.35/n); break; }
     case 'homing': { const n = mv.cnt || 1; for (let j=0;j<n;j++) spawnProj(f, mv, a + (n>1 ? (j-(n-1)/2)*.5 : 0), 1, foe); break; }
     case 'psy': { const z = clampRange(f, tx, ty); game.zones.push({x:z.x, y:z.y, r:mv.r, t:0, owner:f, mv}); break; }
-    case 'quake': game.rings.push({x:f.x, y:f.y, r:0, t:0, owner:f, mv, hit:false, rocks:new Set()});
-      if (mv.t === 'Ground'){ shake(10); crackDecal(f.x, f.y, mv.max*.55); zoomPunch(.02); } else shockRing(f.x, f.y, mv.max*.5, TYPES[mv.t][1], .3, 10); break;
+    case 'quake': { const rg = {x:f.x, y:f.y, r:0, t:0, owner:f, mv, hit:false, rocks:new Set()};
+      if (mv.ring === 'cracks') rg.cracks = makeCracks(mv.max);
+      if (mv.ring === 'stars') rg.stars = Array.from({length:46}, () => ({a:Math.random()*TAU, k:Math.sqrt(Math.random()), s:rand(2,4.5), ph:Math.random()*6}));
+      game.rings.push(rg);
+      if (mv.t === 'Ground'){ shake(10); zoomPunch(.02); } else if (!mv.ring) shockRing(f.x, f.y, mv.max*.5, TYPES[mv.t][1], .3, 10); break; }
     case 'dash': f.dash = {vx:Math.cos(a)*mv.spd, vy:Math.sin(a)*mv.spd, t:mv.dur, mv}; if (mv.inv) f.inv = mv.dur + .05; break;
     case 'melee': {
       f.kx += Math.cos(a)*240; f.ky += Math.sin(a)*240;
@@ -900,11 +920,12 @@ function use(f, i, aim, opts){
       const da = Math.abs(((Math.atan2(foe.y-f.y, foe.x-f.x) - a) % (Math.PI*2) + Math.PI*3) % (Math.PI*2) - Math.PI);
       if (dist(f,foe) <= f.r + foe.r + mv.reach && (da < 1.2 || dist(f,foe) < f.r + foe.r + 4)) hit(f, foe, mv, 1);
       else popText(f.x, f.y - 30, 'Raté', '#a39bd0', 13, .6);
+      if (mv.selfDown){ f.defDown = f.spdDown = mv.selfDown; popText(f.x, f.y - 62, 'Défenses −', '#c98a8a', 13); }
       break; }
     case 'buff': f.buff = {atk:1,spa:1,spe:1,...mv.buff}; f.buffT = mv.dur; burst(f.x, f.y, '#e6b84c', 14, 120, 4); shockRing(f.x, f.y, 60, '#e6b84c', .35, 6);
       for (let j=0;j<14;j++) game.parts.push({x:f.x + rand(-20,20), y:f.y + rand(-10,10), vx:0, vy:-rand(60,140), life:rand(.4,.8), max:.8, col:pick(['#e6b84c','#fff3c0']), size:rand(2,4), drag:.99}); break;
     case 'heal': { const h = Math.round(f.max*mv.pct); f.hp = Math.min(f.max, f.hp + h); popText(f.x, f.y-30, '+'+h, '#4fd17a', 18); burst(f.x, f.y, '#4fd17a', 12, 100, 4); break; }
-    case 'rest': f.hp = f.max; f.burn = f.poison = 0; f.sleep = 2.6; popText(f.x, f.y-30, 'PV max !', '#4fd17a', 18); break;
+    case 'rest': f.hp = f.max; f.burn = f.poison = 0; f.sleep = 4; popText(f.x, f.y-30, 'PV max !', '#4fd17a', 18); break;
     case 'ring': f.ring = mv.dur; break;
     case 'mirror': f.mirror = mv.dur; break;
     case 'blink': {
@@ -931,8 +952,10 @@ function applyStatus(def, fx){
   const T = def.d.types;
   if (fx.burn && !T.includes('Fire') && def.burn <= 0 && Math.random() < fx.burn){ def.burn = 5; popText(def.x, def.y-62, 'Brûlé !', '#EE8130', 13); }
   if (fx.poison && !T.includes('Poison') && !T.includes('Steel') && Math.random() < fx.poison) def.poison = 5;
-  if (fx.slow && !T.includes('Ice') && Math.random() < fx.slow){ if (def.slow <= 0 || def.slowF >= .55) def.slowF = .55; def.slow = Math.max(def.slow, 2.5); }
+  if (fx.slow && !T.includes('Ice') && Math.random() < fx.slow){ if (def.slow <= 0 || def.slowF >= .55) def.slowF = .55; def.slow = Math.max(def.slow, fx.slowT || 2.5); }
   if (fx.stun && Math.random() < fx.stun){ def.stun = .45; def.dash = null; }
+  if (fx.spdDown && Math.random() < fx.spdDown){ def.spdDown = 4; popText(def.x, def.y - 62, 'Déf. Spé. −', '#8a9ac9', 13); }
+  if (fx.defDown && Math.random() < fx.defDown){ def.defDown = 4; popText(def.x, def.y - 62, 'Défense −', '#c98a8a', 13); }
 }
 function hit(att, def, mv, mult){
   if (def.hp <= 0 || def.buried) return;
@@ -942,7 +965,7 @@ function hit(att, def, mv, mult){
   if (e === 0){ popText(def.x, def.y - 34, 'Aucun effet', '#a39bd0', 15); burst(def.x, def.y, '#a39bd0', 5, 80, 3); return; }
   const fx = mv.fx || {};
   if (!mv.p){ applyStatus(def, fx); burst(def.x, def.y, TYPES[mv.t][1], 8, 100, 3); return; }
-  const A = mv.c === 'ph' ? att.st.atk*att.buff.atk : att.st.spa*att.buff.spa, D = mv.c === 'ph' ? def.st.def : def.st.spd;
+  const A = mv.c === 'ph' ? att.st.atk*att.buff.atk : att.st.spa*att.buff.spa, D = mv.c === 'ph' ? def.st.def*(def.defDown > 0 ? .75 : 1) : def.st.spd*(def.spdDown > 0 ? .75 : 1);
   let dmg = ((22*mv.p*A/D)/50 + 2) * (att.d.types.includes(mv.t) ? 1.5 : 1) * e * rand(.88,1) * .3 * mult * suddenDeath();
   if (att.burn > 0 && mv.c === 'ph') dmg *= .5;
   if (att.isAI) dmg *= game.diff.dmg;   // force de l'IA selon la difficulté
@@ -1031,6 +1054,8 @@ function frostDecal(x, y, R){ const sp = []; for (let i=0;i<8;i++) sp.push([Math
   decal({x, y, life:3.5, draw(al){ const g = ctx.createRadialGradient(x, y, 0, x, y, R); g.addColorStop(0, `rgba(220,248,255,${.45*al})`); g.addColorStop(1, 'rgba(220,248,255,0)');
     ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, R, 0, TAU); ctx.fill(); ctx.globalAlpha = al*.6; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5;
     for (const [a,k] of sp){ ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + Math.cos(a)*R*k, y + Math.sin(a)*R*k); ctx.stroke(); } ctx.globalAlpha = 1; }}); }
+function drawBoltBurst(x, y){ spawnFx({b:Array.from({length:5}, () => { const a = Math.random()*TAU; return boltPath(x, y, x + Math.cos(a)*50, y + Math.sin(a)*50, 10); }),
+  update(){ return this.t < .15; }, top(){ ctx.globalAlpha = 1 - this.t/.15; for (const b of this.b) drawBolt(b, '#F7D02C', 2); ctx.globalAlpha = 1; }}); }
 function boltPath(x1, y1, x2, y2, jag){ const pts = [[x1,y1]], n = 9; for (let i=1;i<n;i++){ const k = i/n; pts.push([x1+(x2-x1)*k + rand(-jag,jag), y1+(y2-y1)*k + rand(-jag,jag)*.3]); } pts.push([x2,y2]); return pts; }
 function strokePts(pts){ ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]); for (const p of pts) ctx.lineTo(p[0], p[1]); ctx.stroke(); }
 function drawBolt(pts, col, w){ ctx.lineJoin = 'round'; ctx.lineCap = 'round'; const a = ctx.globalAlpha;
@@ -1133,6 +1158,25 @@ function drawProj(p){
       glowBall(p.x, p.y, r, '#f4ffd0', '#c8e050', '#A6B91A');
       for (let i=0;i<2;i++){ ctx.strokeStyle = '#e8f8a0'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.ellipse(p.x, p.y, r*1.6, r*.6, t*12 + i*1.6, 0, TAU); ctx.stroke(); }
       break;
+    case 'dragonpulse':
+      for (let i=0;i<n;i+=2){ const k = (i+1)/n, q = tr[i]; ctx.globalAlpha = k*.35; ctx.strokeStyle = '#6a9cff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(q.x, q.y, r*(.4 + .5*k), 0, TAU); ctx.stroke(); }
+      for (let j=0;j<3;j++){ const ph = (t*3 + j/3) % 1; ctx.globalAlpha = (1 - ph)*.9; ctx.strokeStyle = j === 1 ? '#cfe0ff' : '#4a7dff'; ctx.lineWidth = 3 - ph*1.5;
+        ctx.beginPath(); ctx.arc(p.x, p.y, r*(.35 + ph*.95), 0, TAU); ctx.stroke(); }
+      ctx.globalAlpha = 1; glowBall(p.x, p.y, r*.45, '#ffffff', '#a8c4ff', '#3a6aff'); break;
+    case 'diamond': {
+      if (n){ ctx.globalAlpha = .35; ctx.strokeStyle = '#dff8ff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(tr[0].x, tr[0].y); ctx.lineTo(p.x, p.y); ctx.stroke(); ctx.globalAlpha = 1; }
+      ctx.translate(p.x, p.y); ctx.rotate(a); const g = ctx.createLinearGradient(-r*1.6, -r, r*1.6, r); g.addColorStop(0, '#9fe3f0'); g.addColorStop(.5, '#ffffff'); g.addColorStop(1, '#5fb8d0');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(r*1.7, 0); ctx.lineTo(0, -r*.85); ctx.lineTo(-r*1.2, 0); ctx.lineTo(0, r*.85); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.stroke(); ctx.beginPath(); ctx.moveTo(r*1.7, 0); ctx.lineTo(-r*1.2, 0); ctx.moveTo(0, -r*.85); ctx.lineTo(0, r*.85); ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.lineWidth = 1; ctx.stroke();
+      if (Math.sin(t*20) > .6){ ctx.fillStyle = '#ffffff'; starPath(r*.4, -r*.3, 4, 1.2, 4, 0); ctx.fill(); }
+      break; }
+    case 'shadowball':
+      for (let i=0;i<n;i++){ const k = (i+1)/n, q = tr[i], w = Math.sin(i*1.3 + t*10)*5; ctx.globalAlpha = k*.5; ctx.fillStyle = i%2 ? '#2a1838' : '#4a2a6a';
+        ctx.beginPath(); ctx.arc(q.x - Math.sin(a)*w, q.y + Math.cos(a)*w, r*(.3 + .5*k), 0, TAU); ctx.fill(); }
+      ctx.globalAlpha = 1; glowBall(p.x, p.y, r*1.05, '#0c0614', '#24123a', '#8a5cc8');
+      ctx.fillStyle = '#0a0410'; ctx.beginPath(); ctx.arc(p.x, p.y, r*.78, 0, TAU); ctx.fill();
+      for (let i=0;i<3;i++){ const aa = t*6 + i*TAU/3; ctx.strokeStyle = '#a77ee0'; ctx.globalAlpha = .7; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(p.x, p.y, r*.9, aa, aa + 1.2); ctx.stroke(); }
+      ctx.globalAlpha = 1; break;
     case 'dart':
       ctx.translate(p.x, p.y); ctx.rotate(a); ctx.strokeStyle = '#c86ad0'; ctx.lineWidth = 3; ctx.lineCap = 'round';
       ctx.beginPath(); ctx.moveTo(-r*3, 0); ctx.lineTo(r*1.2, 0); ctx.stroke(); ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.moveTo(r*2.4, 0); ctx.lineTo(r*.8, -r*.7); ctx.lineTo(r*.8, r*.7); ctx.closePath(); ctx.fill(); break;
@@ -1171,7 +1215,7 @@ function drumBeat(f, n){ shake(2 + n*2); shockRing(f.x, f.y, 55 + n*18, '#9be070
 function rootZone(f, mv, x, y){
   const r = 44, delay = .22, spikes = []; for (let i=0;i<6;i++){ const a = i/6*TAU + rand(-.3,.3), d = rand(8, r*.8); spikes.push({x:x + Math.cos(a)*d, y:y + Math.sin(a)*d*.7, h:rand(28,46), lean:rand(-.35,.35)}); }
   spawnFx({update(){ if (!this.done){ danger(f, x, y, r);
-        if (this.t >= delay){ this.done = true; zoneHit(f, mv, x, y, r); sparks(x, y, ['#7AC74C','#5b3a1e','#a8e07a'], 14, 200, 5); shake(4); crackDecal(x, y, 34); } }
+        if (this.t >= delay){ this.done = true; const e = zoneHit(f, mv, x, y, r); if (e && e.hp > 0){ e.root = Math.max(e.root, 1); popText(e.x, e.y - 62, 'Immobilisé !', '#7AC74C', 13); } sparks(x, y, ['#7AC74C','#5b3a1e','#a8e07a'], 14, 200, 5); shake(4); crackDecal(x, y, 34); } }
       return this.t < delay + .75; },
     ground(){ if (!this.done){ const k = this.t/delay; ctx.globalAlpha = .2 + .3*k; ctx.fillStyle = '#7AC74C'; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill(); ctx.globalAlpha = 1; return; }
       const k = Math.min(1, (this.t - delay)/.75), up = k < .25 ? k/.25 : 1 - (k-.25)/.75;
@@ -1247,6 +1291,16 @@ function bigSlash(f, a, R, half, col){
     const rr = R*(.85 + .15*k); ctx.fillStyle = col; ctx.beginPath(); ctx.arc(0, 0, rr, -half, half); ctx.arc(-rr*.3, 0, rr*.85, half*.9, -half*.9, true); ctx.closePath(); ctx.fill();
     ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, rr, -half, half); ctx.stroke(); ctx.restore(); }});
 }
+// Point visé en direct (Choc Psy) : souris ou stick si la visée est manuelle, sinon l'ennemi (avec l'erreur de visée de l'IA)
+function liveAimPoint(f, i, manual){
+  const e = foeOf(f);
+  if (f.isAI){ const a = Math.random()*TAU, r = Math.random()*game.diff.aimErr*150; return clampRange(f, e.x + Math.cos(a)*r, e.y + Math.sin(a)*r); }
+  if (manual){
+    if (inputMode === 'mouse' && mouse.seen) return clampRange(f, mouse.x, mouse.y);
+    if (inputMode === 'pad' && pad.aimOn){ const p = dirPoint(f, Math.cos(pad.aimA), Math.sin(pad.aimA), pad.aimMag, i); return clampRange(f, p.x, p.y); }
+  }
+  return clampRange(f, e.x, e.y);
+}
 // Direction visée en direct (pour les enchaînements comme Colère)
 function liveAimAngle(f){
   const e = foeOf(f), toFoe = Math.atan2(e.y - f.y, e.x - f.x);
@@ -1257,7 +1311,210 @@ function liveAimAngle(f){
   return toFoe;
 }
 
+// Fissures qui partent du centre (Séisme) : lignes brisées avec leur longueur cumulée
+function makeCracks(R){
+  const lines = [];
+  for (let i=0;i<13;i++){ let a = i/13*TAU + rand(-.2,.2), x = 0, y = 0, L = 0; const pts = [{x, y, L}], seg = 7, len = R*rand(.8,1.05);
+    for (let s=0;s<seg;s++){ a += rand(-.35,.35); const d = len/seg; x += Math.cos(a)*d; y += Math.sin(a)*d; L += d; pts.push({x, y, L}); }
+    // petite branche
+    const b = pts[3 + Math.floor(Math.random()*3)], ba = Math.atan2(b.y, b.x) + (Math.random() < .5 ? .7 : -.7);
+    lines.push(pts, [{x:b.x, y:b.y, L:b.L}, {x:b.x + Math.cos(ba)*R*.18, y:b.y + Math.sin(ba)*R*.18, L:b.L + R*.18}]); }
+  return lines;
+}
+function strokeCracks(x, y, lines, maxL){
+  for (const l of lines){ if (l[0].L > maxL) continue; ctx.beginPath(); ctx.moveTo(x + l[0].x, y + l[0].y);
+    for (let i=1;i<l.length;i++){ const p0 = l[i-1], p1 = l[i]; if (p1.L <= maxL) ctx.lineTo(x + p1.x, y + p1.y);
+      else { const k = (maxL - p0.L)/(p1.L - p0.L); ctx.lineTo(x + p0.x + (p1.x-p0.x)*k, y + p0.y + (p1.y-p0.y)*k); break; } }
+    ctx.stroke(); }
+}
+function crackLinesDecal(x, y, lines){ decal({x, y, life:3.5, draw(al){ ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.globalAlpha = al*.85; ctx.strokeStyle = '#08060f'; ctx.lineWidth = 3.5; strokeCracks(x, y, lines, 1e9);
+  ctx.globalAlpha = al*.3; ctx.strokeStyle = '#E2BF65'; ctx.lineWidth = 1; strokeCracks(x + 1, y + 1, lines, 1e9); ctx.globalAlpha = 1; }}); }
+// Rendu des ondes autour du lanceur (Séisme, Bourdon, Éclat Magique, Bourdon…)
+function drawRing(rg){
+  const k = Math.min(1, rg.t/rg.mv.dur), col = TYPES[rg.mv.t][1], R = Math.max(1, rg.r);
+  if (rg.mv.ring === 'cracks'){
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.globalAlpha = 1; ctx.strokeStyle = '#08060f'; ctx.lineWidth = 4; strokeCracks(rg.x, rg.y, rg.cracks, R);
+    ctx.strokeStyle = '#E2BF65'; ctx.globalAlpha = .55; ctx.lineWidth = 1.5; strokeCracks(rg.x + 1, rg.y + 1, rg.cracks, R);
+    if (k < 1 && Math.random() < .9) for (let i=0;i<3;i++){ const a = Math.random()*TAU; game.parts.push({x:rg.x + Math.cos(a)*R, y:rg.y + Math.sin(a)*R, vx:rand(-30,30), vy:-rand(30,90), life:.4, max:.4, col:pick(['#c9b98f','#8a6a3a','#E2BF65']), size:rand(3,6)}); }
+  } else if (rg.mv.ring === 'sound'){
+    for (let j=0;j<3;j++){ const rr = R - j*14; if (rr <= 4) continue; ctx.globalAlpha = (1 - k*.7)*(1 - j*.25); ctx.strokeStyle = j === 1 ? '#f0ffb0' : '#c8e050'; ctx.lineWidth = 2;
+      ctx.beginPath(); for (let i=0;i<=72;i++){ const a = i/72*TAU, w = Math.sin(a*14 + game.t*24 + j)*3; ctx.lineTo(rg.x + Math.cos(a)*(rr + w), rg.y + Math.sin(a)*(rr + w)); } ctx.stroke(); }
+  } else if (rg.mv.ring === 'stars'){
+    ctx.globalAlpha = (1 - k*.5)*.55; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(rg.x, rg.y, R, 0, TAU); ctx.stroke();
+    ctx.fillStyle = '#ffffff';
+    for (const st of rg.stars){ ctx.globalAlpha = (1 - k*.6)*(.55 + .45*Math.sin(game.t*14 + st.ph)); starPath(rg.x + Math.cos(st.a)*st.k*R, rg.y + Math.sin(st.a)*st.k*R, st.s, st.s*.4, 4, st.ph); ctx.fill(); }
+  } else {
+    ctx.globalAlpha = 1 - k*.6; ctx.strokeStyle = col; ctx.lineWidth = 14*(1-k)+3; ctx.beginPath(); ctx.arc(rg.x, rg.y, R, 0, TAU); ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+}
+const BEAMS = {
+  ice:{tele:'#bff3ff', glow:'#7fd6e8', core:'#ffffff', ball:['#ffffff','#dff8ff','#7fd6e8'], flash:'#e8fbff', sp:['#ffffff','#bff3ff']},
+  fire:{tele:'#ffd25a', glow:'#ff6a1a', core:'#fff3c0', ball:['#fff6c0','#ffc040','#ff5a1a'], flash:'#ffe2b8', sp:['#fff3b0','#ffb43a','#ff6a1a']},
+  steel:{tele:'#ececff', glow:'#9aa0c8', core:'#ffffff', ball:['#ffffff','#e4e4f4','#8a8aa8'], flash:'#f2f2ff', sp:['#ffffff','#d0d0e8']}
+};
+function beamAttack(f, mv, a, kind){
+  const B = BEAMS[kind], wind = .2, ux = Math.cos(a), uy = Math.sin(a);
+  f.act = {n:'Charge', t:0, dur:wind};
+  spawnFx({update(){ for (let d=40; d<560; d+=70) danger(f, f.x + ux*d, f.y + uy*d, 20); if (this.t >= wind){ beamFire(f, mv, a, kind); return false; } return true; },
+    ground(){ const k = this.t/wind; ctx.save(); ctx.translate(f.x, f.y); ctx.rotate(a); ctx.globalAlpha = .25 + .5*k; ctx.strokeStyle = B.tele; ctx.lineWidth = 1 + 2*k; ctx.setLineDash([10,8]);
+      ctx.beginPath(); ctx.moveTo(f.r, 0); ctx.lineTo(560, 0); ctx.stroke(); ctx.restore(); ctx.globalAlpha = 1; glowBall(f.x + ux*(f.r+6), f.y + uy*(f.r+6), 5 + 9*k, ...B.ball); }});
+}
+function beamFire(f, mv, a, kind){
+  const B = BEAMS[kind], ux = Math.cos(a), uy = Math.sin(a), sx = f.x + ux*f.r*.6, sy = f.y + uy*f.r*.6, hw = 18;
+  let L = 560; for (let d=0; d<560; d+=8){ const x = sx + ux*d, y = sy + uy*d; if (x < WALL || x > W-WALL || y < WALL || y > H-WALL){ L = d; break; } }
+  const ex = sx + ux*L, ey = sy + uy*L, e = foeOf(f);
+  const onLine = (o, w) => { const rx = o.x - sx, ry = o.y - sy, along = rx*ux + ry*uy; return along > -10 && along < L + 10 && Math.abs(-rx*uy + ry*ux) < w; };
+  if (e.hp > 0 && !e.buried && onLine(e, hw + e.r*.6)){ const ok = canHit(f, e, mv); hit(f, e, mv, 1);
+    if (kind === 'ice' && ok && e.hp > 0 && Math.random() < .1){ e.root = 1; popText(e.x, e.y - 62, 'Gelé !', '#bff3ff', 15); frostDecal(e.x, e.y, 34); } }
+  for (const rk of [...game.rocks]) if (onLine(rk, hw + rk.r)) hitRock(rk, mv.p*.4, B.glow);
+  shake(4); screenFlash(B.flash, .15, .12); sparks(ex, ey, B.sp, 12, 170, 3);
+  spawnFx({update(){ return this.t < .3; }, top(){ const k = this.t/.3; ctx.lineCap = 'round'; ctx.globalAlpha = 1 - k;
+    ctx.strokeStyle = B.glow; ctx.lineWidth = 18*(1-k) + 4; ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex, ey); ctx.stroke();
+    ctx.strokeStyle = B.core; ctx.lineWidth = 6*(1-k) + 1.5; ctx.stroke(); ctx.globalAlpha = 1; }});
+  if (kind === 'ice'){
+    const crystals = Array.from({length:Math.floor(L/26)}, (_, i) => ({d:i*26 + rand(0,20), o:rand(-10,10), s:rand(4,8), a:Math.random()*3}));
+    spawnFx({update(){ const o = foeOf(f);
+        if (o.hp > 0 && !o.buried && onLine(o, 16 + o.r*.5) && !o.d.types.includes('Ice')){ if (o.slow <= 0 || o.slowF >= .55) o.slowF = .55; o.slow = Math.max(o.slow, .3); }
+        return this.t < 3; },
+      ground(){ const al = Math.min(1, (3 - this.t)/.6); ctx.save(); ctx.translate(sx, sy); ctx.rotate(a);
+        const g = ctx.createLinearGradient(0, -16, 0, 16); g.addColorStop(0, 'rgba(220,248,255,0)'); g.addColorStop(.5, `rgba(220,248,255,${.45*al})`); g.addColorStop(1, 'rgba(220,248,255,0)');
+        ctx.fillStyle = g; ctx.fillRect(0, -16, L, 32); ctx.globalAlpha = al*.85; ctx.fillStyle = '#f0fcff'; ctx.strokeStyle = '#7fd0e0'; ctx.lineWidth = 1;
+        for (const c of crystals){ starPath(c.d, c.o, c.s, c.s*.4, 4, c.a); ctx.fill(); ctx.stroke(); }
+        ctx.restore(); ctx.globalAlpha = 1; }});
+  } else if (kind === 'fire'){
+    const fl = Array.from({length:Math.floor(L/30)}, (_, i) => ({d:i*30 + rand(0,22), o:rand(-9,9), s:rand(.6,1.1), ph:Math.random()*6})); let tick = 0;
+    for (let d=30; d<L; d+=60) scorchDecal(sx + ux*d, sy + uy*d, 26, 3.2);
+    spawnFx({update(dt){ const o = foeOf(f); tick -= dt;
+        if (tick <= 0 && o.hp > 0 && !o.buried && onLine(o, 16 + o.r*.5)){ tick = .5; applyStatus(o, {burn:.25}); }
+        return this.t < 3; },
+      ground(){ const al = Math.min(1, (3 - this.t)/.6); for (const c of fl) drawFlame(sx + ux*c.d - uy*c.o, sy + uy*c.d + ux*c.o, 6*c.s*(.8 + .25*Math.sin(game.t*13 + c.ph)), al*.85); }});
+  }
+}
+// bande longue et étroite devant le lanceur (Mégafouet, Sabotage)
+function laneStrike(f, mv, a, wind, look){
+  const L = 170, half = 20, ux = Math.cos(a), uy = Math.sin(a), sx = f.x, sy = f.y;
+  const inLane = o => { const rx = o.x - sx, ry = o.y - sy, along = rx*ux + ry*uy; return along > -o.r && along < L + o.r*.5 && Math.abs(-rx*uy + ry*ux) < half + o.r*.6; };
+  spawnFx({update(){
+      if (!this.done){ danger(f, sx + ux*L*.5, sy + uy*L*.5, 40);
+        if (this.t >= wind){ this.done = true; const e = foeOf(f); if (e.hp > 0 && !e.buried && inLane(e)) hit(f, e, mv, 1);
+          shake(look === 'whip' ? 7 : 4);
+          if (look === 'whip'){ crackDecal(sx + ux*L, sy + uy*L, 30); for (let d=40; d<=L; d+=26) sparks(sx + ux*d, sy + uy*d, ['#7AC74C','#a8e07a','#5b3a1e'], 3, 120, 4); }
+          else sparks(sx + ux*L*.75, sy + uy*L*.75, ['#2a1626','#c04a6a','#ffffff'], 14, 220, 5); } }
+      return this.t < wind + .32; },
+    ground(){ if (!this.done){ ctx.save(); ctx.translate(sx, sy); ctx.rotate(a); ctx.globalAlpha = .15 + .3*this.t/wind; ctx.fillStyle = look === 'whip' ? '#7AC74C' : '#705746'; ctx.fillRect(0, -half, L, half*2); ctx.restore(); ctx.globalAlpha = 1; } },
+    top(){ const bx = sx, by = sy - 18;
+      if (look === 'whip'){
+        // liane levée pendant la préparation, puis qui s'abat jusqu'au bout de la bande
+        const k = this.t < wind ? 0 : Math.min(1, (this.t - wind)/.1), fade = this.t > wind + .14 ? Math.max(0, 1 - (this.t - wind - .14)/.18) : 1;
+        const ex = bx + (-ux*30)*(1-k) + ux*L*k, ey = by - 120*(1-k) + (uy*L + 18)*k, cx = bx + ux*L*.45, cy = by - 110*(1-k*.7) + uy*L*.45;
+        ctx.globalAlpha = fade; ctx.lineCap = 'round'; ctx.strokeStyle = '#3f6e22'; ctx.lineWidth = 10; ctx.beginPath(); ctx.moveTo(bx, by); ctx.quadraticCurveTo(cx, cy, ex, ey); ctx.stroke();
+        ctx.strokeStyle = '#8fd65a'; ctx.lineWidth = 4; ctx.stroke(); ctx.fillStyle = '#7AC74C';
+        for (let i=1;i<5;i++){ const q = i/5, px = (1-q)*(1-q)*bx + 2*(1-q)*q*cx + q*q*ex, py = (1-q)*(1-q)*by + 2*(1-q)*q*cy + q*q*ey; ctx.beginPath(); ctx.ellipse(px + 6, py - 4, 7, 3, .6, 0, TAU); ctx.fill(); }
+        ctx.globalAlpha = 1;
+      } else if (this.done){
+        const k = Math.min(1, (this.t - wind)/.24); ctx.save(); ctx.translate(sx, sy); ctx.rotate(a); ctx.globalAlpha = 1 - k;
+        ctx.fillStyle = '#2a1626'; ctx.beginPath(); ctx.moveTo(10, -half); ctx.lineTo(L*(.4 + .6*Math.min(1, k*3)), -half*.4); ctx.lineTo(L*(.4 + .6*Math.min(1, k*3)), half*.4); ctx.lineTo(10, half); ctx.closePath(); ctx.fill();
+        ctx.strokeStyle = '#d06080'; ctx.lineWidth = 2.5; ctx.stroke(); ctx.restore(); ctx.globalAlpha = 1;
+      } }});
+}
+// 3 points en triangle autour du point visé (Éboulement)
+function tripleSpots(z, a){ return [0,1,2].map(j => clampArena(z.x + Math.cos(a + j*TAU/3)*48, z.y + Math.sin(a + j*TAU/3)*48, 10)); }
+function fallingRock(f, mv, x, y, delay){
+  const r = 42, seed = Math.random()*10;
+  spawnFx({update(){ if (this.done) return false; danger(f, x, y, r);
+      if (this.t >= delay){ this.done = true; zoneHit(f, mv, x, y, r); shake(5); crackDecal(x, y, 34); sparks(x, y, ['#d8c890','#B6A136','#6e5f34'], 14, 220, 5); }
+      return true; },
+    ground(){ const k = Math.min(1, this.t/delay); ctx.globalAlpha = .15 + .3*k; ctx.fillStyle = '#1a140a'; ctx.beginPath(); ctx.ellipse(x, y, r*k, r*k*.5, 0, 0, TAU); ctx.fill();
+      ctx.globalAlpha = .6; ctx.strokeStyle = '#d8c890'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.stroke(); ctx.globalAlpha = 1; },
+    top(){ const k = Math.min(1, this.t/delay), yy = y - (1 - k*k)*340, R = 20; ctx.save(); ctx.translate(x, yy); ctx.rotate(this.t*5 + seed); ctx.beginPath();
+      for (let i=0;i<7;i++){ const aa = i/7*TAU, rr = R*(.8 + .35*Math.abs(Math.sin(seed*13 + i*2.1))); ctx.lineTo(Math.cos(aa)*rr, Math.sin(aa)*rr); } ctx.closePath();
+      const g = ctx.createLinearGradient(-R, -R, R, R); g.addColorStop(0, '#d8c890'); g.addColorStop(1, '#6e5f34'); ctx.fillStyle = g; ctx.fill(); ctx.strokeStyle = '#3a301a'; ctx.lineWidth = 2; ctx.stroke(); ctx.restore(); }});
+}
+function windTornado(f, mv, a){
+  const spd = 300; let x = f.x + Math.cos(a)*24, y = f.y + Math.sin(a)*24, struck = false;
+  spawnFx({update(dt){ x += Math.cos(a)*spd*dt; y += Math.sin(a)*spd*dt; this.x = x; this.y = y;
+      if (x < WALL || x > W-WALL || y < WALL || y > H-WALL) return false;
+      for (const rk of game.rocks) if (Math.hypot(rk.x-x, rk.y-y) < rk.r + 14){ hitRock(rk, mv.p*.4, '#e8e2ff'); sparks(x, y, ['#ffffff','#cbbcff'], 8, 140, 4); return false; }
+      danger(f, x, y, 30); const e = foeOf(f);
+      if (!struck && e.hp > 0 && !e.buried && Math.hypot(e.x-x, e.y-y) < 26 + e.r*.6){ struck = true; hit(f, e, mv, 1); }
+      if (Math.random() < .6) game.parts.push({x:x + rand(-14,14), y:y + rand(-6,6), vx:-Math.cos(a)*80, vy:-40 - Math.random()*60, life:.3, max:.3, col:pick(['#ffffff','#e8e2ff','#cbbcff']), size:rand(2,4)});
+      return this.t < 1.3; },
+    ground(){ ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(this.x, this.y, 22, 8, 0, 0, TAU); ctx.fill(); },
+    top(){ const al = Math.min(1, (1.3 - this.t)/.25);
+      for (let i=0;i<6;i++){ const k = i/5, w = 22 - 11*k, yy = this.y - k*40, ph = game.t*16 + i*.8; ctx.globalAlpha = al*(.8 - k*.35);
+        ctx.strokeStyle = i%2 ? '#ffffff' : '#cbbcff'; ctx.lineWidth = 4 - k*2; ctx.beginPath(); ctx.ellipse(this.x + Math.sin(ph*.4)*4, yy, w, w*.35, 0, ph % TAU, ph % TAU + 4.4); ctx.stroke(); }
+      ctx.globalAlpha = 1; }});
+}
+function psyPulse(f, mv, x, y, delay){
+  const r = 54;
+  spawnFx({update(){ if (!this.done){ danger(f, x, y, r);
+        if (this.t >= delay){ this.done = true; zoneHit(f, mv, x, y, r); shockRing(x, y, r*1.25, '#F95587', .3, 6); sparks(x, y, ['#ffffff','#ffa0c8','#F95587'], 12, 180, 4); shake(3); } }
+      return this.t < delay + .25; },
+    ground(){ if (!this.done){ const k = this.t/delay; ctx.globalAlpha = .12 + .25*k; ctx.fillStyle = '#F95587'; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill();
+        ctx.globalAlpha = .8; ctx.strokeStyle = '#ffc0d8'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, y, r*(1 - k*.7), 0, TAU); ctx.stroke(); }
+      else { const k = (this.t - delay)/.25; ctx.globalAlpha = .5*(1-k); glowBall(x, y, r*.8, '#ffffff', '#ffa0c8', '#F95587'); }
+      ctx.globalAlpha = 1; }});
+}
+
 const SIG = {
+  // Vent Violent : 3 tornades, deux en V et une au centre
+  ventviolent(f, mv, a){ for (const da of [-.55, 0, .55]) windTornado(f, mv, a + da); },
+  // Rayons (0,3 s de visée puis tir) : glace (traînée de givre qui ralentit), feu (traînée de flammes qui brûle), acier
+  laserglace(f, mv, a){ beamAttack(f, mv, a, 'ice'); },
+  lanceflammes(f, mv, a){ beamAttack(f, mv, a, 'fire'); },
+  luminocanon(f, mv, a){ beamAttack(f, mv, a, 'steel'); },
+  // Hantise : charge invulnérable ; si elle touche, traverse et redevient vulnérable derrière l'ennemi
+  hantise(f, mv, a){
+    f.inv = .6;
+    f.dash = {vx:Math.cos(a)*600, vy:Math.sin(a)*600, t:.5, mv, pierce:1, trail:'#735797',
+      fx(){ if (this.passing){ if (dist(f, this.passing) > f.r + this.passing.r + 4){ f.inv = 0; this.passing = null; this.done = true; sparks(f.x, f.y, ['#735797','#c0a8e8'], 8, 120, 3); } }
+        else if (!this.done) f.inv = Math.max(f.inv, .05);
+        if (Math.random() < .6) game.parts.push({x:f.x + rand(-10,10), y:f.y + rand(-10,10), vx:0, vy:-30, life:.35, max:.35, col:pick(['#3a2458','#735797']), size:rand(5,10)}); },
+      onHit(e){ hit(f, e, mv, 1); this.passing = e; }};
+  },
+  // Demi-Tour : charge ; si elle touche, bondit en arrière à distance fixe (évite les attaques en l'air)
+  demitour(f, mv, a){
+    f.dash = {vx:Math.cos(a)*820, vy:Math.sin(a)*820, t:.32, mv, trail:'#A6B91A',
+      onHit(e){ hit(f, e, mv, 1); sparks(e.x, e.y, ['#c8e050','#A6B91A','#ffffff'], 12, 200, 4);
+        const back = clampArena(e.x - Math.cos(a)*230, e.y - Math.sin(a)*230, f.r), sx = f.x, sy = f.y, dur = .45;
+        f.script = {t:0, update(dt){ this.t += dt; const k = Math.min(1, this.t/dur); f.x = sx + (back.x - sx)*k; f.y = sy + (back.y - sy)*k;
+          f.h = Math.sin(Math.PI*k)*75; f.inv = Math.max(f.inv, .05); f.aimA = a; if (k >= 1){ f.h = 0; return false; } return true; }}; }};
+  },
+  // Mégafouet : une liane s'abat du haut vers le sol sur une bande longue et étroite
+  megafouet(f, mv, a){ laneStrike(f, mv, a, .2, 'whip'); },
+  // Sabotage : claque sur la même bande
+  sabotage(f, mv, a){ laneStrike(f, mv, a, .08, 'slap'); },
+  // Éboulement : 3 zones en même temps, des rochers tombent du ciel
+  eboulement(f, mv, a, tx, ty){ const z = clampRange(f, tx, ty); tripleSpots(z, a).forEach((c, i) => fallingRock(f, mv, c.x, c.y, .55 + i*.04)); },
+  // Change Éclair : charge qui traverse ; 2 s pour lancer la 2e charge
+  changeeclair(f, mv, a, tx, ty, o){
+    const i = o.slot;
+    if (f.recast[i] > 0){ f.recast[i] = 0; f.cds[i] = mv.cd; } else { f.recast[i] = 2; f.cds[i] = 0; }
+    electrify(.25);
+    f.dash = {vx:Math.cos(a)*900, vy:Math.sin(a)*900, t:.3, mv, pierce:1, trail:'#F7D02C',
+      fx(){ if (Math.random() < .9) game.parts.push({x:f.x + rand(-10,10), y:f.y + rand(-10,10), vx:rand(-50,50), vy:rand(-50,50), life:.2, max:.2, col:pick(['#ffffff','#F7D02C','#9fd8ff']), size:rand(2,5)}); },
+      onHit(e){ hit(f, e, mv, 1); drawBoltBurst(e.x, e.y); }};
+  },
+  // Coup d'Jus : 3 décharges autour du lanceur, ralentit
+  coupdjus(f, mv, a){
+    const R = 115, m = sub(mv, {fx:{slow:1}}); let n = 0;
+    spawnFx({update(){
+        while (n < 3 && this.t >= n*.35){ n++; this.cx = f.x; this.cy = f.y; this.bt = this.t; zoneHit(f, m, f.x, f.y, R); shake(4); electrify(.3); scorchDecal(f.x, f.y, 50, 1.5);
+          this.bolts = []; for (let j=0;j<8;j++){ const aa = j/8*TAU + rand(-.3,.3); this.bolts.push(boltPath(f.x, f.y, f.x + Math.cos(aa)*R, f.y + Math.sin(aa)*R, 14)); } }
+        if (n < 3) danger(f, f.x, f.y, R);
+        return this.t < .95; },
+      ground(){ if (n < 3){ ctx.globalAlpha = .18; ctx.fillStyle = '#F7D02C'; ctx.beginPath(); ctx.arc(f.x, f.y, R, 0, TAU); ctx.fill(); ctx.globalAlpha = .6; ctx.strokeStyle = '#fff3a0'; ctx.lineWidth = 2; ctx.stroke(); ctx.globalAlpha = 1; } },
+      top(){ if (!this.bolts) return; const k = (this.t - this.bt)/.2; if (k > 1) return; ctx.globalAlpha = 1 - k;
+        for (const b of this.bolts) drawBolt(b, '#F7D02C', 2.5); glowBall(this.cx, this.cy, 26, '#ffffff', '#fff3a0', '#F7D02C'); ctx.globalAlpha = 1; }});
+  },
+  // Choc Psy : 3 zones en ligne qui éclatent l'une après l'autre
+  chocpsy(f, mv, a, tx, ty, o){
+    // 1er cercle sur le point visé ; les suivants suivent la visée en direct (ou l'ennemi en visée automatique)
+    const first = clampRange(f, tx, ty); psyPulse(f, mv, first.x, first.y, .3); let n = 1;
+    spawnFx({update(){ while (n < 3 && this.t >= n*.3){ n++; const z = liveAimPoint(f, o.slot, o.manual); psyPulse(f, mv, z.x, z.y, .3); } return n < 3; }});
+  },
   // Dracaufeu : énorme cône de feu, le sol reste en flammes
   rafalefeu(f, mv, a){
     const R = 240, half = .55, wind = .38;
@@ -1347,7 +1604,7 @@ const SIG = {
   },
   // Gorythmic : 3 coups de tambour → 1, puis 2, puis 3 zones de racines de plus en plus loin
   tambourbattant(f, mv, a){
-    const ux = Math.cos(a), uy = Math.sin(a), px = -uy, py = ux, sx = f.x, sy = f.y, root = sub(mv, {fx:{slow:.7}}), beats = [0, .38, .76]; let b = 0;
+    const ux = Math.cos(a), uy = Math.sin(a), px = -uy, py = ux, sx = f.x, sy = f.y, root = mv, beats = [0, .38, .76]; let b = 0;
     f.script = {t:0, update(dt){ this.t += dt; f.aimA = a;
       while (b < 3 && this.t >= beats[b]){ b++; f.act = {n:'Attack', t:0, dur:.3}; drumBeat(f, b);
         for (let j=0;j<b;j++){ const lat = (j - (b-1)/2)*78, d = 70*b, c = clampArena(sx + ux*d + px*lat, sy + uy*d + py*lat, 10); rootZone(f, root, c.x, c.y); } }
@@ -1378,9 +1635,9 @@ const SIG = {
   // Pyrax : tourbillon de flammes qui se dirige vers l'ennemi ; 50 % de chance d'augmenter l'Atq. Spé.
   dansedufeu(f, mv, a){
     if (Math.random() < .5){ f.buff = {...f.buff, spa:Math.min(1.6, f.buff.spa*1.3)}; f.buffT = Math.max(f.buffT, 6); popText(f.x, f.y - 62, 'Atq. Spé. +', '#e6b84c', 14); sparks(f.x, f.y, ['#e6b84c','#ffd25a'], 12, 120, 4); }
-    let vx = Math.cos(a)*210, vy = Math.sin(a)*210, tick = 0, n = 0;
+    let vx = Math.cos(a)*280, vy = Math.sin(a)*280, tick = 0, n = 0;
     spawnFx({x:f.x + Math.cos(a)*30, y:f.y + Math.sin(a)*30, update(dt){ const e = foeOf(f);
-        if (e.hp > 0){ const want = Math.atan2(e.y - this.y, e.x - this.x), cur = Math.atan2(vy, vx), d = Math.atan2(Math.sin(want-cur), Math.cos(want-cur)), c = cur + Math.max(-1.1*dt, Math.min(1.1*dt, d)); const sp = Math.hypot(e.x - this.x, e.y - this.y) < 50 ? 70 : 210; vx = Math.cos(c)*sp; vy = Math.sin(c)*sp; }
+        if (e.hp > 0){ const want = Math.atan2(e.y - this.y, e.x - this.x), cur = Math.atan2(vy, vx), d = Math.atan2(Math.sin(want-cur), Math.cos(want-cur)), c = cur + Math.max(-1.1*dt, Math.min(1.1*dt, d)); const sp = Math.hypot(e.x - this.x, e.y - this.y) < 50 ? 90 : 280; vx = Math.cos(c)*sp; vy = Math.sin(c)*sp; }
         this.x += vx*dt; this.y += vy*dt; const c = clampArena(this.x, this.y, 30); this.x = c.x; this.y = c.y;
         danger(f, this.x, this.y, 42); tick -= dt;
         if (tick <= 0 && n < 5 && e.hp > 0 && !e.buried && Math.hypot(e.x - this.x, e.y - this.y) < 36 + e.r*.6){ tick = .28; n++; hit(f, e, mv, 1); }
@@ -1528,7 +1785,10 @@ const SIG = {
         if (this.phase === 0){ this.d += spd*dt; this.x = f.x + Math.cos(a)*this.d; this.y = f.y + Math.sin(a)*this.d;
           const e = foeOf(f);
           if (!struck && e.hp > 0 && !e.buried && Math.hypot(e.x - this.x, e.y - this.y) < e.r + 14){ struck = true; const ok = canHit(f, e, mv); hit(f, e, mv, 1);
-            if (ok && e.hp > 0){ const pa = Math.atan2(f.y - e.y, f.x - e.x); e.kx = Math.cos(pa)*520; e.ky = Math.sin(pa)*520; e.root = .8; e.dash = null; popText(e.x, e.y - 62, 'Ancré !', '#B7B7CE', 14); shake(8); }
+            if (ok && e.hp > 0){ e.dash = null; e.roll = null; popText(e.x, e.y - 62, 'Ancré !', '#B7B7CE', 14); shake(8);
+              e.script = {t:0, update(dt){ this.t += dt; const dx = f.x - e.x, dy = f.y - e.y, m = Math.hypot(dx, dy) || 1, stop = f.r + e.r + 4;
+                if (m <= stop || f.hp <= 0 || this.t > .7){ e.root = Math.max(e.root, .5); return false; }
+                const st = Math.min(m - stop, 760*dt); e.x += dx/m*st; e.y += dy/m*st; return true; }}; }
             this.phase = 1; }
           if (this.d >= out || this.x < WALL || this.x > W - WALL || this.y < WALL || this.y > H - WALL) this.phase = 1; }
         else { this.d -= spd*1.3*dt; this.x = f.x + Math.cos(a)*this.d; this.y = f.y + Math.sin(a)*this.d; if (this.d <= 0) return false; }
@@ -1626,11 +1886,12 @@ function aiPick(f, foe, d){
       case 'buff': s = (f.buffT <= 0 && hpr > .5 && d > 150) ? 1.3 : 0; break;
       case 'blink': s = d < 130 ? 1.6 : 0; break;
       case 'mirror': s = 0; break;
-      case 'sig': {
+      case 'sig': case 'spec': {
         const e = effMult(mv.t, foe.d.types); if (e === 0 && !mv.hitsImmune) break;
         const st = mv.c === 'ph' ? f.st.atk*f.buff.atk : f.st.spa*f.buff.spa;
         s = (mv.aiP || mv.p)/90 * (e || 1) * (f.d.types.includes(mv.t) ? 1.5 : 1) * st/120 * 1.25;
         if (d > mv.range*1.05) s *= mv.close ? .05 : .15;
+        if (f.recast[i] > 0) s *= 3;   // 2e charge de Change Éclair : à utiliser tant qu'elle est disponible
         break; }
       default: {
         const e = effMult(mv.t, foe.d.types);
@@ -1657,7 +1918,9 @@ function aiPick(f, foe, d){
 function stepFighter(f, ix, iy, dt){
   const foe = foeOf(f);
   for (let i=0;i<4;i++) f.cds[i] = Math.max(0, f.cds[i]-dt);
-  for (const k of ['burn','poison','slow','stun','sleep','mirror','ring','recharge','flash','inv','buffT','hurtT','root']) f[k] = Math.max(0, f[k]-dt);
+  for (const k of ['burn','poison','slow','stun','sleep','mirror','ring','recharge','flash','inv','buffT','hurtT','root','defDown','spdDown']) f[k] = Math.max(0, f[k]-dt);
+  // Change Éclair : fenêtre de 2 s pour la 2e charge ; si elle n'est pas utilisée, la recharge démarre
+  for (let i=0;i<4;i++) if (f.recast[i] > 0 && (f.recast[i] -= dt) <= 0){ f.recast[i] = 0; f.cds[i] = Math.max(f.cds[i], MOVES[f.d.moves[i]].cd - 2); }
   for (let i = f.ghosts.length-1; i >= 0; i--) if ((f.ghosts[i].life -= dt) <= 0) f.ghosts.splice(i,1);
   // en l'air (soulevé ou projeté) : ne peut pas agir jusqu'à la retombée
   if (f.air){ f.air.t += dt; const k = Math.min(1, f.air.t/f.air.dur); f.h = f.air.h(k); if (k >= 1){ const a = f.air; f.air = null; f.h = 0; if (a.onLand) a.onLand(); } }
@@ -1683,7 +1946,11 @@ function stepFighter(f, ix, iy, dt){
     if (dsh.fx) dsh.fx(dt);
     ghost(dsh.trail || TYPES[mv.t][1]);
     const end = () => { if (f.dash === dsh) f.dash = null; if (mv.recharge) f.recharge = mv.recharge; };
-    if (foe.hp > 0 && !foe.buried && dist(f,foe) < f.r + foe.r + 6){
+    if (dsh.pierce){
+      if (!dsh.struck && foe.hp > 0 && !foe.buried && dist(f,foe) < f.r + foe.r + 6){ dsh.struck = true; dsh.onHit ? dsh.onHit(foe) : hit(f, foe, mv, 1); }
+      let blocked = false; for (const rk of game.rocks){ if (Math.hypot(f.x-rk.x, f.y-rk.y) < rk.r + f.r){ hitRock(rk, mv.p*.8, TYPES[mv.t][1]); blocked = true; break; } }
+      if (blocked || dsh.t <= 0){ end(); if (dsh.onEnd) dsh.onEnd(); }
+    } else if (foe.hp > 0 && !foe.buried && dist(f,foe) < f.r + foe.r + 6){
       end();
       if (dsh.onHit) dsh.onHit(foe);
       else { hit(f, foe, mv, 1); const a = Math.atan2(foe.y-f.y, foe.x-f.x); foe.kx += Math.cos(a)*320; foe.ky += Math.sin(a)*320; }
@@ -1724,7 +1991,9 @@ function update(dt){
   const [ax,ay] = aiInput(g.e, dt);
   stepFighter(g.p, px, py, dt);
   stepFighter(g.e, ax, ay, dt);
-  if (g.p.hp > 0 && g.e.hp > 0){ const dx = g.e.x-g.p.x, dy = g.e.y-g.p.y, d = Math.hypot(dx,dy) || 1, min = g.p.r + g.e.r;
+  // les deux Pokémon ne se chevauchent pas, sauf pendant une charge qui traverse ou sous terre
+  const passThrough = f => (f.dash && f.dash.pierce) || f.buried;
+  if (g.p.hp > 0 && g.e.hp > 0 && !passThrough(g.p) && !passThrough(g.e)){ const dx = g.e.x-g.p.x, dy = g.e.y-g.p.y, d = Math.hypot(dx,dy) || 1, min = g.p.r + g.e.r;
     if (d < min){ const o = (min-d)/2; g.p.x -= dx/d*o; g.p.y -= dy/d*o; g.e.x += dx/d*o; g.e.y += dy/d*o; } }
 
   for (let i = g.projs.length-1; i >= 0; i--){
@@ -1773,7 +2042,7 @@ function update(dt){
       if (rg.mv.kb && foe.inv <= 0 && effMult(rg.mv.t, foe.d.types) > 0){ const a = Math.atan2(foe.y-rg.y, foe.x-rg.x); foe.kx += Math.cos(a)*rg.mv.kb; foe.ky += Math.sin(a)*rg.mv.kb; }
     }
     for (const rk of [...g.rocks]){ const rd = Math.hypot(rk.x-rg.x, rk.y-rg.y); if (!rg.rocks.has(rk) && rd < rg.r + rk.r){ rg.rocks.add(rk); hitRock(rk, rg.mv.p*.6, TYPES[rg.mv.t][1]); } }
-    if (rg.t >= rg.mv.dur + .15) g.rings.splice(i,1);
+    if (rg.t >= rg.mv.dur + .15){ if (rg.cracks) crackLinesDecal(rg.x, rg.y, rg.cracks); g.rings.splice(i,1); }
   }
   for (let i = g.ents.length-1; i >= 0; i--){ const e = g.ents[i]; e.t += dt; if (e.update(dt) === false) g.ents.splice(g.ents.indexOf(e), 1); }
   for (let i = g.decals.length-1; i >= 0; i--) if ((g.decals[i].life -= dt) <= 0) g.decals.splice(i,1);
@@ -1985,13 +2254,13 @@ function drawAim(){
     case 'dash': lane(mv.spd*mv.dur, f.r); break;
     case 'melee': wedge(f.r + mv.reach, 1.2); break;
     case 'blink': disc(f.x + Math.cos(a)*BLINK_DIST, f.y + Math.sin(a)*BLINK_DIST, f.r); break;
-    case 'sig': { const sh = mv.shape, al = ctx.globalAlpha;
+    case 'sig': case 'spec': { const sh = mv.shape, al = ctx.globalAlpha;
       if (sh[0] === 'lane') lane(sh[1], sh[2]);
       else if (sh[0] === 'wedge') wedge(sh[1], sh[2]);
       else if (sh[0] === 'self') disc(f.x, f.y, sh[1]);
-      else if (sh[0] === 'zone' || sh[0] === 'leap'){ const R = sh[0] === 'leap' ? mv.range : PSY_RANGE, z = clampTo(f, tx, ty, R);
+      else if (sh[0] === 'zone' || sh[0] === 'leap' || sh[0] === 'zone3'){ const R = sh[0] === 'leap' ? mv.range : PSY_RANGE, z = clampTo(f, tx, ty, R);
         ctx.save(); ctx.globalAlpha = .35; ctx.setLineDash([6,8]); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(f.x, f.y, R, 0, Math.PI*2); ctx.stroke(); ctx.restore();
-        disc(z.x, z.y, sh[1]); }
+        if (sh[0] === 'zone3') for (const c of tripleSpots(z, a)){ ctx.globalAlpha = al; disc(c.x, c.y, sh[1]); } else disc(z.x, z.y, sh[1]); }
       else if (sh[0] === 'tambour'){ const ux = Math.cos(a), uy = Math.sin(a);
         for (let b=1;b<=3;b++) for (let j=0;j<b;j++){ const lat = (j - (b-1)/2)*78, c = clampArena(f.x + ux*70*b - uy*lat, f.y + uy*70*b + ux*lat, 10); ctx.globalAlpha = al; disc(c.x, c.y, 44); } }
       else if (sh[0] === 'plasma'){ const ex = f.x + Math.cos(a)*sh[1], ey = f.y + Math.sin(a)*sh[1];
@@ -2021,9 +2290,8 @@ function render(){
     ctx.globalAlpha = .15 + k*.3; ctx.fillStyle = col; ctx.beginPath(); ctx.arc(z.x, z.y, z.r, 0, Math.PI*2); ctx.fill(); ctx.globalAlpha = 1;
     ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.setLineDash([6,6]); ctx.stroke(); ctx.setLineDash([]);
     ctx.beginPath(); ctx.arc(z.x, z.y, z.r*k, 0, Math.PI*2); ctx.stroke(); }
-  for (const rg of g.rings){ const k = Math.min(1, rg.t/rg.mv.dur);
-    ctx.globalAlpha = 1 - k*.6; ctx.strokeStyle = TYPES[rg.mv.t][1]; ctx.lineWidth = 14*(1-k)+3;
-    ctx.beginPath(); ctx.arc(rg.x, rg.y, Math.max(1,rg.r), 0, Math.PI*2); ctx.stroke(); ctx.globalAlpha = 1; }
+  for (const rg of g.rings) drawRing(rg);
+  ctx.globalAlpha = 1;
   drawAim();
   for (const rk of g.rocks) drawRock(rk);
   for (const q of g.parts) if (q.ghost){ ctx.globalAlpha = q.life/q.max*.35; ctx.fillStyle = q.col; ctx.beginPath(); ctx.arc(q.x, q.y, q.size, 0, Math.PI*2); ctx.fill(); }
