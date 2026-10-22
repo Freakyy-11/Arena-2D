@@ -33,6 +33,11 @@ const CHART = {
 };
 // noImmune : une immunité de type compte comme une efficacité normale (×1), les autres types du défenseur comptent toujours
 const effMult = (t, defs, noImmune) => defs.reduce((m,d)=> m * (((CHART[t]||{})[d] ?? 1) || (noImmune ? 1 : 0)), 1);
+// Efficacité adoucie pour un jeu d'action (moins dépendant des types) : la table officielle (×0, ×¼, ×½, ×1, ×2, ×4)
+// devient ×0,33 (immunité), ×0,5, ×0,75, ×1, ×1,33, ×1,66 ; et le bonus de type du lanceur passe de ×1,5 à ×1,25
+const typeScale = raw => raw === 0 ? .33 : raw <= .25 ? .5 : raw < 1 ? .75 : raw >= 4 ? 1.66 : raw > 1 ? 1.33 : 1;
+const typeEff = (t, defs, noImmune) => typeScale(effMult(t, defs, noImmune));
+const STAB = 1.25;
 
 /* Types d'attaque (k) :
    proj    projectile droit            spread  éventail (cnt, ang)       homing  tête chercheuse (cnt)
@@ -185,16 +190,16 @@ const MONS = {
   amphinobi:{name:'Amphinobi',id:658,types:['Water','Dark'],base:[72,95,67,103,71,122],moves:['sheauriken','vibrobscur','laserglace','hydrocanon']}
 };
 const TEAMS = [
-  {id:'dracolosse',name:'Équipe Dracolosse',mons:['dracolosse','mammochon','flamigator','leviator','zeraora','metalosse']},
-  {id:'carchacrok',name:'Équipe Carchacrok',mons:['carchacrok','scalpereur','sinistrail','dracaufeu','lucario','tyranocif']},
-  {id:'lanssorien',name:'Équipe Lanssorien',mons:['lanssorien','gardevoir','gorythmic','amphinobi','ronflex','togekiss']},
+  {id:'dracolosse',name:'Équipe Dracolosse',mons:['dracolosse','lucario','flamigator','leviator','zeraora','metalosse']},
+  {id:'carchacrok',name:'Équipe Carchacrok',mons:['carchacrok','scalpereur','sinistrail','dracaufeu','mammochon','ronflex']},
+  {id:'lanssorien',name:'Équipe Lanssorien',mons:['lanssorien','gardevoir','gorythmic','amphinobi','tyranocif','togekiss']},
   {id:'naganadel',name:'Équipe Naganadel',mons:['naganadel','momartik','minotaupe','alakazam','pyrax','milobellus']},
   // équipes légendaires (un légendaire chacune), équilibrées entre elles par des combats IA contre IA
   {id:'leg-mewtwo',name:'Équipe Mewtwo',legend:1,mons:['mewtwo','gardevoir','metalosse','alakazam','togekiss','tyranocif']},
-  {id:'leg-groudon',name:'Équipe Groudon',legend:1,mons:['groudon','dracaufeu','amphinobi','leviator','flamigator','scalpereur']},
-  {id:'leg-kyogre',name:'Équipe Kyogre',legend:1,mons:['kyogre','carchacrok','amphinobi','milobellus','zeraora','mammochon']},
-  {id:'leg-shifours',name:'Équipe Shifours',legend:1,mons:['shifours','lucario','tyranocif','scalpereur','minotaupe','dracolosse']},
-  {id:'leg-sylveroy',name:'Équipe Sylveroy Effroi',legend:1,mons:['sylveroy','momartik','sinistrail','lanssorien','naganadel','ronflex']},
+  {id:'leg-groudon',name:'Équipe Groudon',legend:1,mons:['groudon','dracaufeu','amphinobi','lucario','flamigator','scalpereur']},
+  {id:'leg-kyogre',name:'Équipe Kyogre',legend:1,mons:['kyogre','carchacrok','amphinobi','milobellus','zeraora','naganadel']},
+  {id:'leg-shifours',name:'Équipe Shifours',legend:1,mons:['shifours','leviator','tyranocif','scalpereur','minotaupe','dracolosse']},
+  {id:'leg-sylveroy',name:'Équipe Sylveroy Effroi',legend:1,mons:['sylveroy','momartik','sinistrail','lanssorien','mammochon','ronflex']},
   {id:'leg-electhorgalar',name:'Équipe Électhor Galar',legend:1,mons:['electhorgalar','mammochon','togekiss','pyrax','gorythmic','metalosse']}
 ];
 const DIFFS = {

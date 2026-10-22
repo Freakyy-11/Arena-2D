@@ -25,6 +25,7 @@ Le jeu s'installe comme une appli (icône sur l'écran d'accueil, plein écran) 
 - 4 difficultés d'IA (Facile, Normal, Champion, Enfer) ; l'IA change de Pokémon quand son duel est mauvais. En Enfer, elle réagit presque toujours, anticipe tes déplacements et frappe plus fort.
 - Mode 2 joueurs en local.
 - Sons et musiques synthétisés (une musique par arène), vibrations du téléphone et de la manette quand ton Pokémon encaisse ; réglables dans le menu et la pause.
+- Types adoucis pour un jeu d'action : immunité ×0,33, double résistance ×0,5, résistance ×0,75, super efficace ×1,33, double faiblesse ×1,66 ; bonus de type du lanceur ×1,25.
 - Dash : 3 charges partagées par l'équipe, une charge rendue toutes les 2 s, invulnérable pendant la ruée.
 - Changement de Pokémon en combat (4 s de recharge), mort subite après 3 minutes.
 

@@ -27,7 +27,7 @@ function dimScreen(dur){ game.dim = Math.max(game.dim, dur); }
 // L'adversaire de f est-il dans le cercle (x,y,r) ? Peut-il être touché par mv ?
 function foeIn(f, x, y, r){ const e = foeOf(f); return e.hp > 0 && !e.buried && Math.hypot(e.x-x, e.y-y) < r + e.r*.6 ? e : null; }
 function typesOf(f){ if (f.grounded > 0 && f.d.types.includes('Flying')){ const t = f.d.types.filter(x => x !== 'Flying'); return t.length ? t : ['Normal']; } return f.d.types; }
-function canHit(f, e, mv){ return !!e && e.hp > 0 && e.inv <= 0 && !e.buried && (mv.hitsImmune || (effMult(mv.t, typesOf(e)) > 0 && (!mv.t2 || effMult(mv.t2, typesOf(e)) > 0))); }
+function canHit(f, e, mv){ return !!e && e.hp > 0 && e.inv <= 0 && !e.buried; }
 // Frappe ce qui est dans le cercle (adversaire + rochers) ; renvoie l'adversaire s'il a pu être touché
 function zoneHit(f, mv, x, y, r, mult=1){
   const e = foeIn(f, x, y, r), ok = canHit(f, e, mv);
@@ -785,7 +785,7 @@ const SIG = {
         if (e.hp > 0 && !e.buried){ const rx = e.x - ox, ry = e.y - oy, along = rx*ux + ry*uy, lat = Math.abs(rx*px + ry*py);
           if (lat < half + e.r*.5 && along < this.d + 22 && along > this.d - 55){
             if (!struck){ struck = true; hit(f, e, mv, 1); shake(9); }
-            if (e.inv <= 0 && effMult(mv.t, typesOf(e)) > 0){ e.kx = ux*spd*1.1; e.ky = uy*spd*1.1; } } }
+            if (e.inv <= 0){ e.kx = ux*spd*1.1; e.ky = uy*spd*1.1; } } }
         for (const rk of [...game.rocks]){ const along = (rk.x-ox)*ux + (rk.y-oy)*uy, lat = Math.abs((rk.x-ox)*px + (rk.y-oy)*py);
           if (!hitRocks.has(rk) && lat < half && Math.abs(along - this.d) < 30){ hitRocks.add(rk); hitRock(rk, mv.p*.6, '#9ec0ff'); } }
         for (let i=0;i<4;i++){ const l = rand(-half, half); game.parts.push({x:cx + px*l, y:cy + py*l, vx:ux*spd*.6 + rand(-30,30), vy:uy*spd*.6 - rand(20,90), life:.4, max:.4, col:pick(['#ffffff','#cfe2ff','#9ec0ff']), size:rand(3,7)}); }

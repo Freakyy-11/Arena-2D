@@ -126,7 +126,7 @@ function update(dt){
     const foe = rg.owner.side === 'p' ? g.e : g.p, fd = Math.hypot(foe.x-rg.x, foe.y-rg.y);
     if (!rg.hit && foe.hp > 0 && fd < rg.r + foe.r && fd > rg.r - 40){
       rg.hit = true; hit(rg.owner, foe, rg.mv, 1);
-      if (rg.mv.kb && foe.inv <= 0 && effMult(rg.mv.t, typesOf(foe)) > 0){ const a = Math.atan2(foe.y-rg.y, foe.x-rg.x); foe.kx += Math.cos(a)*rg.mv.kb; foe.ky += Math.sin(a)*rg.mv.kb; }
+      if (rg.mv.kb && foe.inv <= 0){ const a = Math.atan2(foe.y-rg.y, foe.x-rg.x); foe.kx += Math.cos(a)*rg.mv.kb; foe.ky += Math.sin(a)*rg.mv.kb; }
     }
     for (const rk of [...g.rocks]){ const rd = Math.hypot(rk.x-rg.x, rk.y-rg.y); if (!rg.rocks.has(rk) && rd < rg.r + rk.r){ rg.rocks.add(rk); hitRock(rk, rg.mv.p*.6, TYPES[rg.mv.t][1]); } }
     if (rg.t >= rg.mv.dur + .15){ if (rg.cracks) crackLinesDecal(rg.x, rg.y, rg.cracks); g.rings.splice(i,1); }

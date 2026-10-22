@@ -3,7 +3,7 @@
 function offense(a, b){ let best = 0;
   for (const k of a.d.moves){ const mv = MOVES[k]; if (!mv.p) continue;
     const st = mv.c === 'ph' ? a.st.atk : a.st.spa;
-    best = Math.max(best, effMult(mv.t, b.d.types) * (a.d.types.includes(mv.t) ? 1.5 : 1) * mv.p/90 * st/120); }
+    best = Math.max(best, typeEff(mv.t, b.d.types, mv.hitsImmune) * (a.d.types.includes(mv.t) ? STAB : 1) * mv.p/90 * st/120); }
   return best; }
 const matchup = (c, foe) => offense(c, foe) - .85*offense(foe, c) + .4*(c.hp/c.max);
 function bestSwitch(side, foe){ let bi = -1, bs = -1e9;
@@ -81,18 +81,17 @@ function aiPick(f, foe, d){
       case 'blink': s = d < 130 ? 1.6 : 0; break;
       case 'mirror': s = 0; break;
       case 'sig': case 'spec': {
-        const e = effMult(mv.t, foe.d.types); if (e === 0 && !mv.hitsImmune) break;
+        const e = typeEff(mv.t, foe.d.types, mv.hitsImmune);
         const st = mv.c === 'ph' ? f.st.atk*f.buff.atk : f.st.spa*f.buff.spa;
-        s = (mv.aiP || mv.p)/90 * (e || 1) * (f.d.types.includes(mv.t) ? 1.5 : 1) * st/120 * 1.25;
+        s = (mv.aiP || mv.p)/90 * e * (f.d.types.includes(mv.t) ? STAB : 1) * st/120 * 1.25;
         if (d > mv.range*1.05) s *= mv.close ? .05 : .15;
         if (f.recast[i] > 0) s *= 3;   // 2e charge de Change Éclair : à utiliser tant qu'elle est disponible
         break; }
       default: {
-        const e = effMult(mv.t, foe.d.types);
+        const e = typeEff(mv.t, foe.d.types);
         if (!mv.p){ s = (foe.burn <= 0 && !foe.d.types.includes('Fire') && foe.st.atk > foe.st.spa) ? 1.4 : 0; break; }
-        if (e === 0) break;
         const st = mv.c === 'ph' ? f.st.atk*f.buff.atk : f.st.spa*f.buff.spa;
-        s = mv.p/90 * e * (f.d.types.includes(mv.t) ? 1.5 : 1) * st/120;
+        s = mv.p/90 * e * (f.d.types.includes(mv.t) ? STAB : 1) * st/120;
         if (mv.k === 'quake' && d > mv.max*.85) s *= .1;
         if (mv.k === 'psy' && d > PSY_RANGE + mv.r*.5) s *= .1;
         if (mv.k === 'dash' && d > mv.spd*mv.dur + 40) s *= .15;

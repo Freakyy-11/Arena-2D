@@ -451,12 +451,12 @@ function applyStatus(def, fx){
 function hit(att, def, mv, mult){
   if (def.hp <= 0 || def.buried) return;
   if (def.inv > 0){ popText(def.x, def.y - 34, 'Esquivé', '#a39bd0', 13, .6); return; }
-  const e = effMult(mv.t, typesOf(def), mv.hitsImmune)*(mv.t2 ? effMult(mv.t2, typesOf(def), mv.hitsImmune) : 1);   // t2 : 2e type (Coup Fulgurant)   // ex. Poing Plasma : ×1 sur le type Sol
-  if (e === 0){ AUDIO.immune(); popText(def.x, def.y - 34, 'Aucun effet', '#a39bd0', 15); burst(def.x, def.y, '#a39bd0', 5, 80, 3); return; }
+  // hitsImmune (Poing Plasma…) : une immunité compte ×1 ; t2 : 2e type d'attaque ; une immunité n'annule plus l'attaque (×0,33)
+  const raw = effMult(mv.t, typesOf(def), mv.hitsImmune)*(mv.t2 ? effMult(mv.t2, typesOf(def), mv.hitsImmune) : 1), e = typeScale(raw);
   const fx = mv.fx || {};
   if (!mv.p){ applyStatus(def, fx); burst(def.x, def.y, TYPES[mv.t][1], 8, 100, 3); return; }
   const A = mv.c === 'ph' ? att.st.atk*att.buff.atk*(att.atkDown > 0 ? .75 : 1) : att.st.spa*att.buff.spa, D = mv.c === 'ph' || mv.vsDef ? def.st.def*(def.defDown > 0 ? .75 : 1) : def.st.spd*(def.spdDown > 0 ? .75 : 1)*(def.buff.spd || 1);   // vsDef : Frappe Psy
-  let dmg = ((22*mv.p*A/D)/50 + 2) * (att.d.types.includes(mv.t) || (mv.t2 && att.d.types.includes(mv.t2)) ? 1.5 : 1) * e * rand(.88,1) * .3 * mult * suddenDeath();
+  let dmg = ((22*mv.p*A/D)/50 + 2) * (att.d.types.includes(mv.t) || (mv.t2 && att.d.types.includes(mv.t2)) ? STAB : 1) * e * rand(.88,1) * .3 * mult * suddenDeath();
   if (att.burn > 0 && mv.c === 'ph') dmg *= .5;
   if (att.isAI) dmg *= game.diff.dmg;   // force de l'IA selon la difficulté
   dmg = Math.max(1, Math.round(dmg));
@@ -466,7 +466,7 @@ function hit(att, def, mv, mult){
   if (def.sleep > 0){ def.sleep = 0; }
   popText(def.x + rand(-10,10), def.y - 30, '-' + dmg, '#fff', 22);
   if (e > 1) popText(def.x, def.y - 58, 'Super efficace !', '#e6b84c', 15, 1.1);
-  else if (e < 1) popText(def.x, def.y - 58, 'Pas très efficace…', '#a39bd0', 13, 1.1);
+  else if (e < 1) popText(def.x, def.y - 58, raw === 0 ? 'Très peu efficace…' : 'Pas très efficace…', '#a39bd0', 13, 1.1);
   burst(def.x, def.y, TYPES[mv.t][1], 14, 180, 5);
   shake(Math.min(10, 2 + dmg/6)); impactFx(def.x, def.y, TYPES[mv.t][1], dmg, e);
   applyStatus(def, fx);
