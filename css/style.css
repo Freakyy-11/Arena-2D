@@ -144,3 +144,10 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .choose button b{font-family:var(--font-d);font-size:13px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .choose button small{font-size:11px;color:var(--mute);font-variant-numeric:tabular-nums}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* ---------- Avertissement à l'ouverture ---------- */
+.splash{position:fixed;inset:0;z-index:50;background:var(--bg);display:grid;place-items:center;overflow-y:auto;padding:24px 16px}
+.splash .box{max-width:460px;gap:14px}
+.splash .kicker{font-family:var(--font-d);letter-spacing:.18em;text-transform:uppercase;font-size:11px;color:var(--gold)}
+.splash p{font-size:14px;line-height:1.5}
+.splash .note{font-size:12px}
+.splash .btn{margin-top:6px;min-width:180px;font-size:17px}

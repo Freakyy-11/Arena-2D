@@ -278,7 +278,7 @@ function pollPad(){
   readSticks(pad, gp);
   const b = gp.buttons.map(x => x.pressed || x.value > .5), down = i => b[i] && !pad.prev[i];
   if (b.some(Boolean) || pad.lx || pad.ly || pad.aimOn) setMode('pad');
-  if (!game){ if (down(0) || down(9)) $('start').click(); pad.prev = b; return; }
+  if (!game){ if (down(0) || down(9)){ if (!$('splash').hidden) $('splash').hidden = true; else $('start').click(); } pad.prev = b; return; }   // l'avertissement d'ouverture se ferme d'abord
   const g = game;
   if (g.state === 'end'){ if (down(0)) $('again').click(); else if (down(1)) toMenu(); pad.prev = b; return; }
   if (g.paused){ if (down(9) || down(0) || down(1)) setPause(false); pad.prev = b; return; }

@@ -119,3 +119,6 @@ const openDex = () => { renderDex(); $('menu').hidden = true; $('dex').hidden = 
 const closeDex = () => { $('dex').hidden = true; $('menu').hidden = false; };
 $('openDex').onclick = openDex; $('closeDex').onclick = closeDex;
 addEventListener('keydown', e => { if (e.code === 'Escape' && !$('dex').hidden) closeDex(); });
+
+// ---------- Avertissement à l'ouverture ----------
+$('splashGo').addEventListener('click', () => { $('splash').hidden = true; });
