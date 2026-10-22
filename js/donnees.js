@@ -188,7 +188,14 @@ const TEAMS = [
   {id:'dracolosse',name:'Équipe Dracolosse',mons:['dracolosse','mammochon','flamigator','leviator','zeraora','metalosse']},
   {id:'carchacrok',name:'Équipe Carchacrok',mons:['carchacrok','scalpereur','sinistrail','dracaufeu','lucario','tyranocif']},
   {id:'lanssorien',name:'Équipe Lanssorien',mons:['lanssorien','gardevoir','gorythmic','amphinobi','ronflex','togekiss']},
-  {id:'naganadel',name:'Équipe Naganadel',mons:['naganadel','momartik','minotaupe','alakazam','pyrax','milobellus']}
+  {id:'naganadel',name:'Équipe Naganadel',mons:['naganadel','momartik','minotaupe','alakazam','pyrax','milobellus']},
+  // équipes légendaires (un légendaire chacune), équilibrées entre elles par des combats IA contre IA
+  {id:'leg-mewtwo',name:'Équipe Mewtwo',legend:1,mons:['mewtwo','gardevoir','metalosse','alakazam','togekiss','tyranocif']},
+  {id:'leg-groudon',name:'Équipe Groudon',legend:1,mons:['groudon','dracaufeu','amphinobi','leviator','flamigator','scalpereur']},
+  {id:'leg-kyogre',name:'Équipe Kyogre',legend:1,mons:['kyogre','carchacrok','amphinobi','milobellus','zeraora','mammochon']},
+  {id:'leg-shifours',name:'Équipe Shifours',legend:1,mons:['shifours','lucario','tyranocif','scalpereur','minotaupe','dracolosse']},
+  {id:'leg-sylveroy',name:'Équipe Sylveroy Effroi',legend:1,mons:['sylveroy','momartik','sinistrail','lanssorien','naganadel','ronflex']},
+  {id:'leg-electhorgalar',name:'Équipe Électhor Galar',legend:1,mons:['electhorgalar','mammochon','togekiss','pyrax','gorythmic','metalosse']}
 ];
 const DIFFS = {
   facile:{label:'Facile',react:.1,think:1.1,lead:0,noise:.6,mirror:false,sw:0,dash:0,aimErr:.4,dmg:.65},

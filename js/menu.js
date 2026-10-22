@@ -26,15 +26,18 @@ let legendWarn = false;
 function renderMenu(){
   $('pickMode').innerHTML = [['teams','Équipes prêtes'],['build','Composer mon équipe']].map(([k,l]) => `<button class="pill" data-k="${k}" aria-pressed="${sel.mode===k}">${l}</button>`).join('');
   $('paneTeams').hidden = sel.mode !== 'teams'; $('paneBuild').hidden = sel.mode !== 'build';
-  $('pickTeam').innerHTML = TEAMS.map(t => `<button class="team" data-k="${t.id}" aria-pressed="${sel.team===t.id}">
+  const teamCard = t => `<button class="team" data-k="${t.id}" aria-pressed="${sel.team===t.id}">
       <div class="th"><b>${t.name}</b><small>${t.mons.reduce((a,k)=>a+MONS[k].bst,0)} pts de stats</small></div>
-      <div class="minis">${t.mons.map(k => `<div class="m">${pic(k,40)}<i>${MONS[k].name}</i></div>`).join('')}</div></button>`).join('');
+      <div class="minis">${t.mons.map(k => `<div class="m">${pic(k,40)}<i>${MONS[k].name}</i></div>`).join('')}</div></button>`;
+  // équipes classiques, puis équipes légendaires (un légendaire ★ chacune)
+  const legTeams = TEAMS.filter(t => t.legend);
+  $('pickTeam').innerHTML = TEAMS.filter(t => !t.legend).map(teamCard).join('') + (legTeams.length ? `<div class="teamsHead">Équipes légendaires <small>un légendaire ★ par équipe</small></div>` + legTeams.map(teamCard).join('') : '');
   $('pickBuild').innerHTML = Object.keys(MONS).sort((a,b)=>MONS[a].name.localeCompare(MONS[b].name,'fr')).map(k => { const i = sel.build.indexOf(k);
     return `<button class="mon" data-k="${k}" aria-pressed="${i>=0}">${i>=0?`<span class="num">${i+1}</span>`:''}${MONS[k].legend ? '<span class="leg">★</span>' : ''}${pic(k,46)}<b>${MONS[k].name}</b><div class="types">${chips(MONS[k].types)}</div></button>`; }).join('');
   $('buildCount').textContent = `${sel.build.length}/6`;
   $('pickVs').innerHTML = [['ai', "Contre l'IA"], ['p2', '2 joueurs']].map(([k,l]) => `<button class="pill" data-k="${k}" aria-pressed="${(sel.vs || 'ai')===k}">${l}</button>`).join('');
   $('vsNote').hidden = sel.vs !== 'p2'; $('stepD').hidden = sel.vs === 'p2'; $('eTitle').textContent = sel.vs === 'p2' ? 'Équipe du joueur 2' : "Équipe de l'IA";
-  $('pickE').innerHTML = [['random','Aléatoire'], ...TEAMS.map(t=>[t.id,t.name])].map(([k,l]) => `<button class="pill" data-k="${k}" aria-pressed="${sel.e===k}">${l}</button>`).join('');
+  $('pickE').innerHTML = [['random','Aléatoire'], ...TEAMS.map(t=>[t.id,(t.legend ? '★ ' : '') + t.name])].map(([k,l]) => `<button class="pill" data-k="${k}" aria-pressed="${sel.e===k}">${l}</button>`).join('');
   $('pickD').innerHTML = Object.keys(DIFFS).map(k => `<button class="pill" data-k="${k}" aria-pressed="${sel.d===k}">${DIFFS[k].label}</button>`).join('');
   $('pickA').innerHTML = [['random','Aléatoire'], ...ARENA_LIST].map(([k,l]) => `<button class="pill" data-k="${k}" aria-pressed="${(sel.arena || 'random')===k}">${l}</button>`).join('');
   $('start').disabled = sel.mode === 'build' && sel.build.length !== 6;

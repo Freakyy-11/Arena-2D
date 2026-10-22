@@ -31,7 +31,9 @@ const moveSpeed = f => (160 + (f.d.base[5]-30)/113*70) * f.buff.spe * (f.slow > 
 function resolveTeams(){
   const pk = sel.mode === 'build' ? sel.build.slice() : TEAMS.find(t=>t.id===sel.team).mons.slice();
   let et = sel.e;
-  if (et === 'random'){ const pool = TEAMS.filter(t => sel.mode === 'build' || t.id !== sel.team); et = pool[Math.floor(Math.random()*pool.length)].id; }
+  // adversaire au hasard : dans la même catégorie que ton équipe (avec ou sans légendaire)
+  const legendSide = sel.mode === 'build' ? sel.build.some(k => MONS[k].legend) : !!TEAMS.find(t => t.id === sel.team).legend;
+  if (et === 'random'){ const pool = TEAMS.filter(t => !!t.legend === legendSide && (sel.mode === 'build' || t.id !== sel.team)); et = pool[Math.floor(Math.random()*pool.length)].id; }
   const ar = !sel.arena || sel.arena === 'random' ? ARENA_LIST[Math.floor(Math.random()*ARENA_LIST.length)][0] : sel.arena;
   return {pk, ek: TEAMS.find(t=>t.id===et).mons.slice(), eName: TEAMS.find(t=>t.id===et).name, dk: sel.d, arena: ar, vs2: sel.vs === 'p2'};
 }

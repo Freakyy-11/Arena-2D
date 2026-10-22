@@ -28,6 +28,8 @@ button:disabled{cursor:default}
 .pill{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-size:13px;font-weight:600}
 .pill[aria-pressed="true"]{background:var(--gold);color:var(--gold-ink);border-color:var(--gold)}
 .teams{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:8px}
+.teamsHead{grid-column:1/-1;margin-top:8px;font-family:var(--font-d);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);display:flex;gap:10px;align-items:baseline}
+.teamsHead small{color:var(--mute);letter-spacing:0;text-transform:none;font-family:var(--font-b);font-size:12px}
 .team{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;text-align:left;display:flex;flex-direction:column;gap:8px;min-width:0}
 .team[aria-pressed="true"]{border-color:var(--gold);background:var(--panel-2);box-shadow:0 0 0 1px var(--gold) inset}
 .team .th{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
