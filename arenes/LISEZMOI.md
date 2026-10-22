@@ -1,6 +1,6 @@
 # Images d'arène
 
-Le jeu charge les images listées dans `ARENA_IMAGES` (dans `index.html`), par exemple
+Le jeu charge les images listées dans `ARENA_IMAGES` (dans `js/arenes.js`), par exemple
 `pilier:{file:'pilier.jpg', frame:[130, 556, 636, 1086]}`. Pour une arène sans image, il garde le décor dessiné par le code.
 
 | Arène | Nom du fichier |
@@ -30,7 +30,7 @@ Les formats `.jpg` et `.webp` marchent aussi (par exemple `stade.jpg`).
 ## Calage d'une image qui ne suit pas le format
 
 Une image peut aussi avoir n'importe quelle composition (par exemple très haute, avec la zone de combat au milieu).
-Il suffit d'indiquer dans `index.html`, dans le `frame` de `ARENA_IMAGES`, où se trouve la zone de combat dans l'image,
+Il suffit d'indiquer dans `js/arenes.js`, dans le `frame` de `ARENA_IMAGES`, où se trouve la zone de combat dans l'image,
 en pixels : `[gauche, haut, droite, bas]`. Le jeu étire l'image pour que ce rectangle tombe pile sur l'arène
 (murs exclus), et tout ce qui est au-dessus devient le décor de fond.
 
