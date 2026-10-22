@@ -22,6 +22,7 @@ function hydrate(root){
   });
 }
 
+let legendWarn = false;
 function renderMenu(){
   $('pickMode').innerHTML = [['teams','Équipes prêtes'],['build','Composer mon équipe']].map(([k,l]) => `<button class="pill" data-k="${k}" aria-pressed="${sel.mode===k}">${l}</button>`).join('');
   $('paneTeams').hidden = sel.mode !== 'teams'; $('paneBuild').hidden = sel.mode !== 'build';
@@ -29,7 +30,7 @@ function renderMenu(){
       <div class="th"><b>${t.name}</b><small>${t.mons.reduce((a,k)=>a+MONS[k].bst,0)} pts de stats</small></div>
       <div class="minis">${t.mons.map(k => `<div class="m">${pic(k,40)}<i>${MONS[k].name}</i></div>`).join('')}</div></button>`).join('');
   $('pickBuild').innerHTML = Object.keys(MONS).sort((a,b)=>MONS[a].name.localeCompare(MONS[b].name,'fr')).map(k => { const i = sel.build.indexOf(k);
-    return `<button class="mon" data-k="${k}" aria-pressed="${i>=0}">${i>=0?`<span class="num">${i+1}</span>`:''}${pic(k,46)}<b>${MONS[k].name}</b><div class="types">${chips(MONS[k].types)}</div></button>`; }).join('');
+    return `<button class="mon" data-k="${k}" aria-pressed="${i>=0}">${i>=0?`<span class="num">${i+1}</span>`:''}${MONS[k].legend ? '<span class="leg">★</span>' : ''}${pic(k,46)}<b>${MONS[k].name}</b><div class="types">${chips(MONS[k].types)}</div></button>`; }).join('');
   $('buildCount').textContent = `${sel.build.length}/6`;
   $('pickVs').innerHTML = [['ai', "Contre l'IA"], ['p2', '2 joueurs']].map(([k,l]) => `<button class="pill" data-k="${k}" aria-pressed="${(sel.vs || 'ai')===k}">${l}</button>`).join('');
   $('vsNote').hidden = sel.vs !== 'p2'; $('stepD').hidden = sel.vs === 'p2'; $('eTitle').textContent = sel.vs === 'p2' ? 'Équipe du joueur 2' : "Équipe de l'IA";
@@ -41,17 +42,22 @@ function renderMenu(){
   hydrate($('menu'));
 }
 $('menu').addEventListener('click', e => {
-  const b = e.target.closest('[data-k]'); if (!b) return;
+  const b = e.target.closest('button[data-k]'); if (!b) return;   // button : le portrait (img[data-k]) n'est pas la tuile
   const pane = b.parentElement.id, k = b.dataset.k;
   if (pane === 'pickMode') sel.mode = k;
   else if (b.classList.contains('team')) sel.team = k;
-  else if (pane === 'pickBuild'){ const i = sel.build.indexOf(k); if (i >= 0) sel.build.splice(i,1); else if (sel.build.length < 6) sel.build.push(k); }
+  else if (pane === 'pickBuild'){ const i = sel.build.indexOf(k);
+    if (i >= 0) sel.build.splice(i,1);
+    else if (MONS[k].legend && sel.build.some(x => MONS[x].legend)) legendWarn = true;   // 1 légendaire maximum par équipe
+    else if (sel.build.length < 6) sel.build.push(k); }
   else if (pane === 'pickVs') sel.vs = k;
   else if (pane === 'pickE') sel.e = k;
   else if (pane === 'pickD') sel.d = k;
   else if (pane === 'pickA') sel.arena = k;
   else return;
   save(); const y = $('menu').scrollTop; renderMenu(); $('menu').scrollTop = y;
+  if (legendWarn){ legendWarn = false; const c = $('buildCount'); c.textContent = '1 légendaire max !'; c.style.color = 'var(--foe)';
+    clearTimeout(c.tm); c.tm = setTimeout(() => { c.textContent = `${sel.build.length}/6`; c.style.color = ''; }, 1800); }
 });
 renderMenu();
 
@@ -59,7 +65,7 @@ renderMenu();
 // ---------- Fiche des attaques ----------
 const pct = v => Math.round(v*100) + ' %';
 const fr = v => String(Math.round(v*10)/10).replace('.', ',');
-const STAT_FR = {atk:'Attaque', spa:'Atq. Spé.', spe:'Vitesse'};
+const STAT_FR = {atk:'Attaque', spa:'Atq. Spé.', spe:'Vitesse', spd:'Déf. Spé.'};
 // description d'une attaque, tirée de ses données (ou écrite à la main pour les ★)
 function moveDesc(mv){
   if (mv.desc) return mv.desc;
@@ -99,12 +105,12 @@ function monCard(k){
 }
 let dexTab = null;
 function renderDex(){
-  const tabs = [...TEAMS.map(t => [t.id, t.name]), ['all','Tous']];
+  const tabs = [...TEAMS.map(t => [t.id, t.name]), ['legend','Légendaires'], ['all','Tous']];
   if (sel.mode === 'build' && sel.build.length) tabs.unshift(['mine','Mon équipe']);
   if (!dexTab || !tabs.some(t => t[0] === dexTab)) dexTab = sel.mode === 'build' && sel.build.length ? 'mine' : sel.team;
   $('dexTabs').innerHTML = tabs.map(([k,l]) => `<button class="pill" data-tab="${k}" aria-pressed="${dexTab === k}">${l}</button>`).join('');
   const keys = dexTab === 'all' ? Object.keys(MONS).sort((a,b) => MONS[a].name.localeCompare(MONS[b].name,'fr'))
-    : dexTab === 'mine' ? sel.build : TEAMS.find(t => t.id === dexTab).mons;
+    : dexTab === 'mine' ? sel.build : dexTab === 'legend' ? Object.keys(MONS).filter(k => MONS[k].legend) : TEAMS.find(t => t.id === dexTab).mons;
   $('dexList').innerHTML = keys.map(monCard).join('');
   hydrate($('dexList'));
 }

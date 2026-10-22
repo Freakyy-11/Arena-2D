@@ -165,6 +165,11 @@ function drawProj(p){
       glowBall(p.x, p.y, r, '#f4ffd0', '#c8e050', '#A6B91A');
       for (let i=0;i<2;i++){ ctx.strokeStyle = '#e8f8a0'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.ellipse(p.x, p.y, r*1.6, r*.6, t*12 + i*1.6, 0, TAU); ctx.stroke(); }
       break;
+    case 'focusblast':
+      for (let i=0;i<n;i+=2){ const k = (i+1)/n, q = tr[i]; ctx.globalAlpha = k*.35; ctx.fillStyle = '#ffb347'; ctx.beginPath(); ctx.arc(q.x, q.y, r*(.4 + .5*k), 0, TAU); ctx.fill(); }
+      ctx.globalAlpha = 1; glowBall(p.x, p.y, r*1.1, '#ffffff', '#ffe08a', '#ff7a1a');
+      for (let i=0;i<4;i++){ const aa = t*7 + i*TAU/4; ctx.strokeStyle = i%2 ? '#fff3c0' : '#ff9a2a'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(p.x, p.y, r*(.95 + .1*Math.sin(t*20 + i)), aa, aa + 1.1); ctx.stroke(); }
+      break;
     case 'darkpulse': case 'waterpulse': {
       const dark = look === 'darkpulse', c1 = dark ? '#140a18' : '#2f63d8', c2 = dark ? '#8a4a8a' : '#cfe2ff';
       ctx.translate(p.x, p.y); ctx.rotate(a); ctx.lineCap = 'round';
@@ -317,7 +322,8 @@ function bigSlash(f, a, R, half, col){
 function liveAimPoint(f, i, manual){
   const e = foeOf(f);
   if (f.isAI){ const a = Math.random()*TAU, r = Math.random()*game.diff.aimErr*150; return clampRange(f, e.x + Math.cos(a)*r, e.y + Math.sin(a)*r); }
-  if (manual){
+  if (manual && f.side === 'e' && game.vs2){ if (pad2.aimOn){ const p = dirPoint(f, Math.cos(pad2.aimA), Math.sin(pad2.aimA), pad2.aimMag, i); return clampRange(f, p.x, p.y); } }
+  else if (manual){
     if (inputMode === 'mouse' && mouse.seen) return clampRange(f, mouse.x, mouse.y);
     if (inputMode === 'pad' && pad.aimOn){ const p = dirPoint(f, Math.cos(pad.aimA), Math.sin(pad.aimA), pad.aimMag, i); return clampRange(f, p.x, p.y); }
   }
@@ -327,6 +333,7 @@ function liveAimPoint(f, i, manual){
 function liveAimAngle(f){
   const e = foeOf(f), toFoe = Math.atan2(e.y - f.y, e.x - f.x);
   if (f.isAI) return toFoe + (Math.random()*2-1)*game.diff.aimErr;
+  if (f.side === 'e' && game.vs2) return pad2.aimOn ? pad2.aimA : toFoe;
   if (inputMode === 'mouse' && mouse.seen) return Math.atan2(mouse.y - f.y, mouse.x - f.x);
   if (inputMode === 'pad' && pad.aimOn) return pad.aimA;
   if (inputMode === 'touch' && touchAim && touchAim.active) return Math.atan2(touchAim.dy, touchAim.dx);
@@ -493,12 +500,13 @@ function bigShuriken(f, mv, z){
       ctx.fillStyle = '#3d6fe0'; ctx.beginPath(); ctx.arc(0, 0, 5, 0, TAU); ctx.fill(); ctx.restore(); ctx.globalAlpha = 1; }});
 }
 // coup de poing (Poing Glace) : le poing avance puis éclate en glace
-function punchFx(x, y, a){
-  sparks(x, y, ['#ffffff','#bfe9f5','#96D9D6'], 16, 220, 5); frostDecal(x, y, 30); shake(5);
+function punchFx(x, y, a, kind){   // kind : 'fire' (Poing Feu), glace sinon
+  const fire = kind === 'fire';
+  sparks(x, y, fire ? ['#fff3b0','#ffb43a','#ff6a1a'] : ['#ffffff','#bfe9f5','#96D9D6'], 16, 220, 5); if (fire) scorchDecal(x, y, 30, 2.5); else frostDecal(x, y, 30); shake(5);
   spawnFx({update(){ return this.t < .28; }, top(){ const k = Math.min(1, this.t/.08), fade = this.t > .12 ? 1 - (this.t - .12)/.16 : 1;
     ctx.save(); ctx.translate(x - Math.cos(a)*16*(1-k), y - Math.sin(a)*16*(1-k)); ctx.rotate(a); ctx.globalAlpha = Math.max(0, fade);
-    glowBall(0, 0, 18 + 8*k, '#ffffff', '#dff8ff', '#5fb8d0');
-    ctx.fillStyle = '#eafcff'; ctx.strokeStyle = '#5fb8d0'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(0, 0, 12, 14, 0, 0, TAU); ctx.fill(); ctx.stroke();
+    glowBall(0, 0, 18 + 8*k, fire ? '#fff6c0' : '#ffffff', fire ? '#ffc040' : '#dff8ff', fire ? '#ff5a1a' : '#5fb8d0');
+    ctx.fillStyle = fire ? '#ffe0b0' : '#eafcff'; ctx.strokeStyle = fire ? '#ff6a1a' : '#5fb8d0'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(0, 0, 12, 14, 0, 0, TAU); ctx.fill(); ctx.stroke();
     for (let i=0;i<3;i++){ ctx.beginPath(); ctx.moveTo(6, -8 + i*6); ctx.lineTo(11, -8 + i*6); ctx.stroke(); }
     ctx.restore(); ctx.globalAlpha = 1; }});
 }
@@ -935,3 +943,190 @@ const SIG = {
     for (let i=0;i<3;i++) spawnFx({update(){ if (this.t >= i*.08){ spawnProj(f, sub(mv, {k:'proj', spd:660, r:9, life:1, look:'shuriken', bounce:1}), a + (i-1)*.05, 1); return false; } return true; }});
   }
 };
+
+// =====================================================================
+// LÉGENDAIRES : Mewtwo, Groudon, Kyogre, Shifours (et Close Combat en rafale)
+// =====================================================================
+// météore psychique qui tombe sur une zone (Frappe Psy) ; big = le dernier, énorme, qui étourdit 0,5 s
+function psyMeteor(f, mv, x, y, delay, big){
+  const r = big ? 80 : 40;
+  spawnFx({update(){ if (this.done) return this.t < delay + .3; danger(f, x, y, r);
+      if (this.t >= delay){ this.done = true; const e = zoneHit(f, mv, x, y, r);
+        if (big){ if (e && e.hp > 0){ e.stun = Math.max(e.stun, .5); e.dash = null; popText(e.x, e.y - 62, 'Étourdi !', '#F95587', 14); }
+          shake(16); zoomPunch(.06); hitstop(.08); screenFlash('#ffd0e4', .35, .25); crackDecal(x, y, 70); shockRing(x, y, 130, '#F95587', .45, 14);
+          sparks(x, y, ['#ffffff','#ffa0c8','#F95587','#b06cff'], 40, 340, 7); }
+        else { shake(5); shockRing(x, y, 60, '#ffa0c8', .3, 6); sparks(x, y, ['#ffffff','#ffa0c8','#F95587'], 14, 220, 5); crackDecal(x, y, 30); } }
+      return true; },
+    ground(){ if (this.done){ const k = (this.t - delay)/.3; ctx.globalAlpha = .5*(1-k); glowBall(x, y, r*.8, '#ffffff', '#ffa0c8', '#F95587'); ctx.globalAlpha = 1; return; }
+      const k = Math.min(1, this.t/delay); ctx.globalAlpha = .12 + .3*k; ctx.fillStyle = '#F95587'; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill();
+      ctx.globalAlpha = .8; ctx.strokeStyle = '#ffc0d8'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, y, r*(1 - k*.7), 0, TAU); ctx.stroke(); ctx.globalAlpha = 1; },
+    top(){ if (this.done) return; const k = Math.min(1, this.t/delay), yy = y - (1 - k*k)*360 - 10, R = (big ? 26 : 13)*(.7 + .3*k);
+      ctx.globalAlpha = .45; ctx.strokeStyle = '#ffa0c8'; ctx.lineWidth = R*1.2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x, yy - R*3); ctx.lineTo(x, yy); ctx.stroke(); ctx.globalAlpha = 1;
+      glowBall(x, yy, R*1.15, '#ffffff', '#ffb8d8', '#b04ae0'); ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(x - R*.25, yy - R*.25, R*.35, 0, TAU); ctx.fill(); }});
+}
+// pieu de pierre (Lame Pangéenne) : sort du sol avec une lueur de magma à la base
+function drawStoneSpike(s, up){
+  if (up <= 0) return; const h = s.h*up, tx = s.x + s.lean*h, ty = s.y - h;
+  ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(s.x, s.y + 2, s.w*1.3, s.w*.5, 0, 0, TAU); ctx.fill();
+  const g = ctx.createLinearGradient(s.x, ty, s.x, s.y); g.addColorStop(0, '#f0c08a'); g.addColorStop(.5, '#b4683a'); g.addColorStop(1, '#5a2a16');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(s.x - s.w, s.y); ctx.lineTo(tx, ty); ctx.lineTo(s.x + s.w, s.y); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#2a140a'; ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,150,60,.85)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(s.x - s.w*.8, s.y - 1); ctx.lineTo(s.x + s.w*.8, s.y - 1); ctx.stroke();
+}
+function punchFire(x, y, a){ punchFx(x, y, a, 'fire'); }
+// trois griffes bleu-mauve sur la zone d'attaque (Draco-Griffe)
+function dragonClaws(f, mv, x, y, a){
+  zoneHit(f, mv, x, y, 48); shake(6); sparks(x, y, ['#ffffff','#8a7aff','#4aa0ff'], 14, 220, 4);
+  spawnFx({update(){ return this.t < .38; }, top(){ const fade = this.t > .2 ? Math.max(0, 1 - (this.t - .2)/.18) : 1;
+    ctx.save(); ctx.translate(x, y); ctx.rotate(a); ctx.lineCap = 'round'; ctx.globalAlpha = fade;
+    for (let s=0;s<3;s++){ const k = Math.max(0, Math.min(1, (this.t - s*.04)/.07)); if (!k) continue; const o = (s-1)*16;
+      const x1 = o - 12, y1 = -36, x2 = x1 + 24*k, y2 = y1 + 72*k;
+      ctx.strokeStyle = '#241650'; ctx.lineWidth = 10; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+      const g = ctx.createLinearGradient(x1, y1, x2, y2); g.addColorStop(0, '#8a5cff'); g.addColorStop(1, '#4aa8ff');
+      ctx.strokeStyle = g; ctx.lineWidth = 6; ctx.stroke(); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke(); }
+    ctx.restore(); ctx.globalAlpha = 1; }});
+}
+// gros poing noir vu de face (Poing Obscur)
+function drawFrontFist(x, y, S, al){
+  // paume, 4 jointures, pouce ; 1re passe : halo rouge (ombre), 2e passe : remplissage noir et contour par-dessus
+  const boxes = [[-26, -12, 52, 40, 10], [-26, -28, 13, 22, 6], [-13, -28, 13, 22, 6], [0, -28, 13, 22, 6], [13, -28, 13, 22, 6], [-32, 2, 20, 13, 6]];
+  const path = () => { ctx.beginPath(); for (const [bx, by, w, h, r] of boxes) ctx.roundRect(bx, by, w, h, r); };
+  ctx.save(); ctx.translate(x, y); ctx.scale(S, S); ctx.globalAlpha = al; ctx.fillStyle = '#16101c';
+  ctx.shadowColor = '#c04a6a'; ctx.shadowBlur = 18; path(); ctx.fill(); ctx.shadowBlur = 0;
+  ctx.strokeStyle = '#a83a5e'; ctx.lineWidth = 1.6;
+  for (const [bx, by, w, h, r] of boxes){ ctx.beginPath(); ctx.roundRect(bx, by, w, h, r); ctx.fill(); ctx.stroke(); }
+  ctx.strokeStyle = '#5a2a40'; ctx.lineWidth = 1.5;
+  for (let i=0;i<4;i++){ ctx.beginPath(); ctx.moveTo(-23 + i*13, -20); ctx.lineTo(-16 + i*13, -20); ctx.stroke(); }
+  ctx.restore(); ctx.globalAlpha = 1;
+}
+function darkFist(f, mv, x, y, delay){
+  const r = 46;
+  spawnFx({update(){ if (!this.done){ danger(f, x, y, r);
+        if (this.t >= delay){ this.done = true; const e = zoneHit(f, mv, x, y, r); if (e) popText(e.x, e.y - 80, 'Coup critique !', '#ef5050', 14, 1);
+          shake(9); hitstop(.05); crackDecal(x, y, 44); shockRing(x, y, 80, '#c04a6a', .35, 10); sparks(x, y, ['#140a18','#c04a6a','#ffffff'], 16, 260, 5); } }
+      return this.t < delay + .3; },
+    ground(){ if (this.done) return; const k = this.t/delay; ctx.globalAlpha = .15 + .3*k; ctx.fillStyle = '#2a1626'; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill();
+      ctx.globalAlpha = .8; ctx.strokeStyle = '#d06080'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, y, r*(1 - k*.6), 0, TAU); ctx.stroke(); ctx.globalAlpha = 1; },
+    top(){ const k = Math.min(1, this.t/delay), fade = this.done ? Math.max(0, 1 - (this.t - delay)/.3) : 1;
+      drawFrontFist(x, y - 30 - (1 - k)*70, this.done ? 1.3 : .45 + .85*k*k, fade); }});
+}
+// petit poing orange de profil (Close Combat)
+function drawJab(x, y, a, S, al){
+  ctx.save(); ctx.translate(x, y); ctx.rotate(a); ctx.scale(S, S); ctx.globalAlpha = al;
+  ctx.strokeStyle = '#ffd0a0'; ctx.lineWidth = 2; for (const o of [-6, 0, 6]){ ctx.beginPath(); ctx.moveTo(-26, o); ctx.lineTo(-12, o); ctx.stroke(); }
+  glowBall(0, 0, 12, '#fff3c0', '#ffb060', '#ff7a1a');
+  ctx.fillStyle = '#ffb060'; ctx.strokeStyle = '#a8400a'; ctx.lineWidth = 1.8; ctx.beginPath(); ctx.ellipse(0, 0, 10, 11, 0, 0, TAU); ctx.fill(); ctx.stroke();
+  for (let i=0;i<3;i++){ ctx.beginPath(); ctx.moveTo(4, -6 + i*6); ctx.lineTo(9, -6 + i*6); ctx.stroke(); }
+  ctx.restore(); ctx.globalAlpha = 1;
+}
+
+Object.assign(SIG, {
+  // Mewtwo : 5 météores psychiques l'un après l'autre (ils suivent la visée) ; il s'immobilise seulement pour le dernier, énorme, qui étourdit
+  frappepsy(f, mv, a, tx, ty, o){
+    const T = [0, .25, .5, .75, 1.05], hold = .85, delay = .4, big = sub(mv, {p:90}); let n = 0;
+    f.busy = T[4];   // pas d'autre attaque pendant la série
+    const drop = () => { const z = n === 0 ? clampRange(f, tx, ty) : liveAimPoint(f, o.slot, o.manual); psyMeteor(f, n < 4 ? mv : big, z.x, z.y, delay, n === 4); n++; };
+    drop(); f.act = {n:'Charge', t:0, dur:.4};
+    const side = sideOf(f);
+    spawnFx({update(){ if (f.hp <= 0 || side.team[side.active] !== f) return false;   // K.O. ou changé : la série s'arrête
+        while (n < 4 && this.t >= T[n]){ drop(); f.act = {n:'Charge', t:0, dur:.4}; }
+        if (n === 4 && this.t >= hold && !this.held){ this.held = true; dimScreen(.5); f.act = {n:'Charge', t:0, dur:T[4] - hold + .2};
+          // immobile le temps de faire tomber le dernier météore
+          f.script = {t:0, update(dt){ this.t += dt; f.vx = f.vy = 0; if (n === 4 && this.t >= T[4] - hold) drop(); return this.t < T[4] - hold + .15; }}; }
+        if (this.held && Math.random() < .6) game.parts.push({x:f.x + rand(-20,20), y:f.y + rand(-14,10), vx:0, vy:-rand(40,90), life:.4, max:.4, col:pick(['#ffa0c8','#b06cff','#ffffff']), size:rand(2,4)});
+        return n < 5 && this.t < 2; }});
+  },
+  // Groudon : grand cône de pieux de pierre qui jaillissent du sol et empalent (×1 sur les types Vol)
+  lamepangeenne(f, mv, a){
+    const R = 250, half = .55, wind = .35, sx = f.x, sy = f.y, spikes = [], rocksHit = new Set(); let struck = false;
+    for (let i=0;i<36;i++){ const aa = a + rand(-half, half)*.95, d = rand(40, R); spikes.push({x:sx + Math.cos(aa)*d, y:sy + Math.sin(aa)*d, d, h:rand(26, 48), w:rand(6, 10), lean:rand(-.25,.25)}); }
+    spikes.sort((p, q) => p.y - q.y);
+    f.act = {n:'Charge', t:0, dur:wind}; shake(3);
+    f.script = {t:0, update(dt){ this.t += dt; f.aimA = a; return this.t < wind + .15; }};
+    spawnFx({update(){ const tt = this.t - wind;
+        if (tt < .3) for (let k=1;k<=3;k++) danger(f, sx + Math.cos(a)*R*k/3.6, sy + Math.sin(a)*R*k/3.6, 34*k);
+        if (tt >= 0){
+          if (!this.started){ this.started = true; f.act = {n:'Attack', t:0, dur:.45}; shake(15); zoomPunch(.05); hitstop(.05); screenFlash('#ff7a3a', .25, .25); }
+          const front = 40 + (R - 40)*Math.min(1, tt/.25), e = foeOf(f);
+          if (!struck && e.hp > 0 && !e.buried && Math.hypot(e.x - sx, e.y - sy) < front + e.r*.6 && angDiff(Math.atan2(e.y - sy, e.x - sx), a) < half){
+            struck = true; const ok = canHit(f, e, mv); hit(f, e, mv, 1); if (ok && e.hp > 0){ launch(e, .6, 70); popText(e.x, e.y - 62, 'Empalé !', '#E2BF65', 14); } crackDecal(e.x, e.y, 46); }
+          for (const rk of [...game.rocks]) if (!rocksHit.has(rk) && Math.hypot(rk.x - sx, rk.y - sy) < front && angDiff(Math.atan2(rk.y - sy, rk.x - sx), a) < half){ rocksHit.add(rk); hitRock(rk, mv.p*.6, '#E2BF65'); }
+          for (const s of spikes) if (!s.up && s.d < front){ s.up = this.t; if (Math.random() < .4) sparks(s.x, s.y, ['#c9b98f','#8a6a3a','#ff8a3a'], 3, 120, 4); } }
+        return tt < 1.2; },
+      ground(){ if (this.t < wind){ const k = this.t/wind; ctx.globalAlpha = .12 + .25*k; ctx.fillStyle = '#c87a3a'; ctx.beginPath(); ctx.moveTo(sx, sy); ctx.arc(sx, sy, R, a - half, a + half); ctx.closePath(); ctx.fill();
+        ctx.globalAlpha = .8; ctx.strokeStyle = '#ffb060'; ctx.lineWidth = 2; ctx.setLineDash([8,6]); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1; } },
+      top(){ const tt = this.t - wind, out = tt > .95 ? Math.max(0, 1 - (tt - .95)/.25) : 1;
+        for (const s of spikes) if (s.up) drawStoneSpike(s, Math.min(1, (this.t - s.up)/.08)*out); }});
+  },
+  poingfeu(f, mv, a){
+    f.dash = {vx:Math.cos(a)*760, vy:Math.sin(a)*760, t:.35, mv, trail:'#ffb43a',
+      fx(){ if (Math.random() < .6) game.parts.push({x:f.x + rand(-10,10), y:f.y + rand(-10,10), vx:-Math.cos(a)*80, vy:-60, life:.3, max:.3, col:pick(['#ffd25a','#ff8a2a','#e8432a']), size:rand(3,6)}); },
+      onHit(e){ hit(f, e, mv, 1); punchFire(e.x - Math.cos(a)*e.r*.5, e.y - Math.sin(a)*e.r*.5, a); }, onEnd(){ punchFire(f.x + Math.cos(a)*f.r, f.y + Math.sin(a)*f.r, a); }};
+  },
+  // Draco-Griffe : courte charge, puis trois griffes sur la zone devant le lanceur
+  dracogriffe(f, mv, a){
+    const claw = () => dragonClaws(f, mv, f.x + Math.cos(a)*(f.r + 22), f.y + Math.sin(a)*(f.r + 22), a);
+    f.dash = {vx:Math.cos(a)*700, vy:Math.sin(a)*700, t:.18, mv, trail:'#7a5cff', onHit(){ claw(); }, onEnd(){ claw(); }};
+  },
+  // Kyogre : une vague circulaire grandit et repousse, laisse une flaque qui ralentit, puis une vague plus fine revient vers le centre
+  ondeoriginelle(f, mv, a){
+    const cx = f.x, cy = f.y, R = 240, grow = .55, gap = .4, back = .45, band = 34, ret = sub(mv, {p:50}); let hit1 = false, hit2 = false;
+    f.act = {n:'Charge', t:0, dur:.5}; screenFlash('#6390F0', .2, .35); shake(8);
+    spawnFx({update(){ const t = this.t, e = foeOf(f), alive = e.hp > 0 && !e.buried, d = Math.hypot(e.x - cx, e.y - cy);
+        this.r1 = t < grow ? R*Math.sin(t/grow*Math.PI/2) : null;
+        if (this.r1 !== null){ danger(f, cx, cy, Math.min(R, this.r1 + 60));
+          if (!hit1 && alive && Math.abs(d - this.r1) < band + e.r*.5){ hit1 = true; const ok = canHit(f, e, mv); hit(f, e, mv, 1);
+            if (ok){ const ang = Math.atan2(e.y - cy, e.x - cx); e.kx += Math.cos(ang)*460; e.ky += Math.sin(ang)*460; } } }
+        const t2 = t - grow - gap; this.r2 = t2 >= 0 && t2 < back ? R*(1 - t2/back) : null;
+        if (this.r2 !== null){ danger(f, cx, cy, R); if (!hit2 && alive && Math.abs(d - this.r2) < 18 + e.r*.5){ hit2 = true; hit(f, e, ret, 1); } }
+        if (t > grow && t < grow + 2 && alive && d < R*.85 && !e.d.types.includes('Water')){ if (e.slow <= 0 || e.slowF >= .6) e.slowF = .6; e.slow = Math.max(e.slow, .25); }
+        for (const rr of [this.r1, this.r2]) if (rr) for (let i=0;i<5;i++){ const aa = Math.random()*TAU; game.parts.push({x:cx + Math.cos(aa)*rr, y:cy + Math.sin(aa)*rr, vx:Math.cos(aa)*60, vy:-rand(30,90), life:.35, max:.35, col:pick(['#ffffff','#cfe2ff','#9ec0ff']), size:rand(3,6)}); }
+        return t < grow + 2; },
+      ground(){ const t = this.t; if (t <= grow) return; const al = Math.min(1, (grow + 2 - t)/.5)*Math.min(1, (t - grow)/.2), RR = R*.85;
+        const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, RR); g.addColorStop(0, `rgba(61,111,224,${.28*al})`); g.addColorStop(.85, `rgba(61,111,224,${.2*al})`); g.addColorStop(1, 'rgba(61,111,224,0)');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, RR, 0, TAU); ctx.fill();
+        ctx.globalAlpha = al*.35; ctx.strokeStyle = '#cfe2ff'; ctx.lineWidth = 1.5; for (let j=0;j<3;j++){ const rr = (game.t*30 + j*RR/3) % RR; ctx.beginPath(); ctx.arc(cx, cy, rr, 0, TAU); ctx.stroke(); } ctx.globalAlpha = 1; },
+      top(){ const wave = (r, w) => { if (!r || r < 4) return; const r0 = Math.max(0, r - w), r1 = r + w*.4, g = ctx.createRadialGradient(cx, cy, r0, cx, cy, r1);
+          g.addColorStop(0, 'rgba(40,80,200,0)'); g.addColorStop(.55, 'rgba(61,111,224,.8)'); g.addColorStop(.85, 'rgba(158,192,255,.95)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+          ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, r1, 0, TAU); ctx.arc(cx, cy, r0, 0, TAU, true); ctx.fill();
+          ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3; ctx.beginPath(); for (let i=0;i<=72;i++){ const aa = i/72*TAU, rr = r + Math.sin(aa*12 + game.t*14)*3; ctx.lineTo(cx + Math.cos(aa)*rr, cy + Math.sin(aa)*rr); } ctx.stroke(); };
+        wave(this.r1, band*1.6); wave(this.r2, 18); }});
+  },
+  // Fatal-Foudre : un éclair au centre de la zone, puis 5 éclairs ensemble tout autour
+  fatalfoudre(f, mv, a, tx, ty){
+    const z = clampRange(f, tx, ty), center = sub(mv, {fx:{stun:.3}}), ring = sub(mv, {p:Math.round(mv.p*.6)});
+    boltZone(f, center, z.x, z.y, .5);
+    for (let i=0;i<5;i++){ const aa = a + i*TAU/5, p = clampArena(z.x + Math.cos(aa)*88, z.y + Math.sin(aa)*88, 10); boltZone(f, ring, p.x, p.y, .85); }
+    electrify(1.1);
+  },
+  // Shifours : charge ; au bout, 3 poings noirs s'abattent sur 3 zones côte à côte ; si la charge touche, elle étourdit et le poing du centre touche
+  poingobscur(f, mv, a){
+    const charge = sub(mv, {p:40}), ux = Math.cos(a), uy = Math.sin(a), px = -uy, py = ux;
+    const row = (x, y) => { for (const j of [0, -1, 1]){ const p = clampArena(x + px*j*72, y + py*j*72, 10); darkFist(f, mv, p.x, p.y, .32); } dimScreen(.4); };
+    f.dash = {vx:ux*820, vy:uy*820, t:.34, mv:charge, trail:'#3a1a2a',
+      fx(){ if (Math.random() < .7) game.parts.push({x:f.x + rand(-10,10), y:f.y + rand(-10,10), vx:-ux*80, vy:-uy*80, life:.25, max:.25, col:pick(['#140a18','#3a1a2a','#c04a6a']), size:rand(4,8)}); },
+      onHit(e){ const ok = canHit(f, e, charge); hit(f, e, charge, 1); if (ok && e.hp > 0){ e.stun = Math.max(e.stun, .5); e.dash = null; } row(e.x, e.y); },
+      onEnd(){ row(f.x + ux*40, f.y + uy*40); }};
+  },
+  // Close Combat : rafale de coups de poing devant soi pendant 1 s (le lanceur peut bouger) ; chaque coup bloque l'ennemi un instant ; le dernier, plus gros, repousse
+  closecombat(f, mv, a){
+    const jab = sub(mv, {p:6}), last = sub(mv, {p:40}), N = 10, dur = 1, side = sideOf(f); let n = 0;
+    f.busy = dur + .05;
+    spawnFx({fists:[], update(){ if (f.hp <= 0 || side.team[side.active] !== f){ f.busy = 0; return false; }
+        const aa = liveAimAngle(f); f.aimA = aa;
+        while (n < N && this.t >= n*dur/(N - 1)){ n++; const fin = n === N, reach = fin ? 46 : 36, d = f.r + (fin ? 30 : 24), j = fin ? 0 : 8;
+          const x = f.x + Math.cos(aa)*d + rand(-j, j), y = f.y + Math.sin(aa)*d + rand(-j, j), m = fin ? last : jab, e = foeOf(f);
+          f.act = {n:'Attack', t:0, dur:.18};
+          if (e.hp > 0 && !e.buried && Math.hypot(e.x - x, e.y - y) < reach + e.r*.6){ const ok = canHit(f, e, m); hit(f, e, m, 1);
+            if (fin && ok){ e.kx += Math.cos(aa)*480; e.ky += Math.sin(aa)*480; }
+            // chaque coup bloque un instant et ramène l'ennemi devant les poings : il reste pris dans le combo tant que le lanceur ne s'éloigne pas trop
+            else if (ok && e.hp > 0){ e.stun = Math.max(e.stun, .16); e.dash = null; const hx = f.x + Math.cos(aa)*(f.r + e.r + 6), hy = f.y + Math.sin(aa)*(f.r + e.r + 6); e.kx = (hx - e.x)*5; e.ky = (hy - e.y)*5; } }
+          for (const rk of [...game.rocks]) if (Math.hypot(rk.x - x, rk.y - y) < reach + rk.r) hitRock(rk, fin ? 30 : 5, '#ff9a3a');
+          this.fists.push({x, y, a:aa, t:this.t, big:fin});
+          if (fin){ shake(9); shockRing(x, y, 70, '#ffb060', .3, 8); sparks(x, y, ['#ffffff','#ffb060','#ff7a1a'], 16, 260, 5); f.defDown = f.spdDown = mv.selfDown; popText(f.x, f.y - 62, 'Défenses −', '#c98a8a', 13); }
+          else shake(2); }
+        if (n < N) danger(f, f.x + Math.cos(aa)*(f.r + 26), f.y + Math.sin(aa)*(f.r + 26), 40);
+        return n < N || this.t < dur + .25; },
+      top(){ for (const p of this.fists){ const k = (this.t - p.t)/(p.big ? .25 : .14); if (k <= 1) drawJab(p.x, p.y, p.a, p.big ? 1.7 : 1, 1 - k); } }});
+  },
+});

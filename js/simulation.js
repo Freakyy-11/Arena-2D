@@ -3,7 +3,7 @@
 function stepFighter(f, ix, iy, dt){
   const foe = foeOf(f);
   for (let i=0;i<4;i++) f.cds[i] = Math.max(0, f.cds[i]-dt);
-  for (const k of ['burn','poison','slow','stun','sleep','mirror','ring','recharge','flash','inv','buffT','hurtT','root','defDown','spdDown','atkDown','grounded']) f[k] = Math.max(0, f[k]-dt);
+  for (const k of ['burn','poison','slow','stun','sleep','mirror','ring','recharge','flash','inv','buffT','hurtT','root','defDown','spdDown','atkDown','grounded','busy']) f[k] = Math.max(0, f[k]-dt);
   if (f.healT > 0 && f.hp > 0){ const st = Math.min(dt, f.healT); f.healT -= st; f.hp = Math.min(f.max, f.hp + f.healRate*st); }
   // Change Éclair : fenêtre de 2 s pour la 2e charge ; si elle n'est pas utilisée, la recharge démarre
   for (let i=0;i<4;i++) if (f.recast[i] > 0 && (f.recast[i] -= dt) <= 0){ f.recast[i] = 0; f.cds[i] = Math.max(f.cds[i], MOVES[f.d.moves[i]].cd - 2); }
@@ -11,7 +11,7 @@ function stepFighter(f, ix, iy, dt){
   // en l'air (soulevé ou projeté) : ne peut pas agir jusqu'à la retombée
   if (f.air){ f.air.t += dt; const k = Math.min(1, f.air.t/f.air.dur); f.h = f.air.h(k); if (k >= 1){ const a = f.air; f.air = null; f.h = 0; if (a.onLand) a.onLand(); } }
   if (f.act && (f.act.t += dt) >= f.act.dur) f.act = null;
-  if (f.buffT <= 0) f.buff = {atk:1,spa:1,spe:1};
+  if (f.buffT <= 0) f.buff = {atk:1,spa:1,spe:1,spd:1};
   if (f.hp > 0 && (f.burn > 0 || f.poison > 0)){
     f.dot += dt;
     if (f.dot >= 1){ f.dot -= 1; const d = Math.max(1, Math.round(f.max*((f.burn>0?.04:0)+(f.poison>0?.05:0))));
@@ -47,7 +47,7 @@ function stepFighter(f, ix, iy, dt){
     }
     if (f.dash === dsh){ f.vx = 0; f.vy = 0; }
   } else {
-    if (!canAct(f) || game.state !== 'fight' || f.root > 0){ ix = 0; iy = 0; }
+    if (!canMove(f) || game.state !== 'fight' || f.root > 0){ ix = 0; iy = 0; }
     const im = Math.hypot(ix, iy); if (im > .2){ f.lastDir = {x:ix/im, y:iy/im}; }
     const sp = moveSpeed(f), k = Math.min(1, dt*12);
     f.vx += (ix*sp - f.vx)*k; f.vy += (iy*sp - f.vy)*k;

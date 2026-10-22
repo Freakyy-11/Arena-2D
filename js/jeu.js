@@ -21,7 +21,7 @@ function makeFighter(key, side){
   return { key, d, side, isAI: side === 'e', x:CX, y:CY, vx:0, vy:0, kx:0, ky:0, r:24, hp, max:hp,
     st:{atk:s(b[1]),def:s(b[2]),spa:s(b[3]),spd:s(b[4])},
     cds:[0,0,0,0], burn:0, poison:0, slow:0, stun:0, sleep:0, dot:0, mirror:0, ring:0, dash:null, recharge:0, inv:0,
-    buff:{atk:1,spa:1,spe:1}, buffT:0, flash:0, face:1, bob:Math.random()*6, dead:0, koShown:false,
+    buff:{atk:1,spa:1,spe:1,spd:1}, buffT:0, busy:0, flash:0, face:1, bob:Math.random()*6, dead:0, koShown:false,
     act:null, hurtT:0, aimA:0, seed:Math.random()*600, roll:null, script:null, air:null, h:0, buried:false, root:0, slowF:.55, ghosts:[], ghT:0, holdT:[0,0,0,0], iceSpike:null, defDown:0, spdDown:0, atkDown:0, grounded:0, healT:0, healRate:0, recast:[0,0,0,0], recastN:[0,0,0,0], lastDir:{x:0, y: side === 'p' ? -1 : 1},
     held:[false,false,false,false], ai:{think:1, strafe:1, strafeT:0, swT:2} };
 }
@@ -67,8 +67,8 @@ function sendIn(side, idx, announce=true){
   const alive = old.hp > 0;
   f.x = alive ? old.x : side.spawn.x; f.y = alive ? old.y : side.spawn.y;
   f.vx = f.vy = f.kx = f.ky = 0; f.dash = null; f.roll = null; f.script = null; f.air = null; f.h = 0; f.buried = false; f.root = 0; f.act = null; f.hurtT = 0; f.stun = 0; f.recharge = 0; f.mirror = 0; f.ring = 0; f.slow = 0;
-  f.buff = {atk:1,spa:1,spe:1}; f.buffT = 0; f.inv = INV_ON_SWITCH; f.held.fill(false); f.defDown = f.spdDown = f.atkDown = f.grounded = f.healT = 0; f.recast.fill(0); f.recastN.fill(0);
-  if (alive){ old.dash = null; old.roll = null; old.script = null; old.air = null; old.h = 0; old.buried = false; old.buff = {atk:1,spa:1,spe:1}; old.buffT = 0; old.mirror = 0; old.ring = 0; old.held.fill(false); }
+  f.buff = {atk:1,spa:1,spe:1,spd:1}; f.buffT = 0; f.busy = 0; f.inv = INV_ON_SWITCH; f.held.fill(false); f.defDown = f.spdDown = f.atkDown = f.grounded = f.healT = 0; f.recast.fill(0); f.recastN.fill(0);
+  if (alive){ old.dash = null; old.roll = null; old.script = null; old.air = null; old.h = 0; old.buried = false; old.buff = {atk:1,spa:1,spe:1,spd:1}; old.buffT = 0; old.mirror = 0; old.ring = 0; old.held.fill(false); }
   side.active = idx;
   if (side === game.ps){ game.p = f; buildMoves(); } else game.e = f;
   for (const p of game.projs) if (p.target === old) p.target = f;
@@ -87,7 +87,7 @@ function trySwitch(side, idx){
 function tryRoll(f, dx, dy){
   if (!game || game.state !== 'fight' || game.paused) return false;
   const side = sideOf(f);
-  if (side.dashN < 1 || !canAct(f)) return false;
+  if (side.dashN < 1 || !canMove(f)) return false;
   let m = Math.hypot(dx, dy);
   if (m < .2){ dx = f.lastDir.x; dy = f.lastDir.y; m = 1; }
   if (side.dashN === DASH_MAX) side.dashT = DASH_REGEN;
@@ -359,7 +359,8 @@ const ACT_ANIM = {melee:'Attack', dash:'Attack', quake:'Attack', proj:'Shoot', s
   buff:'Charge', heal:'Charge', ring:'Charge', mirror:'Charge', blink:'Charge', rest:'Charge'};
 const ACT_DUR = {Attack:.45, Shoot:.4, Charge:.6};
 const BLINK_DIST = 220;
-function canAct(f){ return f.hp > 0 && f.stun <= 0 && f.sleep <= 0 && f.recharge <= 0 && !f.dash && !f.roll && !f.script && !f.air; }
+function canMove(f){ return f.hp > 0 && f.stun <= 0 && f.sleep <= 0 && f.recharge <= 0 && !f.dash && !f.roll && !f.script && !f.air; }
+function canAct(f){ return canMove(f) && !(f.busy > 0); }   // busy : attaque en cours (Close Combat, Frappe Psy) : on peut bouger et faire un Dash, pas attaquer
 // aim : point visé {x,y} ; absent = visée automatique sur l'adversaire (avec anticipation pour l'IA)
 function use(f, i, aim, opts){
   if (!game || game.state !== 'fight') return false;
@@ -408,7 +409,7 @@ function use(f, i, aim, opts){
       else popText(f.x, f.y - 30, 'Raté', '#a39bd0', 13, .6);
       if (mv.selfDown){ f.defDown = f.spdDown = mv.selfDown; popText(f.x, f.y - 62, 'Défenses −', '#c98a8a', 13); }
       break; }
-    case 'buff': f.buff = {atk:1,spa:1,spe:1,...mv.buff}; f.buffT = mv.dur; burst(f.x, f.y, '#e6b84c', 14, 120, 4); shockRing(f.x, f.y, 60, '#e6b84c', .35, 6);
+    case 'buff': f.buff = {atk:1,spa:1,spe:1,spd:1,...mv.buff}; f.buffT = mv.dur; burst(f.x, f.y, '#e6b84c', 14, 120, 4); shockRing(f.x, f.y, 60, '#e6b84c', .35, 6);
       for (let j=0;j<14;j++) game.parts.push({x:f.x + rand(-20,20), y:f.y + rand(-10,10), vx:0, vy:-rand(60,140), life:rand(.4,.8), max:.8, col:pick(['#e6b84c','#fff3c0']), size:rand(2,4), drag:.99}); break;
     case 'heal': if (mv.lock){ const lk = mv.lock; f.act = {n:'Charge', t:0, dur:lk}; f.script = {t:0, update(dt){ this.t += dt; return this.t < lk; }}; }
       if (mv.roost){ f.healT = mv.roost; f.healRate = f.max*mv.pct/mv.roost; f.grounded = mv.roost; popText(f.x, f.y - 30, 'Atterrissage', '#4fd17a', 15); shockRing(f.x, f.y, 50, '#4fd17a', .35, 6); break; } { const h = Math.round(f.max*mv.pct); f.hp = Math.min(f.max, f.hp + h); popText(f.x, f.y-30, '+'+h, '#4fd17a', 18); burst(f.x, f.y, '#4fd17a', 12, 100, 4); break; }
@@ -452,7 +453,7 @@ function hit(att, def, mv, mult){
   if (e === 0){ AUDIO.immune(); popText(def.x, def.y - 34, 'Aucun effet', '#a39bd0', 15); burst(def.x, def.y, '#a39bd0', 5, 80, 3); return; }
   const fx = mv.fx || {};
   if (!mv.p){ applyStatus(def, fx); burst(def.x, def.y, TYPES[mv.t][1], 8, 100, 3); return; }
-  const A = mv.c === 'ph' ? att.st.atk*att.buff.atk*(att.atkDown > 0 ? .75 : 1) : att.st.spa*att.buff.spa, D = mv.c === 'ph' ? def.st.def*(def.defDown > 0 ? .75 : 1) : def.st.spd*(def.spdDown > 0 ? .75 : 1);
+  const A = mv.c === 'ph' ? att.st.atk*att.buff.atk*(att.atkDown > 0 ? .75 : 1) : att.st.spa*att.buff.spa, D = mv.c === 'ph' || mv.vsDef ? def.st.def*(def.defDown > 0 ? .75 : 1) : def.st.spd*(def.spdDown > 0 ? .75 : 1)*(def.buff.spd || 1);   // vsDef : Frappe Psy
   let dmg = ((22*mv.p*A/D)/50 + 2) * (att.d.types.includes(mv.t) ? 1.5 : 1) * e * rand(.88,1) * .3 * mult * suddenDeath();
   if (att.burn > 0 && mv.c === 'ph') dmg *= .5;
   if (att.isAI) dmg *= game.diff.dmg;   // force de l'IA selon la difficulté

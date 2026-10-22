@@ -45,6 +45,15 @@ const effMult = (t, defs, noImmune) => defs.reduce((m,d)=> m * (((CHART[t]||{})[
    fx : burn, poison, slow, stun (chances) · drain, recoil (part des dégâts) · self (boost du lanceur)
    ★ : range = portée pour l'IA · shape = repère de visée · anim = animation PMD · close = corps à corps · aiP = puissance estimée pour l'IA */
 const MOVES = {
+  // Légendaires
+  frappepsy:{n:'Frappe Psy',t:'Psychic',c:'sp',p:34,k:'sig',sig:'frappepsy',vsDef:1,cd:7,range:380,shape:['zone',80],anim:'Charge',per:1,aiP:170,desc:"Mewtwo s'immobilise et fait tomber 5 météores psychiques l'un après l'autre sur la zone visée (ils suivent la visée). Le dernier, énorme (puissance 90), étourdit 0,5 s. Calculée sur la Défense de la cible, pas sur sa Déf. Spé."},
+  plenitude:{n:'Plénitude',t:'Psychic',c:'st',k:'buff',buff:{spa:1.3,spd:1.3},dur:10,cd:15},
+  lamepangeenne:{n:'Lame Pangéenne',t:'Ground',c:'ph',p:120,k:'sig',sig:'lamepangeenne',cd:6.5,range:240,shape:['wedge',250,.55],anim:'Attack',hitsImmune:1,aiP:150,desc:"Après une courte préparation, des pieux de pierre jaillissent du sol dans un grand cône et empalent l'ennemi (projeté en l'air). Efficacité normale (×1) sur le type Vol."},
+  poingfeu:{n:'Poing Feu',t:'Fire',c:'ph',p:80,k:'spec',sig:'poingfeu',cd:3.5,range:280,shape:['lane',266,24],anim:'Attack',close:1,fx:{burn:.3},desc:"Charge, puis coup de poing enflammé à l'impact ou au bout de la course. 30 % de chance de brûler."},
+  dracogriffe:{n:'Draco-Griffe',t:'Dragon',c:'ph',p:80,k:'spec',sig:'dracogriffe',cd:3,range:170,shape:['lane',160,26],anim:'Attack',close:1,desc:"Courte charge, puis trois griffes bleu-mauve lacèrent la zone devant le lanceur."},
+  ondeoriginelle:{n:'Onde Originelle',t:'Water',c:'sp',p:110,k:'sig',sig:'ondeoriginelle',cd:7,range:230,shape:['self',240],anim:'Charge',aiP:150,desc:"Une vague circulaire part de Kyogre et grandit : elle repousse l'ennemi et laisse une flaque qui ralentit pendant 2 s. 0,4 s plus tard, une vague plus fine revient vers le centre (puissance 50)."},
+  fatalfoudre:{n:'Fatal-Foudre',t:'Electric',c:'sp',p:90,k:'spec',sig:'fatalfoudre',cd:5,range:380,shape:['zone',134],anim:'Shoot',aiP:110,desc:"Sur la zone visée, un éclair tombe au centre (30 % de chance d'étourdir), puis 5 éclairs tombent ensemble tout autour (puissance 54)."},
+  poingobscur:{n:'Poing Obscur',t:'Dark',c:'ph',p:90,k:'sig',sig:'poingobscur',cd:5,range:300,shape:['obscur',280],anim:'Attack',close:1,aiP:150,desc:"Charge (puissance 40). Si elle touche, elle étourdit 0,5 s. Au bout de la charge, trois énormes poings noirs s'abattent sur trois zones côte à côte : celui du centre touche à coup sûr si la charge a touché. Coup critique."},
   // Feu
   lanceflammes:{n:'Lance-Flammes',t:'Fire',c:'sp',p:80,k:'spec',sig:'lanceflammes',beam:1,cd:4,range:560,shape:['lane',560,18],anim:'Shoot',fx:{burn:.3},desc:"Après 0,2 s de visée, jet de flammes à longue portée. 30 % de chance de brûler. Laisse une traînée de flammes au sol pendant 3 s qui peut brûler."},
   deflagration:{n:'Déflagration',t:'Fire',c:'sp',p:120,k:'spec',sig:'deflagration',cd:4.5,range:420,shape:['lane',420,30],anim:'Shoot',fx:{burn:.3},desc:"Un grand pentagramme de flammes avance. Le sol qu'il traverse reste en flammes 3 s : rester dedans peut brûler."},
@@ -89,7 +98,8 @@ const MOVES = {
   eclatmagique:{n:'Éclat Magique',t:'Fairy',c:'sp',p:85,k:'quake',max:140,dur:.35,cd:4,ring:'stars'},
   pouvoirlunaire:{n:'Pouvoir Lunaire',t:'Fairy',c:'sp',p:130,k:'sig',sig:'pouvoirlunaire',cd:5,range:380,shape:['zone',72],anim:'Shoot',desc:"Une lune descend sur la zone visée et explose."},
   // Combat
-  closecombat:{n:'Close Combat',t:'Fighting',c:'ph',p:120,k:'melee',reach:64,cd:4.5,selfDown:3},
+  closecombat:{n:'Close Combat',t:'Fighting',c:'ph',p:6,k:'spec',sig:'closecombat',cd:5,range:80,shape:['lane',90,30],anim:'Attack',close:1,per:1,selfDown:3,aiP:110,desc:"Pendant 1 s, rafale de coups de poing devant soi (le lanceur peut se déplacer). Chaque coup qui touche bloque l'ennemi un instant et le ramène devant les poings : il reste pris dans le combo tant que le lanceur ne s'éloigne pas trop. Le dernier coup, plus gros, inflige 40 de puissance et repousse. Baisse ensuite les défenses du lanceur pendant 3 s."},
+  exploforce:{n:'Exploforce',t:'Fighting',c:'sp',p:120,k:'proj',spd:230,r:24,life:2.4,cd:4.5,look:'focusblast',fx:{spdDown:.1}},
   exploforce:{n:'Exploforce',t:'Fighting',c:'sp',p:120,k:'proj',spd:270,r:20,life:2,cd:4.5},
   aurasphere:{n:'Aurasphère',t:'Fighting',c:'sp',p:65,k:'sig',sig:'aurasphere',cd:4,range:500,shape:['lane',520,14],anim:'Shoot',aiP:105,desc:"Maintenir la touche pour charger : la sphère grossit et frappe plus fort (jusqu'à +50). Elle suit l'ennemi."},
   // Acier
@@ -146,6 +156,10 @@ const MONS = {
   metalosse:{name:'Métalosse',id:376,types:['Steel','Psychic'],base:[80,135,130,95,90,70],moves:['poingmeteore','psykoudboul','seisme','poingglace']},
   ronflex:{name:'Ronflex',id:143,types:['Normal'],base:[160,110,65,65,110,30],moves:['plaquage','gigaimpact','seisme','repos']},
   gorythmic:{name:'Gorythmic',id:812,types:['Grass'],base:[100,125,90,60,70,85],moves:['tambourbattant','megafouet','sabotage','closecombat']},
+  mewtwo:{name:'Mewtwo',id:150,legend:1,types:['Psychic'],base:[106,110,90,154,90,130],moves:['frappepsy','exploforce','ballombre','plenitude']},
+  groudon:{name:'Groudon',id:383,legend:1,types:['Ground'],base:[100,150,140,100,90,90],moves:['lamepangeenne','poingfeu','dracogriffe','lamederoc']},
+  kyogre:{name:'Kyogre',id:382,legend:1,types:['Water'],base:[100,100,90,150,140,90],moves:['ondeoriginelle','fatalfoudre','laserglace','plenitude']},
+  shifours:{name:'Shifours',id:892,legend:1,types:['Fighting','Dark'],base:[100,130,100,63,60,97],moves:['poingobscur','closecombat','demitour','poingglace']},
   zeraora:{name:'Zeraora',id:807,types:['Electric'],base:[88,112,75,102,80,143],moves:['poingplasma','changeeclair','closecombat','coupdjus']},
   togekiss:{name:'Togekiss',id:468,types:['Fairy','Flying'],base:[85,50,95,120,115,80],moves:['lamedair','vibraqua','eclatmagique','atterrissage']},
   pyrax:{name:'Pyrax',id:637,types:['Bug','Fire'],base:[85,60,65,135,105,100],moves:['papillodanse','dansedufeu','bourdon','ventviolent']},
