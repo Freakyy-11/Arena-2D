@@ -111,7 +111,7 @@ function buildCard(s){
 function buildMoves(){
   $('moves').innerHTML = game.p.d.moves.map((k,i) => { const mv = MOVES[k];
     const tag = mv.c === 'ph' ? 'Physique' : mv.c === 'sp' ? 'Spécial' : 'Statut';
-    return `<button class="mv" data-i="${i}" style="--tc:${TYPES[mv.t][1]}"><em></em><b>${mv.k === 'sig' ? '★ ' : ''}${mv.n}</b><span>${TYPES[mv.t][0]} · ${tag}</span></button>`; }).join('');
+    return `<button class="mv" data-i="${i}" style="--tc:${TYPES[mv.t][1]}"><em></em><b>${mv.k === 'sig' ? '★ ' : ''}${mv.n}</b><span>${TYPES[mv.t][0]}${mv.t2 ? '/' + TYPES[mv.t2][0] : ''} · ${tag}</span></button>`; }).join('');
   game.p.btns = [...$('moves').querySelectorAll('.mv')];
   game.p.btns.forEach((b,i) => {
     b.addEventListener('pointerdown', e => { e.preventDefault(); try{ b.setPointerCapture(e.pointerId); }catch(_){}
@@ -449,12 +449,12 @@ function applyStatus(def, fx){
 function hit(att, def, mv, mult){
   if (def.hp <= 0 || def.buried) return;
   if (def.inv > 0){ popText(def.x, def.y - 34, 'Esquivé', '#a39bd0', 13, .6); return; }
-  const e = effMult(mv.t, typesOf(def), mv.hitsImmune);   // ex. Poing Plasma : ×1 sur le type Sol
+  const e = effMult(mv.t, typesOf(def), mv.hitsImmune)*(mv.t2 ? effMult(mv.t2, typesOf(def), mv.hitsImmune) : 1);   // t2 : 2e type (Coup Fulgurant)   // ex. Poing Plasma : ×1 sur le type Sol
   if (e === 0){ AUDIO.immune(); popText(def.x, def.y - 34, 'Aucun effet', '#a39bd0', 15); burst(def.x, def.y, '#a39bd0', 5, 80, 3); return; }
   const fx = mv.fx || {};
   if (!mv.p){ applyStatus(def, fx); burst(def.x, def.y, TYPES[mv.t][1], 8, 100, 3); return; }
   const A = mv.c === 'ph' ? att.st.atk*att.buff.atk*(att.atkDown > 0 ? .75 : 1) : att.st.spa*att.buff.spa, D = mv.c === 'ph' || mv.vsDef ? def.st.def*(def.defDown > 0 ? .75 : 1) : def.st.spd*(def.spdDown > 0 ? .75 : 1)*(def.buff.spd || 1);   // vsDef : Frappe Psy
-  let dmg = ((22*mv.p*A/D)/50 + 2) * (att.d.types.includes(mv.t) ? 1.5 : 1) * e * rand(.88,1) * .3 * mult * suddenDeath();
+  let dmg = ((22*mv.p*A/D)/50 + 2) * (att.d.types.includes(mv.t) || (mv.t2 && att.d.types.includes(mv.t2)) ? 1.5 : 1) * e * rand(.88,1) * .3 * mult * suddenDeath();
   if (att.burn > 0 && mv.c === 'ph') dmg *= .5;
   if (att.isAI) dmg *= game.diff.dmg;   // force de l'IA selon la difficulté
   dmg = Math.max(1, Math.round(dmg));

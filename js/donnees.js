@@ -47,6 +47,11 @@ const effMult = (t, defs, noImmune) => defs.reduce((m,d)=> m * (((CHART[t]||{})[
 const MOVES = {
   // Légendaires
   frappepsy:{n:'Frappe Psy',t:'Psychic',c:'sp',p:34,k:'sig',sig:'frappepsy',vsDef:1,cd:7,range:380,shape:['zone',80],anim:'Charge',per:1,aiP:170,desc:"Mewtwo s'immobilise et fait tomber 5 météores psychiques l'un après l'autre sur la zone visée (ils suivent la visée). Le dernier, énorme (puissance 90), étourdit 0,5 s. Calculée sur la Défense de la cible, pas sur sa Déf. Spé."},
+  sombreruade:{n:'Sombre Ruade',t:'Ghost',c:'sp',p:70,k:'sig',sig:'sombreruade',cd:7,range:360,shape:['lanes3',380,62],anim:'Attack',aiP:160,desc:"Le lanceur se dédouble à gauche et à droite : les trois cavaliers chargent en ligne droite et traversent l'ennemi, qui est ralenti. Peu après, des branches maudites jaillissent du sol sur les trois couloirs (puissance 60) et la zone ralentit pendant 2 s."},
+  machination:{n:'Machination',t:'Dark',c:'st',k:'buff',buff:{spa:1.6},dur:8,cd:15},
+  vampibaiser:{n:'Vampibaiser',t:'Fairy',c:'sp',p:50,k:'spec',sig:'vampibaiser',cd:3.5,range:200,shape:['lane',190,24],anim:'Attack',close:1,fx:{drain:.75},desc:"Courte charge, puis un baiser qui vole 75 % des dégâts infligés en PV."},
+  coupfulgurant:{n:'Coup Fulgurant',t:'Electric',c:'ph',p:50,k:'sig',sig:'coupfulgurant',uses:3,cd:6,range:260,shape:['lane',260,24],anim:'Attack',close:1,per:1,aiP:140,desc:"Utilisable 3 fois de suite (2 s pour enchaîner) : les deux premières fois, une charge fulgurante traverse l'ennemi ; la 3e, le lanceur bondit et s'écrase sur lui (puissance 85) en l'étourdissant 0,45 s."},
+  rapace:{n:'Rapace',t:'Flying',c:'ph',p:120,k:'spec',sig:'rapace',cd:5,range:300,shape:['leap',60],anim:'Attack',close:1,fx:{recoil:.25},aiP:120,desc:"S'envole (hors d'atteinte), puis fonce en piqué sur la zone visée : étourdit 0,5 s. Le lanceur subit un quart des dégâts infligés."},
   plenitude:{n:'Plénitude',t:'Psychic',c:'st',k:'buff',buff:{spa:1.3,spd:1.3},dur:10,cd:15},
   lamepangeenne:{n:'Lame Pangéenne',t:'Ground',c:'ph',p:120,k:'sig',sig:'lamepangeenne',cd:6.5,range:240,shape:['wedge',250,.55],anim:'Attack',hitsImmune:1,aiP:150,desc:"Après une courte préparation, des pieux de pierre jaillissent du sol dans un grand cône et empalent l'ennemi (projeté en l'air). Efficacité normale (×1) sur le type Vol."},
   poingfeu:{n:'Poing Feu',t:'Fire',c:'ph',p:80,k:'spec',sig:'poingfeu',cd:3.5,range:280,shape:['lane',266,24],anim:'Attack',close:1,fx:{burn:.3},desc:"Charge, puis coup de poing enflammé à l'impact ou au bout de la course. 30 % de chance de brûler."},
@@ -160,6 +165,8 @@ const MONS = {
   groudon:{name:'Groudon',id:383,legend:1,types:['Ground'],base:[100,150,140,100,90,90],moves:['lamepangeenne','poingfeu','dracogriffe','lamederoc']},
   kyogre:{name:'Kyogre',id:382,legend:1,types:['Water'],base:[100,100,90,150,140,90],moves:['ondeoriginelle','fatalfoudre','laserglace','plenitude']},
   shifours:{name:'Shifours',id:892,legend:1,types:['Fighting','Dark'],base:[100,130,100,63,60,97],moves:['poingobscur','closecombat','demitour','poingglace']},
+  sylveroy:{name:'Sylveroy Effroi',id:10194,pmd:897,legend:1,ab:'SYL',types:['Psychic','Ghost'],base:[100,85,80,165,100,150],moves:['sombreruade','chocpsy','machination','vampibaiser']},
+  electhorgalar:{name:'Électhor Galar',id:10170,pmd:'0145/0001',legend:1,ab:'ÉLG',types:['Fighting','Flying'],base:[90,125,90,85,90,100],moves:['coupfulgurant','rapace','closecombat','sabotage']},
   zeraora:{name:'Zeraora',id:807,types:['Electric'],base:[88,112,75,102,80,143],moves:['poingplasma','changeeclair','closecombat','coupdjus']},
   togekiss:{name:'Togekiss',id:468,types:['Fairy','Flying'],base:[85,50,95,120,115,80],moves:['lamedair','vibraqua','eclatmagique','atterrissage']},
   pyrax:{name:'Pyrax',id:637,types:['Bug','Fire'],base:[85,60,65,135,105,100],moves:['papillodanse','dansedufeu','bourdon','ventviolent']},
@@ -208,7 +215,7 @@ const PMD_BASE = 'https://raw.githubusercontent.com/PMDCollab/SpriteCollab/maste
 const PMD_WANT = ['Idle','Walk','Attack','Shoot','Hurt','Charge','Sleep'];
 const PMD = {};
 function loadPmd(k, dex = MONS[k].id){
-  const o = PMD[k] = {st:'load', a:{}}, id = String(dex).padStart(4,'0');
+  const o = PMD[k] = {st:'load', a:{}}, id = typeof dex === 'string' ? dex : String(dex).padStart(4,'0');   // une forme : '0145/0001'
   fetch(PMD_BASE+id+'/AnimData.xml').then(r => { if (!r.ok) throw 0; return r.text(); }).then(txt => {
     const doc = new DOMParser().parseFromString(txt,'text/xml'), raw = {};
     for (const a of doc.querySelectorAll('Anim')){
@@ -228,7 +235,7 @@ function loadPmd(k, dex = MONS[k].id){
     if (!pending) o.st = 'fail';
   }).catch(() => { o.st = 'fail'; });
 }
-for (const k in MONS) loadPmd(k);
+for (const k in MONS) loadPmd(k, MONS[k].pmd || MONS[k].id);   // pmd : sprite animé d'un autre Pokémon (Sylveroy Effroi → Spectreval)
 loadPmd('fantyrm', 885);   // les Fantyrm lancés par Lanssorien (Draco-Flèches)
 // déplacement du corps dans chaque image d'une animation (certaines attaques PMD font bondir le Pokémon) :
 // dr[ligne][image] = décalage {x,y} du centre des pixels par rapport à la 1re image, pour pouvoir le compenser

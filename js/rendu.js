@@ -183,6 +183,9 @@ function drawAim(f = game.p, P = pad, main = true){   // main : joueur 1 (tactil
         if (sh[0] === 'zone3') for (const c of tripleSpots(z, a)){ ctx.globalAlpha = al; disc(c.x, c.y, sh[1]); } else disc(z.x, z.y, sh[1]); }
       else if (sh[0] === 'tambour'){ const ux = Math.cos(a), uy = Math.sin(a);
         for (let b=1;b<=3;b++) for (let j=0;j<b;j++){ const lat = (j - (b-1)/2)*78, c = clampArena(f.x + ux*70*b - uy*lat, f.y + uy*70*b + ux*lat, 10); ctx.globalAlpha = al; disc(c.x, c.y, 44); } }
+      else if (sh[0] === 'lanes3'){ const px = -Math.sin(a), py = Math.cos(a), al0 = ctx.globalAlpha;
+        for (const j of [-1, 1]){ ctx.save(); ctx.translate(px*j*sh[2], py*j*sh[2]); ctx.globalAlpha = al0*.7; lane(sh[1], 22); ctx.restore(); }
+        ctx.globalAlpha = al0; lane(sh[1], 22); }
       else if (sh[0] === 'obscur'){ const ex = f.x + Math.cos(a)*sh[1], ey = f.y + Math.sin(a)*sh[1], px = -Math.sin(a), py = Math.cos(a);
         for (const j of [0, -1, 1]){ ctx.globalAlpha = al*.7; disc(ex + px*j*72, ey + py*j*72, 46); }
         ctx.globalAlpha = al; lane(sh[1], f.r); }

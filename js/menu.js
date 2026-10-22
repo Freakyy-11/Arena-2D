@@ -96,7 +96,7 @@ function moveDesc(mv){
 function moveRow(k){
   const mv = MOVES[k], cat = mv.c === 'ph' ? 'Physique' : mv.c === 'sp' ? 'Spécial' : 'Statut';
   const pow = mv.p ? `Puissance ${mv.p}${mv.per ? ' par coup' : ''} · ` : '';
-  return `<div class="mvr${mv.k === 'sig' ? ' sig' : ''}" style="--tc:${TYPES[mv.t][1]}"><div class="mh"><b>${mv.k === 'sig' ? '★ ' : ''}${mv.n}</b>${chips([mv.t])}<small>${cat} · ${pow}Recharge ${fr(mv.cd)} s</small></div><p>${moveDesc(mv)}</p></div>`;
+  return `<div class="mvr${mv.k === 'sig' ? ' sig' : ''}" style="--tc:${TYPES[mv.t][1]}"><div class="mh"><b>${mv.k === 'sig' ? '★ ' : ''}${mv.n}</b>${chips(mv.t2 ? [mv.t, mv.t2] : [mv.t])}<small>${cat} · ${pow}Recharge ${fr(mv.cd)} s</small></div><p>${moveDesc(mv)}</p></div>`;
 }
 function monCard(k){
   const m = MONS[k], b = m.base, mv = [...m.moves].sort((x,y) => (MOVES[y].k === 'sig') - (MOVES[x].k === 'sig'));

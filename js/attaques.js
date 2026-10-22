@@ -27,7 +27,7 @@ function dimScreen(dur){ game.dim = Math.max(game.dim, dur); }
 // L'adversaire de f est-il dans le cercle (x,y,r) ? Peut-il être touché par mv ?
 function foeIn(f, x, y, r){ const e = foeOf(f); return e.hp > 0 && !e.buried && Math.hypot(e.x-x, e.y-y) < r + e.r*.6 ? e : null; }
 function typesOf(f){ if (f.grounded > 0 && f.d.types.includes('Flying')){ const t = f.d.types.filter(x => x !== 'Flying'); return t.length ? t : ['Normal']; } return f.d.types; }
-function canHit(f, e, mv){ return !!e && e.hp > 0 && e.inv <= 0 && !e.buried && (mv.hitsImmune || effMult(mv.t, typesOf(e)) > 0); }
+function canHit(f, e, mv){ return !!e && e.hp > 0 && e.inv <= 0 && !e.buried && (mv.hitsImmune || (effMult(mv.t, typesOf(e)) > 0 && (!mv.t2 || effMult(mv.t2, typesOf(e)) > 0))); }
 // Frappe ce qui est dans le cercle (adversaire + rochers) ; renvoie l'adversaire s'il a pu être touché
 function zoneHit(f, mv, x, y, r, mult=1){
   const e = foeIn(f, x, y, r), ok = canHit(f, e, mv);
@@ -1128,5 +1128,130 @@ Object.assign(SIG, {
         if (n < N) danger(f, f.x + Math.cos(aa)*(f.r + 26), f.y + Math.sin(aa)*(f.r + 26), 40);
         return n < N || this.t < dur + .25; },
       top(){ for (const p of this.fists){ const k = (this.t - p.t)/(p.big ? .25 : .14); if (k <= 1) drawJab(p.x, p.y, p.a, p.big ? 1.7 : 1, 1 - k); } }});
+  },
+});
+
+// ---------- Sylveroy Cavalier d'Effroi ----------
+// longueur d'un couloir avant le mur
+function laneEnd(sx, sy, ux, uy, L){ for (let d=0; d<L; d+=8){ const x = sx + ux*d, y = sy + uy*d; if (x < WALL+10 || x > W-WALL-10 || y < WALL+10 || y > H-WALL-10) return d; } return L; }
+// double spectral du cavalier (sprite de Spectreval, teinté violet)
+function drawRiderGhost(x, y, a, al){
+  const pm = PMD.sylveroy; ctx.save(); ctx.globalAlpha = al; glowBall(x, y - 12, 26, '#e8d8ff', '#8a5cc8', '#3a2458');
+  if (pm && pm.st === 'ok'){ ctx.filter = 'brightness(.75) sepia(1) hue-rotate(225deg) saturate(2.5)'; drawPmdAt(pm, 'Walk', x, y - 12, a, PMD_SCALE); ctx.filter = 'none'; }
+  ctx.restore(); ctx.globalAlpha = 1;
+}
+// branche maudite qui sort du sol
+function drawCursedBranch(b, up, al){
+  if (up <= 0 || al <= 0) return; const h = b.h*Math.min(1, up), tx = b.x + b.lean*h, ty = b.y - h, cx = b.x + b.lean*18, cy = b.y - h*.5;
+  ctx.globalAlpha = al; ctx.lineCap = 'round';
+  ctx.strokeStyle = '#140a1c'; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(b.x, b.y); ctx.quadraticCurveTo(cx, cy, tx, ty); ctx.stroke();
+  const mx = b.x + b.lean*h*.5, my = b.y - h*.55; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(mx, my); ctx.lineTo(mx + b.fork*13*Math.min(1, up), my - 9*Math.min(1, up)); ctx.stroke();
+  ctx.strokeStyle = '#9a6ad8'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(b.x, b.y); ctx.quadraticCurveTo(cx, cy, tx, ty); ctx.stroke();
+  ctx.fillStyle = '#c8a8ff'; ctx.beginPath(); ctx.arc(tx, ty, 2, 0, TAU); ctx.fill(); ctx.globalAlpha = 1;
+}
+// baiser rose (Vampibaiser)
+function kissFx(x, y){
+  sparks(x, y, ['#ffffff','#ffc0de','#ff7ab8'], 12, 160, 4);
+  spawnFx({hearts:Array.from({length:5}, () => ({dx:rand(-22,22), v:rand(40,80), ph:Math.random()*6, s:rand(4,7)})),
+    update(){ return this.t < .7; },
+    top(){ const k = this.t/.7, pop = Math.min(1, this.t/.1), fade = 1 - Math.max(0, (this.t - .3)/.4);
+      ctx.save(); ctx.translate(x, y - 20); ctx.scale(pop*1.2, pop*1.2); ctx.globalAlpha = Math.max(0, fade);
+      // lèvres
+      ctx.fillStyle = '#ff5fa8'; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(-16, 0); ctx.quadraticCurveTo(-8, -12, 0, -4); ctx.quadraticCurveTo(8, -12, 16, 0); ctx.quadraticCurveTo(0, 14, -16, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = '#c0306e'; ctx.beginPath(); ctx.moveTo(-14, 0); ctx.quadraticCurveTo(0, 4, 14, 0); ctx.stroke();
+      ctx.restore();
+      for (const h of this.hearts){ const hx = x + h.dx + Math.sin(game.t*6 + h.ph)*4, hy = y - 20 - h.v*k*1.4, s = h.s; ctx.globalAlpha = Math.max(0, 1 - k); ctx.fillStyle = '#ff8ac4';
+        ctx.beginPath(); ctx.moveTo(hx, hy + s*.9); ctx.bezierCurveTo(hx - s*1.4, hy - s*.2, hx - s*.6, hy - s*1.2, hx, hy - s*.4); ctx.bezierCurveTo(hx + s*.6, hy - s*1.2, hx + s*1.4, hy - s*.2, hx, hy + s*.9); ctx.fill(); }
+      ctx.globalAlpha = 1; }});
+}
+Object.assign(SIG, {
+  // Sylveroy Effroi : se dédouble ; 3 cavaliers chargent et traversent (ralentit), puis des branches maudites jaillissent des couloirs et les ralentissent 2 s
+  sombreruade(f, mv, a){
+    const ux = Math.cos(a), uy = Math.sin(a), px = -uy, py = ux, spd = 1050, wait = .3, slowT = 2, run = sub(mv, {fx:{slow:1}}), branchMv = sub(mv, {p:60, fx:{slow:1}});
+    const lanes = [-62, 0, 62].map(o => { const s = clampArena(f.x + px*o, f.y + py*o, 20); return {sx:s.x, sy:s.y, L:laneEnd(s.x, s.y, ux, uy, 380), o}; });
+    const runT = Math.max(...lanes.map(l => l.L))/spd, branches = [];
+    for (const l of lanes) for (let d=20; d<l.L; d+=24) branches.push({x:l.sx + ux*d + px*rand(-12,12), y:l.sy + uy*d + py*rand(-12,12), h:rand(24,42), lean:rand(-.45,.45), fork:Math.random() < .5 ? -1 : 1, delay:d/Math.max(1, l.L)*.12});
+    branches.sort((p, q) => p.y - q.y);
+    const inLane = (l, o, len, w) => { const rx = o.x - l.sx, ry = o.y - l.sy, along = rx*ux + ry*uy; return along > -w && along < len + w && Math.abs(-rx*uy + ry*ux) < w; };
+    let struck = false;
+    screenFlash('#3a2458', .3, .3); dimScreen(.6); for (const l of lanes) if (l.o) sparks(l.sx, l.sy, ['#e8d8ff','#8a5cc8','#3a2458'], 12, 160, 5);
+    // le vrai Sylveroy charge au centre, ses doubles sur les côtés
+    f.dash = {vx:ux*spd, vy:uy*spd, t:lanes[1].L/spd, mv:run, pierce:1, trail:'#8a5cc8', onHit(){}};
+    spawnFx({update(){ const t = this.t, e = foeOf(f), ok = e.hp > 0 && !e.buried, tb = t - runT - wait;
+        if (t < runT){ const head = t*spd;
+          for (const l of lanes) for (let d = head; d < Math.min(l.L, head + 160); d += 50) danger(f, l.sx + ux*d, l.sy + uy*d, 34);
+          if (!struck && ok) for (const l of lanes) if (inLane(l, e, Math.min(head, l.L), 28 + e.r*.6)){ struck = true; hit(f, e, run, 1); sparks(e.x, e.y, ['#3a2458','#8a5cc8','#e8d8ff'], 16, 220, 5); break; } }
+        else if (tb < 0) for (const l of lanes) for (let d = 20; d < l.L; d += 50) danger(f, l.sx + ux*d, l.sy + uy*d, 30);
+        if (tb >= 0 && !this.burst){ this.burst = true; shake(10); zoomPunch(.03); screenFlash('#2a1838', .25, .2);
+          if (ok && lanes.some(l => inLane(l, e, l.L, 26 + e.r*.6))) hit(f, e, branchMv, 1);
+          for (const l of lanes) for (let d=30; d<l.L; d+=70) sparks(l.sx + ux*d, l.sy + uy*d, ['#140a1c','#8a5cc8','#c8a8ff'], 4, 140, 4); }
+        if (tb >= 0 && tb < slowT && ok && lanes.some(l => inLane(l, e, l.L, 24 + e.r*.5))){ if (e.slow <= 0 || e.slowF >= .5) e.slowF = .5; e.slow = Math.max(e.slow, .3); }
+        return tb < slowT; },
+      ground(){ const t = this.t, tb = t - runT - wait, al = tb < 0 ? .3 : .3*Math.min(1, (slowT - tb)/.5);
+        ctx.save(); ctx.fillStyle = '#3a2458';
+        for (const l of lanes){ const len = tb < 0 ? Math.min(t*spd, l.L) : l.L; ctx.save(); ctx.translate(l.sx, l.sy); ctx.rotate(a); ctx.globalAlpha = al; ctx.fillRect(0, -22, len, 44);
+          if (tb >= 0){ ctx.globalAlpha = al*.8; ctx.strokeStyle = '#8a5cc8'; ctx.lineWidth = 1.5; ctx.setLineDash([6, 8]); ctx.strokeRect(0, -22, len, 44); ctx.setLineDash([]); } ctx.restore(); }
+        ctx.restore(); ctx.globalAlpha = 1; },
+      top(){ const t = this.t, tb = t - runT - wait;
+        for (const l of lanes) if (l.o && t < l.L/spd + .12){ const d = Math.min(t*spd, l.L), fade = t > l.L/spd ? Math.max(0, 1 - (t - l.L/spd)/.12) : 1; drawRiderGhost(l.sx + ux*d, l.sy + uy*d, a, .8*fade); }
+        if (tb >= 0){ const out = tb > slowT - .4 ? Math.max(0, (slowT - tb)/.4) : 1; for (const b of branches) drawCursedBranch(b, (tb - b.delay)/.1, out); } }});
+  },
+  // Vampibaiser : courte charge, puis un baiser qui vole des PV
+  vampibaiser(f, mv, a){
+    const kiss = (x, y) => kissFx(x, y);
+    f.dash = {vx:Math.cos(a)*720, vy:Math.sin(a)*720, t:.22, mv, trail:'#ff8ac4',
+      onHit(e){ hit(f, e, mv, 1); kiss(e.x, e.y); }, onEnd(){ kiss(f.x + Math.cos(a)*(f.r + 10), f.y + Math.sin(a)*(f.r + 10)); }};
+  },
+});
+
+// ---------- Électhor de Galar ----------
+Object.assign(SIG, {
+  // 1re et 2e utilisations : charge fulgurante qui traverse ; 3e : bondit et s'écrase sur l'adversaire (étourdit)
+  coupfulgurant(f, mv, a, tx, ty, o){
+    const n = mv.uses - (f.recastN[o.slot] || 0);
+    if (n < 3){
+      const R = 260, e = foeOf(f), ux = Math.cos(a), uy = Math.sin(a), sx = f.x, sy = f.y; let L = R, target = null;
+      if (e.hp > 0 && !e.buried){ const rx = e.x - sx, ry = e.y - sy, along = rx*ux + ry*uy, lat = Math.abs(-rx*uy + ry*ux);
+        if (along > 0 && along < R + e.r && lat < f.r + e.r){ target = e; L = along + f.r + e.r + 20; } }
+      const end = clampArena(sx + ux*L, sy + uy*L, f.r), bolt = boltPath(sx, sy, end.x, end.y, 14);
+      for (let i=1;i<=6;i++) f.ghosts.push({x:sx + (end.x-sx)*i/7, y:sy + (end.y-sy)*i/7, life:.15 + i*.025, max:.3});
+      f.x = end.x; f.y = end.y; f.vx = ux*200; f.vy = uy*200; f.inv = Math.max(f.inv, .2); electrify(.25); sparks(sx, sy, ['#ffffff','#F7D02C'], 10, 160, 3);
+      spawnFx({update(){ return this.t < .25; }, top(){ const k = this.t/.25; ctx.globalAlpha = 1 - k; drawBolt(bolt, '#F7D02C', 5*(1 - k) + 1.5); ctx.globalAlpha = 1; }});
+      if (target){ hit(f, target, mv, 1); hitstop(.07); shake(8); drawBoltBurst(target.x, target.y); target.kx += ux*200; target.ky += uy*200; }
+      return;
+    }
+    const slam = sub(mv, {p:85}), z = clampArena(tx, ty, f.r), sx = f.x, sy = f.y, dur = .5, R = 70;
+    f.act = {n:'Attack', t:0, dur};
+    spawnFx({update(){ return this.t < dur; }, ground(){ const k = this.t/dur; ctx.globalAlpha = .15 + .3*k; ctx.fillStyle = '#F7D02C'; ctx.beginPath(); ctx.arc(z.x, z.y, R, 0, TAU); ctx.fill();
+      ctx.globalAlpha = .9; ctx.strokeStyle = '#C22E28'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(z.x, z.y, R*k, 0, TAU); ctx.stroke(); ctx.globalAlpha = 1; }});
+    f.script = {t:0, update(dt){ this.t += dt; const k = Math.min(1, this.t/dur), e = foeOf(f);
+      // pendant la montée, la zone suit un peu l'adversaire
+      if (k < .5 && e.hp > 0 && !e.buried){ const w = clampTo({x:sx, y:sy}, e.x, e.y, 300), dx = w.x - z.x, dy = w.y - z.y, m = Math.hypot(dx, dy); if (m > 1){ const st = Math.min(m, 240*dt); z.x += dx/m*st; z.y += dy/m*st; } }
+      f.x = sx + (z.x - sx)*k; f.y = sy + (z.y - sy)*k; f.h = Math.sin(Math.PI*k)*110; if (k > .15 && k < .85) f.inv = Math.max(f.inv, .04);
+      if (Math.random() < .7) game.parts.push({x:f.x + rand(-12,12), y:f.y - f.h + rand(-12,12), vx:rand(-50,50), vy:rand(-50,50), life:.2, max:.2, col:pick(['#ffffff','#F7D02C','#ff8a5a']), size:rand(2,5)});
+      danger(f, z.x, z.y, R);
+      if (k >= 1){ f.h = 0; const t = zoneHit(f, slam, z.x, z.y, R); if (t && t.hp > 0){ t.stun = Math.max(t.stun, .45); t.dash = null; popText(t.x, t.y - 62, 'Étourdi !', '#F7D02C', 14); }
+        shake(16); zoomPunch(.06); hitstop(.08); electrify(.5); screenFlash('#fff3a0', .3, .2); crackDecal(z.x, z.y, 60);
+        shockRing(z.x, z.y, 110, '#F7D02C', .4, 14); shockRing(z.x, z.y, 70, '#C22E28', .35, 8); drawBoltBurst(z.x, z.y); sparks(z.x, z.y, ['#ffffff','#F7D02C','#C22E28'], 30, 320, 6); return false; }
+      return true; }};
+  },
+  // Rapace : s'envole (hors d'atteinte), puis pique sur la zone ; étourdit 0,5 s, recul d'un quart des dégâts
+  rapace(f, mv, a, tx, ty){
+    const z0 = clampTo(f, tx, ty, mv.range), z = clampArena(z0.x, z0.y, f.r), up = .4, dive = .14, R = 60, H = 150;
+    f.act = {n:'Charge', t:0, dur:up};
+    spawnFx({update(){ return this.t < up + dive; }, ground(){ const k = Math.min(1, this.t/(up + dive)); ctx.globalAlpha = .15 + .3*k; ctx.fillStyle = '#A98FF3'; ctx.beginPath(); ctx.arc(z.x, z.y, R, 0, TAU); ctx.fill();
+      ctx.globalAlpha = .9; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(z.x, z.y, R*(1 - k*.6), 0, TAU); ctx.stroke(); ctx.globalAlpha = 1; }});
+    f.script = {t:0, update(dt){ this.t += dt; const e = foeOf(f); danger(f, z.x, z.y, R + 10);
+      if (this.t < up){ const k = this.t/up; f.h = H*Math.sin(k*Math.PI/2); f.inv = Math.max(f.inv, .05);
+        if (e.hp > 0 && !e.buried){ const w = clampTo(f, e.x, e.y, mv.range), dx = w.x - z.x, dy = w.y - z.y, m = Math.hypot(dx, dy); if (m > 1){ const st = Math.min(m, 200*dt); z.x += dx/m*st; z.y += dy/m*st; } }
+        if (Math.random() < .5) game.parts.push({x:f.x + rand(-16,16), y:f.y + rand(-4,4), vx:rand(-40,40), vy:rand(10,40), life:.3, max:.3, col:pick(['#ffffff','#e8e2ff']), size:rand(2,4)});
+        return true; }
+      if (!this.d){ this.d = {x:f.x, y:f.y}; f.act = {n:'Attack', t:0, dur:.3}; }
+      const k = Math.min(1, (this.t - up)/dive); f.x = this.d.x + (z.x - this.d.x)*k; f.y = this.d.y + (z.y - this.d.y)*k; f.h = H*(1 - k); f.inv = Math.max(f.inv, .03);
+      for (let i=0;i<3;i++) game.parts.push({x:f.x + rand(-10,10), y:f.y - f.h + rand(-10,10), vx:rand(-30,30), vy:-rand(40,120), life:.25, max:.25, col:pick(['#ffffff','#cbbcff','#A98FF3']), size:rand(3,6)});
+      if (k >= 1){ f.h = 0; const t = zoneHit(f, mv, z.x, z.y, R); if (t && t.hp > 0){ t.stun = Math.max(t.stun, .5); t.dash = null; }
+        shake(14); zoomPunch(.05); hitstop(.06); screenFlash('#ffffff', .25, .15); crackDecal(z.x, z.y, 50); shockRing(z.x, z.y, 100, '#A98FF3', .4, 12); sparks(z.x, z.y, ['#ffffff','#cbbcff','#A98FF3'], 26, 300, 6); return false; }
+      return true; }};
   },
 });

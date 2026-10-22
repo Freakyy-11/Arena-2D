@@ -17,7 +17,7 @@ Le jeu s'installe comme une appli (icône sur l'écran d'accueil, plein écran) 
 
 ## Contenu
 
-- 28 Pokémon avec leurs stats officielles et 4 attaques chacun, dont 4 légendaires ★ (Mewtwo, Groudon, Kyogre, Shifours Style Poing Final) : 1 au maximum dans une équipe composée.
+- 30 Pokémon avec leurs stats officielles et 4 attaques chacun, dont 6 légendaires ★ (Mewtwo, Groudon, Kyogre, Shifours Style Poing Final, Sylveroy Cavalier d'Effroi, Électhor de Galar) : 1 au maximum dans une équipe composée.
 - Une attaque emblématique ★ par Pokémon, avec son propre effet (Rafale Feu, Pouvoir Lunaire, Génusection, Poing Plasma, Tunnel, Surf…), et un rendu propre à chaque type pour les autres attaques.
 - Effets de combat : tremblement et éclair d'écran, écran électrisé ou givré, gel d'image à l'impact, marques au sol, adversaire soulevé ou projeté en l'air.
 - 4 équipes prêtes (Dracolosse, Carchacrok, Lanssorien, Naganadel) ou équipe composée ; le bouton « Attaques des Pokémon » du menu détaille les 4 attaques de chacun (puissance, recharge, effet).
