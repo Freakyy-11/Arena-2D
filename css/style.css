@@ -116,6 +116,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .bench button .hb i{display:block;height:100%;background:var(--hp);transform-origin:left}
 .bench button::after{content:"";position:absolute;inset:0;background:#000a;transform:scaleY(var(--cd,0));transform-origin:bottom;pointer-events:none}
 .bench button.on::after,.bench button.ko::after{display:none}
+#battle.spectate .pad{visibility:hidden}
 .pad{display:grid;grid-template-columns:112px minmax(0,1fr) 54px;gap:10px;align-items:center;touch-action:none;padding-bottom:4px}
 .stick{width:112px;height:112px;border-radius:50%;background:radial-gradient(circle,#ffffff10 0 40%,#ffffff08 41%);border:1px solid var(--line);position:relative;touch-action:none}
 .knob{position:absolute;left:50%;top:50%;width:50px;height:50px;margin:-25px 0 0 -25px;border-radius:50%;background:var(--panel-2);border:2px solid var(--gold);will-change:transform}

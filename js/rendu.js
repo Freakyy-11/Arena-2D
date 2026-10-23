@@ -70,7 +70,7 @@ function drawPmd(f, pm, fy, x = f.x){
   const A = pm.a[name] || ((name === 'Shoot' || name === 'Charge') && pm.a.Attack) || pm.a.Idle || pm.a.Walk;
   const loop = prog == null || A === pm.a.Idle || A === pm.a.Walk;
   const i = pmdFrame(A, loop ? game.t*60 + f.seed : Math.max(0, Math.min(1, prog))*A.total, loop);
-  const oct = ((Math.round(pmdDir(f)/(Math.PI/4)) % 8) + 8) % 8, row = DIR_ROW[oct], S = PMD_SCALE;
+  const oct = ((Math.round(pmdDir(f)/(Math.PI/4)) % 8) + 8) % 8, row = pmdRow(A, oct), S = PMD_SCALE;
   ctx.save(); ctx.translate(x, fy);
   // on retire l'essentiel du bond de l'animation (3 px d'élan gardés) pour que le sprite reste sur sa hitbox
   if (A.dr && A.dr[row]){ const d = A.dr[row][i] || {x:0,y:0}, k = v => Math.sign(v)*Math.max(0, Math.abs(v)-3); ctx.translate(-k(d.x)*S, -k(d.y)*S); }

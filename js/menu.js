@@ -35,8 +35,8 @@ function renderMenu(){
   $('pickBuild').innerHTML = Object.keys(MONS).sort((a,b)=>MONS[a].name.localeCompare(MONS[b].name,'fr')).map(k => { const i = sel.build.indexOf(k);
     return `<button class="mon" data-k="${k}" aria-pressed="${i>=0}">${i>=0?`<span class="num">${i+1}</span>`:''}${MONS[k].legend ? '<span class="leg">★</span>' : ''}${pic(k,46)}<b>${MONS[k].name}</b><div class="types">${chips(MONS[k].types)}</div></button>`; }).join('');
   $('buildCount').textContent = `${sel.build.length}/6`;
-  $('pickVs').innerHTML = [['ai', "Contre l'IA"], ['p2', '2 joueurs']].map(([k,l]) => `<button class="pill" data-k="${k}" aria-pressed="${(sel.vs || 'ai')===k}">${l}</button>`).join('');
-  $('vsNote').hidden = sel.vs !== 'p2'; $('stepD').hidden = sel.vs === 'p2'; $('eTitle').textContent = sel.vs === 'p2' ? 'Équipe du joueur 2' : "Équipe de l'IA";
+  $('pickVs').innerHTML = [['ai', "Contre l'IA"], ['p2', '2 joueurs'], ['spec', 'IA contre IA']].map(([k,l]) => `<button class="pill" data-k="${k}" aria-pressed="${(sel.vs || 'ai')===k}">${l}</button>`).join('');
+  $('vsNote').hidden = sel.vs !== 'p2'; $('specNote').hidden = sel.vs !== 'spec'; $('stepD').hidden = sel.vs === 'p2'; $('eTitle').textContent = sel.vs === 'p2' ? 'Équipe du joueur 2' : sel.vs === 'spec' ? "Équipe de l'IA 2" : "Équipe de l'IA";
   $('pickE').innerHTML = [['random','Aléatoire'], ...TEAMS.map(t=>[t.id,(t.legend ? '★ ' : '') + t.name])].map(([k,l]) => `<button class="pill" data-k="${k}" aria-pressed="${sel.e===k}">${l}</button>`).join('');
   $('pickD').innerHTML = Object.keys(DIFFS).map(k => `<button class="pill" data-k="${k}" aria-pressed="${sel.d===k}">${DIFFS[k].label}</button>`).join('');
   $('pickA').innerHTML = [['random','Aléatoire'], ...ARENA_LIST].map(([k,l]) => `<button class="pill" data-k="${k}" aria-pressed="${(sel.arena || 'random')===k}">${l}</button>`).join('');

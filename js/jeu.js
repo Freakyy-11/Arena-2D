@@ -35,7 +35,7 @@ function resolveTeams(){
   const legendSide = sel.mode === 'build' ? sel.build.some(k => MONS[k].legend) : !!TEAMS.find(t => t.id === sel.team).legend;
   if (et === 'random'){ const pool = TEAMS.filter(t => !!t.legend === legendSide && (sel.mode === 'build' || t.id !== sel.team)); et = pool[Math.floor(Math.random()*pool.length)].id; }
   const ar = !sel.arena || sel.arena === 'random' ? ARENA_LIST[Math.floor(Math.random()*ARENA_LIST.length)][0] : sel.arena;
-  return {pk, ek: TEAMS.find(t=>t.id===et).mons.slice(), eName: TEAMS.find(t=>t.id===et).name, dk: sel.d, arena: ar, vs2: sel.vs === 'p2'};
+  return {pk, ek: TEAMS.find(t=>t.id===et).mons.slice(), eName: TEAMS.find(t=>t.id===et).name, dk: sel.d, arena: ar, vs2: sel.vs === 'p2', spec: sel.vs === 'spec'};
 }
 function startMatch(m){
   lastMatch = m; touchAim = null;
@@ -43,7 +43,8 @@ function startMatch(m){
   const ps = {team: m.pk.map(k => makeFighter(k,'p')), active:0, swCd:0, dashN:DASH_MAX, dashT:0, spawn:{x:CX,y:H-140}};
   const es = {team: m.ek.map(k => makeFighter(k,'e')), active:0, swCd:0, dashN:DASH_MAX, dashT:0, spawn:{x:CX,y:140}, name:m.eName};
   if (m.vs2) es.team.forEach(f => f.isAI = false);   // 2 joueurs : le joueur 2 remplace l'IA
-  game = { ps, es, p:ps.team[0], e:es.team[0], diff: DIFFS[m.dk], arena: m.arena || 'stade', vs2: !!m.vs2,
+  if (m.spec) ps.team.forEach(f => f.isAI = true);    // IA contre IA : ton équipe est jouée par l'IA, tu regardes
+  game = { ps, es, p:ps.team[0], e:es.team[0], diff: DIFFS[m.dk], arena: m.arena || 'stade', vs2: !!m.vs2, spectate: !!m.spec,
     projs:[], zones:[], rings:[], parts:[], texts:[], slashes:[], ents:[], decals:[], dangers:[], shake:0, t:0, fightT:0,
     sflash:null, elec:0, frost:0, dim:0, zoom:1, hitstop:0,
     state:'intro', introT:2.6, introBig:true, koT:0, paused:false,
@@ -52,6 +53,7 @@ function startMatch(m){
   buildHUD(); buildMoves(); buildBench();
   $('menu').hidden = true; $('battle').hidden = false;
   for (const o of ['ovEnd','ovPause','ovChoose']) $(o).hidden = true;
+  $('battle').classList.toggle('spectate', game.spectate);
   resize(); AUDIO.music(game.arena); AUDIO.duck(false);
 }
 $('start').onclick = () => { if (!$('start').disabled) startMatch(resolveTeams()); };
@@ -105,7 +107,7 @@ const aliveIdx = side => side.team.map((f,i)=>f.hp>0?i:-1).filter(i=>i>=0);
 function buildHUD(){ buildCard('p'); buildCard('e'); }
 function buildCard(s){
   const side = s === 'p' ? game.ps : game.es, f = side.team[side.active], el = $(s === 'p' ? 'hudP' : 'hudE');
-  el.innerHTML = `<div class="top"><span class="nm">${f.d.name}</span><span class="who">${s==='p' ? (game.vs2 ? 'Joueur 1' : 'Toi') : (game.vs2 ? 'Joueur 2' : 'IA · '+game.diff.label)}</span></div>
+  el.innerHTML = `<div class="top"><span class="nm">${f.d.name}</span><span class="who">${s==='p' ? (game.vs2 ? 'Joueur 1' : game.spectate ? 'IA 1 · ' + game.diff.label : 'Toi') : (game.vs2 ? 'Joueur 2' : (game.spectate ? 'IA 2 · ' : 'IA · ') + game.diff.label)}</span></div>
     <div class="types">${chips(f.d.types)}</div>
     <div class="bar"><i></i></div><div class="meta"><span class="balls"></span><span class="hpn"></span><span class="sts"></span></div>`;
   side.hud = { bar: el.querySelector('.bar i'), hpn: el.querySelector('.hpn'), sts: el.querySelector('.sts'), balls: el.querySelector('.balls'), last:'', lastB:'' };
@@ -140,7 +142,7 @@ function buildBench(){
   hydrate($('bench'));
   game.ps.benchBtns = [...$('bench').querySelectorAll('button')];
 }
-$('bench').addEventListener('click', e => { const b = e.target.closest('button'); if (b && game) trySwitch(game.ps, +b.dataset.i); });
+$('bench').addEventListener('click', e => { const b = e.target.closest('button'); if (b && game && !game.spectate) trySwitch(game.ps, +b.dataset.i); });
 function hpColor(r){ return r > .5 ? 'var(--hp)' : r > .2 ? 'var(--hp-mid)' : 'var(--hp-low)'; }
 function updateHUD(){
   for (const sd of [game.ps, game.es]) if (sd.swSel != null && ((sd.swSelT -= 1/60) <= 0 || sd.swSel === sd.active || sd.team[sd.swSel].hp <= 0)) sd.swSel = null;
@@ -188,7 +190,7 @@ const pad = mkPad(), pad2 = mkPad();   // pad2 : manette du joueur 2 (mode 2 jou
 const PAD_DZ_MOVE = .15, PAD_DZ_AIM = .25, PAD_AIM_ON = .35, PAD_AIM_SMOOTH = 20, PAD_AIM_HOLD = .18;
 function padStick(x, y, dz){ const m = Math.hypot(x, y); if (m < dz) return [0,0,0]; const k = Math.min(1, (m-dz)/(1-dz)); return [x/m*k, y/m*k, k]; }
 // attaque maintenue : on vise ; au relâchement, l'attaque part vers le point visé
-function press(i, src, f = game && game.p){ if (game && !f.held[i]){ f.held[i] = src; f.holdT[i] = game.t; } }
+function press(i, src, f = game && game.p){ if (game && game.spectate && f === game.p) return; if (game && !f.held[i]){ f.held[i] = src; f.holdT[i] = game.t; } }
 function release(i, src, f = game && game.p){
   if (!game) return; const h = f.held[i];
   if (!h || (src && h !== src)) return;
@@ -228,6 +230,7 @@ const SW_KEYS = {Digit1:0,Digit2:1,Digit3:2,Digit4:3,Digit5:4,Digit6:5,Numpad1:0
 addEventListener('keydown', e => {
   if (!game) return;
   if (e.code === 'Escape' || e.code === 'KeyP'){ setPause(!game.paused); return; }
+  if (game.spectate) return;   // IA contre IA : seule la pause répond
   if (MOVE_KEYS[e.code]){ keys.add(e.code); e.preventDefault(); }
   if (ATK_KEYS[e.code] !== undefined){ setMode('kb'); press(ATK_KEYS[e.code], 'auto'); e.preventDefault(); }
   if (AIM_KEYS[e.code] !== undefined){ setMode('mouse'); press(AIM_KEYS[e.code], 'mouse'); e.preventDefault(); }
@@ -292,6 +295,7 @@ function pollPad(){
   if (g.state === 'end'){ if (down(0)) $('again').click(); else if (down(1)) toMenu(); pad.prev = b; return; }
   if (g.paused){ if (down(9) || down(0) || down(1)) setPause(false); pad.prev = b; return; }
   if (down(9)) setPause(true);
+  if (g.spectate){ pad.prev = b; return; }
   if (g.state === 'choose'){
     const al = aliveIdx(g.ps); let k = al.indexOf(chooseFocus); if (k < 0) k = 0;
     if (down(14) || down(12) || down(2)) k = (k + al.length - 1) % al.length;

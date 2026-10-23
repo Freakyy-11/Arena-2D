@@ -74,7 +74,7 @@ function update(dt){
   g.es.swCd = Math.max(0, g.es.swCd - (g.state === 'fight' ? dt : 0));
   if (g.state === 'fight') for (const side of [g.ps, g.es]) if (side.dashN < DASH_MAX && (side.dashT -= dt) <= 0){
     side.dashN++; side.dashT = side.dashN < DASH_MAX ? DASH_REGEN : 0; }
-  const [px,py] = playerInput();
+  const [px,py] = g.spectate ? aiInput(g.p, dt) : playerInput();
   const [ax,ay] = g.vs2 ? playerInput2() : aiInput(g.e, dt);
   stepFighter(g.p, px, py, dt);
   stepFighter(g.e, ax, ay, dt);
@@ -157,7 +157,8 @@ function resolveKO(){
   for (const f of [...g.ps.team, ...g.es.team]){ f.script = null; f.dash = null; f.air = null; f.h = 0; f.buried = false; f.iceSpike = null; f.root = 0; }
   if (g.e.hp <= 0){ if (g.vs2) sendIn(g.es, ea[0]);   // joueur 2 : le suivant dans l'ordre de son équipe
     else { const b = bestSwitch(g.es, g.p.hp > 0 ? g.p : g.ps.team[pa[0]]); sendIn(g.es, b.i >= 0 ? b.i : ea[0]); } }
-  if (g.p.hp <= 0){ g.state = 'choose'; showChoose(); return; }
+  if (g.p.hp <= 0 && g.spectate){ const b = bestSwitch(g.ps, g.e.hp > 0 ? g.e : g.es.team[ea[0]]); sendIn(g.ps, b.i >= 0 ? b.i : pa[0]); }   // IA contre IA : l'IA 1 choisit seule
+  else if (g.p.hp <= 0){ g.state = 'choose'; showChoose(); return; }
   g.state = 'intro'; g.introT = .9; g.introBig = false;
 }
 function showChoose(){
@@ -180,10 +181,10 @@ function chooseNext(i){
 }
 function showEnd(pAlive, eAlive){
   const win = eAlive === 0 && pAlive > 0, draw = eAlive === 0 && pAlive === 0;
-  $('endT').textContent = draw ? 'Égalité' : game.vs2 ? (win ? 'Le joueur 1 gagne !' : 'Le joueur 2 gagne !') : win ? 'Victoire !' : 'Défaite…';
+  $('endT').textContent = draw ? 'Égalité' : game.vs2 ? (win ? 'Le joueur 1 gagne !' : 'Le joueur 2 gagne !') : game.spectate ? (win ? "L'IA 1 gagne !" : "L'IA 2 gagne !") : win ? 'Victoire !' : 'Défaite…';
   $('endT').style.color = win ? 'var(--gold)' : game.vs2 ? '#ef5050' : 'var(--fg)';
   const n = win ? pAlive : eAlive;
-  if (game.vs2 && !draw){ $('endS').textContent = `Avec ${n} Pokémon encore debout, en ${Math.round(game.fightT)} s.`; $('ovEnd').hidden = false; game.p.held.fill(false); AUDIO.stopMusic(); AUDIO.end(true); return; }
+  if ((game.vs2 || game.spectate) && !draw){ $('endS').textContent = `Avec ${n} Pokémon encore debout, en ${Math.round(game.fightT)} s.`; $('ovEnd').hidden = false; game.p.held.fill(false); AUDIO.stopMusic(); AUDIO.end(true); return; }
   $('endS').textContent = draw ? 'Les deux derniers Pokémon sont tombés en même temps.'
     : win ? `Tu bats ${game.es.name} avec ${n} Pokémon encore debout, en ${Math.round(game.fightT)} s.`
     : `${game.es.name} gagne avec ${n} Pokémon encore debout.`;

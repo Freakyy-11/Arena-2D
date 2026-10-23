@@ -80,7 +80,7 @@ const MOVES = {
   dracocharge:{n:'Draco-Charge',t:'Dragon',c:'ph',p:100,k:'dash',spd:740,dur:.42,cd:4,fx:{stun:.25}},
   dansedraco:{n:'Danse Draco',t:'Dragon',c:'st',k:'buff',buff:{atk:1.4,spe:1.25},dur:10,cd:15},
   dracofleches:{n:'Draco-Flèches',t:'Dragon',c:'ph',p:50,k:'sig',sig:'dracofleches',cd:4,range:450,shape:['lane',450,12],anim:'Shoot',aiP:105,desc:"Lance deux Fantyrm qui poursuivent l'ennemi.",per:1},
-  colere:{n:'Colère',t:'Dragon',c:'ph',p:58,k:'sig',sig:'colere',cd:6,range:130,shape:['wedge',130,1],anim:'Attack',close:1,aiP:170,desc:"4 coups enchaînés, redirigeables entre chaque, de plus en plus larges. Le dernier frappe plus fort. Le lanceur ne se déplace pas pendant l'enchaînement.",per:1},
+  colere:{n:'Colère',t:'Dragon',c:'ph',p:58,k:'sig',sig:'colere',cd:6,range:130,shape:['wedge',130,1],anim:'Attack',close:1,aiP:170,desc:"4 coups de griffes enchaînés, redirigeables entre chaque, de plus en plus larges : le lanceur bondit en avant à chaque coup et l'ennemi touché reste pris dans le combo. Le dernier frappe plus fort, fend le sol et repousse. Ensuite, le lanceur est épuisé (étourdi 0,5 s).",per:1},
   // Eau
   vibraqua:{n:'Vibraqua',t:'Water',c:'sp',p:75,k:'proj',spd:430,r:22,life:1.4,cd:3.5,look:'waterpulse',fx:{stun:.2}},
   hydrocanon:{n:'Hydrocanon',t:'Water',c:'sp',p:38,k:'spec',sig:'hydrocanon',cd:4.5,range:520,shape:['lane',520,30],anim:'Shoot',per:1,aiP:120,desc:"Après 0,25 s de visée, énorme rayon d'eau pendant 0,6 s : 4 coups qui repoussent l'ennemi. Le lanceur ne bouge pas pendant le tir."},
@@ -131,7 +131,8 @@ const MOVES = {
   crocsgivre:{n:'Crocs Givre',t:'Ice',c:'ph',p:70,k:'melee',reach:58,cd:2,jaw:'ice',fx:{slow:.3}},
   eclatsglace:{n:'Éclats Glace',t:'Ice',c:'ph',p:55,k:'homing',cnt:1,spd:360,turn:2.6,r:11,life:1.7,cd:3,look:'diamond',fx:{slow:1,slowT:.5}},
   laserglace:{n:'Laser Glace',t:'Ice',c:'sp',p:80,k:'spec',sig:'laserglace',beam:1,cd:4,range:560,shape:['lane',560,18],anim:'Shoot',fx:{slow:1},desc:"Après 0,2 s de visée, laser à longue portée. Ralentit à coup sûr, 10 % de chance d'immobiliser 1 s. Laisse une traînée de givre au sol pendant 3 s qui ralentit."},
-  chuteglace:{n:'Chute Glace',t:'Ice',c:'ph',p:40,k:'sig',sig:'chuteglace',cd:5,range:380,shape:['zone',80],anim:'Shoot',aiP:135,desc:"Pluie de 5 stalactites sur la zone. La dernière ralentit très fortement et reste plantée : la prochaine attaque du lanceur la fait exploser.",per:1},
+  chuteglace:{n:'Chute Glace',t:'Ice',c:'ph',p:40,k:'sig',sig:'chuteglace',cd:5,range:380,shape:['zone',80],anim:'Shoot',aiP:135,desc:"5 stalactites tombent l'une après l'autre : la 1re sur la zone visée, les suivantes sur la position de l'ennemi (elles le suivent). La dernière, plus grosse, immobilise 0,4 s et reste plantée : la prochaine attaque du lanceur la fait exploser.",per:1},
+  cavalerielourde:{n:'Cavalerie Lourde',t:'Ground',c:'ph',p:95,k:'spec',sig:'cavalerielourde',cd:4.5,range:280,shape:['lane',280,26],anim:'Attack',close:1,aiP:115,desc:"Charge, puis au bout de la course un petit bond en avant écrase une zone en cercle : l'ennemi touché est immobilisé 0,35 s."},
   blizzard:{n:'Blizzard',t:'Ice',c:'sp',p:40,k:'sig',sig:'blizzard',cd:6,range:230,shape:['wedge',235,.7],anim:'Shoot',aiP:115,desc:"Tempête de neige en cône pendant 1 s (4 coups, ralentit). Si les 4 coups touchent, l'ennemi est gelé 0,5 s. Le lanceur ne se déplace pas pendant ce temps.",per:1},
   // Normal
   gigaimpact:{n:'Giga Impact',t:'Normal',c:'ph',p:150,k:'dash',spd:820,dur:.48,cd:7,recharge:1.1},
@@ -182,7 +183,7 @@ const MONS = {
   minotaupe:{name:'Minotaupe',id:530,types:['Ground','Steel'],base:[110,135,60,50,65,88],moves:['seisme','tunnel','tetedefer','eboulement']},
   leviator:{name:'Léviator',id:130,types:['Water','Flying'],base:[95,125,79,60,100,81],moves:['cascade','dansedraco','machouille','crocsgivre']},
   naganadel:{name:'Naganadel',id:804,types:['Poison','Dragon'],base:[73,73,73,127,73,121],moves:['dracochoc','doubledard','deflagration','vibrobscur']},
-  mammochon:{name:'Mammochon',id:473,types:['Ice','Ground'],base:[110,130,80,70,60,80],moves:['chuteglace','eclatsglace','seisme','eboulement']},
+  mammochon:{name:'Mammochon',id:473,types:['Ice','Ground'],base:[110,130,80,70,60,80],moves:['chuteglace','eclatsglace','cavalerielourde','eboulement']},
   momartik:{name:'Momartik',id:478,types:['Ice','Ghost'],base:[70,80,70,80,70,110],moves:['laserglace','ballombre','blizzard','feufollet']},
   flamigator:{name:'Flamigator',id:911,types:['Fire','Ghost'],base:[104,75,100,110,75,66],moves:['chantflamboyant','ballombre','telluriforce','paresse']},
   carchacrok:{name:'Carchacrok',id:445,types:['Dragon','Ground'],base:[108,130,95,80,85,102],moves:['colere','seisme','danselames','dracocharge']},
@@ -263,6 +264,8 @@ function pmdDrift(A){ try{
 }catch(e){} }
 // octant de l'angle (0 = droite, sens horaire à l'écran) → ligne de la planche PMD (bas, bas-droite, droite…)
 const DIR_ROW = [2,1,0,7,6,5,4,3];
+// certaines animations (le sommeil) n'ont qu'une seule direction : on prend alors leur unique ligne
+const pmdRow = (A, oct) => Math.round(A.img.height/A.fh) >= 8 ? DIR_ROW[oct] : 0;
 function pmdFrame(A, tick, loop){
   tick = loop ? tick % A.total : Math.min(tick, A.total-1);
   let i = 0; while (i < A.d.length-1 && tick >= A.d[i]){ tick -= A.d[i]; i++; }

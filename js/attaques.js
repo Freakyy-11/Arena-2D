@@ -101,7 +101,7 @@ function impactFx(x, y, col, dmg, e){
 }
 function drawPmdAt(pm, name, x, y, dirA, S){
   const A = pm.a[name] || pm.a.Walk || pm.a.Idle; if (!A) return;
-  const i = pmdFrame(A, game.t*60, true), oct = ((Math.round(dirA/(Math.PI/4)) % 8) + 8) % 8, row = DIR_ROW[oct];
+  const i = pmdFrame(A, game.t*60, true), oct = ((Math.round(dirA/(Math.PI/4)) % 8) + 8) % 8, row = pmdRow(A, oct);
   ctx.imageSmoothingEnabled = false; ctx.drawImage(A.img, i*A.fw, row*A.fh, A.fw, A.fh, x - A.fw/2*S, y - A.fh/2*S, A.fw*S, A.fh*S);
 }
 
@@ -320,16 +320,28 @@ function iceSpike(f, x, y){
         ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1; ctx.stroke(); } }});
 }
 function icicle(f, mv, x, y, delay, last){
-  const r = last ? 36 : 30;
+  const r = last ? 44 : 30;
   spawnFx({update(){ if (this.done) return false; danger(f, x, y, r);
       if (this.t >= delay){ this.done = true; const e = zoneHit(f, mv, x, y, r); shake(last ? 8 : 4); sparks(x, y, ['#ffffff','#dff8ff','#96D9D6'], 12, 220, 4); frostDecal(x, y, r + 6);
-        if (last){ if (e && e.hp > 0){ e.slow = 3; e.slowF = .3; popText(e.x, e.y - 62, 'Très ralenti !', '#96D9D6', 13); } iceSpike(f, x, y); } }
+        if (last){ if (e && e.hp > 0){ e.root = Math.max(e.root, .4); e.dash = null; popText(e.x, e.y - 62, 'Immobilisé !', '#96D9D6', 13); } iceSpike(f, x, y); } }
       return true; },
     ground(){ const k = Math.min(1, this.t/delay); ctx.globalAlpha = .15 + .3*k; ctx.fillStyle = '#0a1a24'; ctx.beginPath(); ctx.ellipse(x, y, r*k, r*k*.5, 0, 0, TAU); ctx.fill();
       ctx.globalAlpha = .6; ctx.strokeStyle = '#bfe9f5'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.stroke(); ctx.globalAlpha = 1; },
     top(){ const k = Math.min(1, this.t/delay), yy = y - (1 - k*k)*340, w = last ? 13 : 10, h = last ? 50 : 40;
       const g = ctx.createLinearGradient(x, yy - h, x, yy); g.addColorStop(0, '#7fd0e0'); g.addColorStop(1, '#ffffff');
       ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(x - w, yy - h); ctx.lineTo(x + w, yy - h); ctx.lineTo(x, yy); ctx.closePath(); ctx.fill(); }});
+}
+// trois griffes violettes en arc, avec une traînée de flammes draconiques (Colère)
+function dragonClawSlash(f, a, R, half, big){
+  const x = f.x, y = f.y, dur = big ? .32 : .26;
+  for (let i=0;i<(big ? 22 : 12);i++){ const aa = a + rand(-half, half), d = R*rand(.7, 1.05); game.parts.push({x:x + Math.cos(aa)*d, y:y + Math.sin(aa)*d, vx:Math.cos(aa)*60, vy:-rand(40, 110), life:rand(.3, .5), max:.5, col:pick(['#b08cff','#6F35FC','#ffffff','#d8c8ff']), size:rand(3, 6)}); }
+  spawnFx({update(){ return this.t < dur; }, top(){ const sweep = Math.min(1, this.t/.1), fade = this.t > .12 ? Math.max(0, 1 - (this.t - .12)/(dur - .12)) : 1;
+    ctx.save(); ctx.translate(x, y); ctx.rotate(a); ctx.lineCap = 'round'; ctx.globalAlpha = fade;
+    for (const [k, w] of [[.78, 1], [.92, 1.2], [1.06, 1]]){ const rr = R*k, a0 = -half, a1 = -half + 2*half*sweep;
+      ctx.strokeStyle = '#2a1458'; ctx.lineWidth = (big ? 11 : 8)*w; ctx.beginPath(); ctx.arc(0, 0, rr, a0, a1); ctx.stroke();
+      ctx.strokeStyle = big ? '#a07bff' : '#7a4cff'; ctx.lineWidth = (big ? 6 : 4.5)*w; ctx.stroke();
+      ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.6*w; ctx.stroke(); }
+    ctx.restore(); ctx.globalAlpha = 1; }});
 }
 function bigSlash(f, a, R, half, col){
   const x = f.x, y = f.y;
@@ -895,10 +907,24 @@ const SIG = {
         if (ok && e.hp > 0){ e.stun = Math.max(e.stun, .5); e.dash = null; } backLeap(f, e, a); }};
   },
   // Mammochon : pluie de stalactites ; la dernière ralentit fortement et reste plantée — la prochaine attaque de Mammochon la fait exploser
+  // Mammochon : 5 stalactites l'une après l'autre ; chacune vise la position de l'ennemi au moment où elle tombe (elles le suivent)
   chuteglace(f, mv, a, tx, ty){
-    const z = clampRange(f, tx, ty), R = 80, n = 5;
-    for (let i=0;i<n;i++){ const last = i === n-1, aa = Math.random()*TAU, rr = last ? 0 : rand(22, R-10), p = clampArena(z.x + Math.cos(aa)*rr, z.y + Math.sin(aa)*rr, 10);
-      icicle(f, mv, p.x, p.y, .45 + i*.14, last); }
+    const first = clampRange(f, tx, ty); let n = 0;
+    const drop = p => { const c = clampArena(p.x, p.y, 10); icicle(f, mv, c.x, c.y, .4, n === 4); n++; };
+    drop(first);
+    spawnFx({update(){ while (n < 5 && this.t >= n*.18){ const e = foeOf(f); drop(e.hp > 0 && !e.buried ? clampRange(f, e.x + e.vx*.3 + rand(-12, 12), e.y + e.vy*.3 + rand(-12, 12)) : first); } return n < 5; }});
+  },
+  // Cavalerie Lourde : charge ; au bout (ou au contact), petit bond en avant qui écrase une zone en cercle et immobilise
+  cavalerielourde(f, mv, a){
+    const ux = Math.cos(a), uy = Math.sin(a);
+    const hop = () => { const sx = f.x, sy = f.y, end = clampArena(sx + ux*70, sy + uy*70, f.r), dur = .22, R = 80; f.act = {n:'Attack', t:0, dur:.35};
+      f.script = {t:0, update(dt){ this.t += dt; const k = Math.min(1, this.t/dur); f.x = sx + (end.x - sx)*k; f.y = sy + (end.y - sy)*k; f.h = Math.sin(Math.PI*k)*45; danger(f, end.x, end.y, R);
+        if (k >= 1){ f.h = 0; const e = zoneHit(f, mv, end.x, end.y, R); if (e && e.hp > 0){ e.root = Math.max(e.root, .35); e.dash = null; popText(e.x, e.y - 62, 'Immobilisé !', '#E2BF65', 13); }
+          shake(13); zoomPunch(.04); hitstop(.05); crackDecal(end.x, end.y, R); shockRing(end.x, end.y, R*1.3, '#E2BF65', .4, 12); sparks(end.x, end.y, ['#c9b98f','#8a6a3a','#E2BF65'], 26, 300, 6); return false; }
+        return true; }}; };
+    f.dash = {vx:ux*700, vy:uy*700, t:.3, mv, trail:'#c9a86a',
+      fx(){ if (Math.random() < .7) game.parts.push({x:f.x + rand(-12,12), y:f.y + f.r*.6, vx:-ux*80 + rand(-30,30), vy:-rand(20,60), life:.35, max:.35, col:pick(['#c9b98f','#8a6a3a','#E2BF65']), size:rand(3,6)}); },
+      onHit(){ hop(); }, onEnd(){ hop(); }};
   },
   // Momartik : tempête de neige en cône pendant 1 s
   blizzard(f, mv, a){
@@ -932,16 +958,23 @@ const SIG = {
         ctx.globalAlpha = 1; }});
   },
   // Carchacrok : 4 coups redirigeables, de plus en plus larges
+  // Carchacrok : 4 coups de griffes enchaînés ; il bondit en avant à chaque coup, l'ennemi touché reste pris dans le combo,
+  // le dernier coup fend le sol et repousse ; ensuite Carchacrok est épuisé 0,5 s
   colere(f, mv, a){
-    const reach = [60, 78, 98, 122], half = [.9, 1, 1.1, 1.25], times = [0, .3, .6, .92], last = sub(mv, {p:mv.p*1.4}); let n = 0;
+    const reach = [60, 78, 98, 122], half = [.9, 1, 1.1, 1.25], times = [0, .3, .6, .92], last = sub(mv, {p:mv.p*1.4}); let n = 0, lunge = null;
     f.script = {t:0, update(dt){ this.t += dt;
-      while (n < 4 && this.t >= times[n]){ const aa = n ? liveAimAngle(f) : a, R = f.r + reach[n]; f.aimA = aa; f.act = {n:'Attack', t:0, dur:.28};
-        f.kx += Math.cos(aa)*220; f.ky += Math.sin(aa)*220;
-        const e = foeOf(f); if (inWedge(f, e, aa, R, half[n])) hit(f, e, n === 3 ? last : mv, 1);
-        bigSlash(f, aa, R, half[n], n === 3 ? '#9a6bff' : '#6F35FC'); shake(3 + n*3);
-        if (n === 3){ screenFlash('#6F35FC', .25, .2); zoomPunch(.04); }
+      if (lunge && lunge.t > 0){ const st = Math.min(dt, lunge.t); lunge.t -= st; const c = clampArena(f.x + lunge.vx*st, f.y + lunge.vy*st, f.r); f.x = c.x; f.y = c.y; }   // petit bond en avant
+      while (n < 4 && this.t >= times[n]){ const aa = n ? liveAimAngle(f) : a, R = f.r + reach[n], fin = n === 3; f.aimA = aa; f.act = {n:'Attack', t:0, dur:.28};
+        lunge = {vx:Math.cos(aa)*400, vy:Math.sin(aa)*400, t:.1};
+        const e = foeOf(f);
+        if (inWedge(f, e, aa, R + 20, half[n])){ const ok = canHit(f, e, fin ? last : mv); hit(f, e, fin ? last : mv, 1);
+          if (ok && e.hp > 0){ if (fin){ e.kx += Math.cos(aa)*520; e.ky += Math.sin(aa)*520; }
+            else { e.stun = Math.max(e.stun, .22); e.dash = null; const hx = f.x + Math.cos(aa)*(f.r + e.r + 30), hy = f.y + Math.sin(aa)*(f.r + e.r + 30); e.kx = (hx - e.x)*5; e.ky = (hy - e.y)*5; } } }
+        dragonClawSlash(f, aa, R, half[n], fin); shake(3 + n*3);
+        if (fin){ screenFlash('#6F35FC', .25, .2); zoomPunch(.04); const cx = f.x + Math.cos(aa)*R*.8, cy = f.y + Math.sin(aa)*R*.8; crackDecal(cx, cy, 70); shockRing(cx, cy, 110, '#8a5cff', .4, 12); }
         n++; }
-      return this.t < 1.15; }};
+      if (this.t >= 1.15){ f.stun = Math.max(f.stun, .5); popText(f.x, f.y - 62, 'Épuisé…', '#a39bd0', 13); return false; }   // contrepartie, comme la confusion de Colère dans les jeux
+      return true; }};
   },
   // Sinistrail : lance son ancre au bout d'une chaîne, qui attire et immobilise
   ancrage(f, mv, a){
