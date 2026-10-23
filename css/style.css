@@ -71,6 +71,11 @@ button:disabled{cursor:default}
 .mvr .mh{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline}
 .mvr .mh b{font-family:var(--font-d);font-size:14px}
 .mvr .mh small{font-size:11px;color:var(--mute);font-variant-numeric:tabular-nums}
+.mvr .slot{font-family:var(--font-d);font-size:11px;font-weight:700;background:var(--tc);color:#120f24;border-radius:5px;padding:1px 6px}
+.mvr .ord{margin-left:auto;display:flex;gap:4px}
+.mvr .ord button{background:var(--panel);border:1px solid var(--line);border-radius:6px;width:30px;height:26px;font-size:12px;line-height:1}
+.mvr .ord button:disabled{opacity:.3}
+.pk .reset{margin-left:auto;background:none;border:1px solid var(--line);border-radius:8px;padding:4px 8px;font-size:11px;color:var(--mute)}
 .mvr p{margin:0;font-size:12px;line-height:1.4;color:var(--fg)}
 #openDex{align-self:flex-start}
 

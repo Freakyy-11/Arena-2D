@@ -96,15 +96,24 @@ function moveDesc(mv){
   if (mv.kb) extra.push('Repousse.');
   return [base, ...extra].join(' ');
 }
-function moveRow(k){
+// Ordre des attaques : chaque joueur choisit sur quel bouton va chaque attaque (gardé sur l'appareil)
+const DEFAULT_MOVES = Object.fromEntries(Object.keys(MONS).map(k => [k, MONS[k].moves.slice()]));
+const SLOT_NAMES = ['L1', 'L2', 'R1', 'R2'];
+let moveOrder = {}; try { moveOrder = JSON.parse(localStorage.getItem('arene-ordre') || '{}') || {}; } catch(e){}
+for (const [k, o] of Object.entries(moveOrder)) if (MONS[k] && Array.isArray(o) && o.length === 4 && new Set(o).size === 4 && o.every(m => DEFAULT_MOVES[k].includes(m))) MONS[k].moves = o.slice(); else delete moveOrder[k];
+function saveOrder(k){ const m = MONS[k].moves; if (m.every((x, n) => x === DEFAULT_MOVES[k][n])) delete moveOrder[k]; else moveOrder[k] = m.slice(); try { localStorage.setItem('arene-ordre', JSON.stringify(moveOrder)); } catch(e){} }
+function moveSlot(k, i, d){ const m = MONS[k].moves, j = i + d; if (j < 0 || j > 3) return; [m[i], m[j]] = [m[j], m[i]]; saveOrder(k); }
+function resetOrder(k){ MONS[k].moves = DEFAULT_MOVES[k].slice(); saveOrder(k); }
+function moveRow(k, slot, mon){
   const mv = MOVES[k], cat = mv.c === 'ph' ? 'Physique' : mv.c === 'sp' ? 'Spécial' : 'Statut';
   const pow = mv.p ? `Puissance ${mv.p}${mv.per ? ' par coup' : ''} · ` : '';
-  return `<div class="mvr${mv.k === 'sig' ? ' sig' : ''}" style="--tc:${TYPES[mv.t][1]}"><div class="mh"><b>${mv.k === 'sig' ? '★ ' : ''}${mv.n}</b>${chips(mv.t2 ? [mv.t, mv.t2] : [mv.t])}<small>${cat} · ${pow}Recharge ${fr(mv.cd)} s</small></div><p>${moveDesc(mv)}</p></div>`;
+  const ord = mon ? `<span class="ord"><button data-mv="${mon}" data-i="${slot}" data-d="-1" aria-label="Monter" ${slot === 0 ? 'disabled' : ''}>▲</button><button data-mv="${mon}" data-i="${slot}" data-d="1" aria-label="Descendre" ${slot === 3 ? 'disabled' : ''}>▼</button></span>` : '';
+  return `<div class="mvr${mv.k === 'sig' ? ' sig' : ''}" style="--tc:${TYPES[mv.t][1]}"><div class="mh">${mon ? `<span class="slot">${SLOT_NAMES[slot]}</span>` : ''}<b>${mv.k === 'sig' ? '★ ' : ''}${mv.n}</b>${chips(mv.t2 ? [mv.t, mv.t2] : [mv.t])}<small>${cat} · ${pow}Recharge ${fr(mv.cd)} s</small>${ord}</div><p>${moveDesc(mv)}</p></div>`;
 }
 function monCard(k){
-  const m = MONS[k], b = m.base, mv = [...m.moves].sort((x,y) => (MOVES[y].k === 'sig') - (MOVES[x].k === 'sig'));
-  return `<article class="pk"><div class="ph">${pic(k,44)}<div><b>${m.name}</b><div class="types">${chips(m.types)}</div></div></div>
-    <div class="stats">PV ${b[0]} · Atq ${b[1]} · Déf ${b[2]} · Atq.Spé ${b[3]} · Déf.Spé ${b[4]} · Vit ${b[5]}</div>${mv.map(moveRow).join('')}</article>`;
+  const m = MONS[k], b = m.base, custom = !!moveOrder[k];
+  return `<article class="pk"><div class="ph">${pic(k,44)}<div><b>${m.name}</b><div class="types">${chips(m.types)}</div></div>${custom ? `<button class="reset" data-reset="${k}">Ordre par défaut</button>` : ''}</div>
+    <div class="stats">PV ${b[0]} · Atq ${b[1]} · Déf ${b[2]} · Atq.Spé ${b[3]} · Déf.Spé ${b[4]} · Vit ${b[5]}</div>${m.moves.map((mv, i) => moveRow(mv, i, k)).join('')}</article>`;
 }
 let dexTab = null;
 function renderDex(){
@@ -117,6 +126,11 @@ function renderDex(){
   $('dexList').innerHTML = keys.map(monCard).join('');
   hydrate($('dexList'));
 }
+$('dexList').addEventListener('click', e => {
+  const b = e.target.closest('[data-mv], [data-reset]'); if (!b) return; const y = $('dex').scrollTop;
+  if (b.dataset.reset) resetOrder(b.dataset.reset); else moveSlot(b.dataset.mv, +b.dataset.i, +b.dataset.d);
+  renderDex(); $('dex').scrollTop = y;
+});
 $('dexTabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (!b) return; dexTab = b.dataset.tab; renderDex(); $('dex').scrollTop = 0; });
 const openDex = () => { renderDex(); $('menu').hidden = true; $('dex').hidden = false; $('dex').scrollTop = 0; };
 const closeDex = () => { $('dex').hidden = true; $('menu').hidden = false; };

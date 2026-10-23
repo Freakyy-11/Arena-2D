@@ -203,18 +203,25 @@ function labelControls(){
 }
 // point visé selon la source (null = visée automatique)
 function aimPoint(src, i, f = game.p){
-  if (src === 'pad2') return pad2.aimOn ? dirPoint(f, Math.cos(pad2.aimA), Math.sin(pad2.aimA), pad2.aimMag, i) : null;
+  if (src === 'pad2') return pad2.aimOn ? dirPoint(f, Math.cos(pad2.aimA), Math.sin(pad2.aimA), pad2.aimMag, i, true) : null;
   if (src === 'mouse') return mouse.seen ? {x:mouse.x, y:mouse.y} : null;
-  if (src === 'pad') return pad.aimOn ? dirPoint(f, Math.cos(pad.aimA), Math.sin(pad.aimA), pad.aimMag, i) : null;
+  if (src === 'pad') return pad.aimOn ? dirPoint(f, Math.cos(pad.aimA), Math.sin(pad.aimA), pad.aimMag, i, true) : null;
   if (src && src.dx !== undefined) return dirPoint(f, src.dx, src.dy, src.mag, i);
   return null;
 }
 // direction (dx,dy) → point visé ; pour une zone (Psyko…), la distance vient du glissé ou de l'inclinaison du stick (0..1)
-function dirPoint(f, dx, dy, mag, i){
+// assist (manette) : visée aimantée sur l'ennemi quand le stick pointe à peu près vers lui,
+// et les zones se posent à la distance de l'ennemi dans la direction visée (plus besoin de doser l'inclinaison du stick)
+const AIM_MAGNET = .22;   // ~12°
+function dirPoint(f, dx, dy, mag, i, assist){
   const m = Math.hypot(dx,dy) || 1, mv = MOVES[f.d.moves[i]];
   const zone = mv.k === 'psy' || (mv.shape && ['zone','zone3','leap','lanezone'].includes(mv.shape[0])), R = mv.shape && mv.shape[0] === 'leap' ? mv.range : PSY_RANGE;
-  const d = zone ? PSY_MIN + (mag != null ? mag : 1)*(R - PSY_MIN) : 200;
-  return {x: f.x + dx/m*d, y: f.y + dy/m*d};
+  let ux = dx/m, uy = dy/m, d = zone ? PSY_MIN + (mag != null ? mag : 1)*(R - PSY_MIN) : 200;
+  if (assist && game){ const e = foeOf(f);
+    if (e.hp > 0){ const ex = e.x - f.x, ey = e.y - f.y, ed = Math.hypot(ex, ey) || 1, cos = (ex*ux + ey*uy)/ed;
+      const snap = cos > Math.cos(AIM_MAGNET); if (snap){ ux = ex/ed; uy = ey/ed; }
+      if (zone && cos > 0) d = Math.max(PSY_MIN, Math.min(R, snap ? ed : ed*cos)); } }
+  return {x: f.x + ux*d, y: f.y + uy*d};
 }
 
 const SW_KEYS = {Digit1:0,Digit2:1,Digit3:2,Digit4:3,Digit5:4,Digit6:5,Numpad1:0,Numpad2:1,Numpad3:2,Numpad4:3,Numpad5:4,Numpad6:5};
@@ -287,8 +294,8 @@ function pollPad(){
   if (down(9)) setPause(true);
   if (g.state === 'choose'){
     const al = aliveIdx(g.ps); let k = al.indexOf(chooseFocus); if (k < 0) k = 0;
-    if (down(14) || down(12)) k = (k + al.length - 1) % al.length;
-    if (down(15) || down(13)) k = (k + 1) % al.length;
+    if (down(14) || down(12) || down(2)) k = (k + al.length - 1) % al.length;
+    if (down(15) || down(13) || down(1)) k = (k + 1) % al.length;
     if (al[k] !== chooseFocus){ chooseFocus = al[k]; focusChoose(); }
     if (down(0) || down(3)) chooseNext(chooseFocus);
     pad.prev = b; return;
@@ -296,7 +303,7 @@ function pollPad(){
   PAD_ATK.forEach((bi,i) => { if (down(bi)) press(i, 'pad'); else if (!b[bi]) release(i, 'pad'); });
   if (down(0)) tryRoll(g.p, ...playerInput());
   // flèches gauche/droite : présélection d'un Pokémon de la barre d'équipe ; Triangle : changement
-  if (down(14) || down(15)) preselect(g.ps, down(15));
+  if (down(14) || down(15) || down(2) || down(1)) preselect(g.ps, down(15) || down(1));   // flèches, ou Carré (gauche) / Rond (droite)
   if (down(3) && g.ps.swSel != null && trySwitch(g.ps, g.ps.swSel)) g.ps.swSel = null;
   pad.prev = b;
 }
@@ -311,7 +318,7 @@ function pollPad2(gp){
   if (down(9)){ setPause(true); return; }
   PAD_ATK.forEach((bi,i) => { if (down(bi)) press(i, 'pad2', g.e); else if (!b[bi]) release(i, 'pad2', g.e); });
   if (down(0)) tryRoll(g.e, pad2.lx, pad2.ly);
-  if (down(14) || down(15)) preselect(g.es, down(15));
+  if (down(14) || down(15) || down(2) || down(1)) preselect(g.es, down(15) || down(1));
   if (down(3) && g.es.swSel != null && trySwitch(g.es, g.es.swSel)) g.es.swSel = null;
 }
 const playerInput2 = () => [pad2.lx, pad2.ly];
@@ -449,7 +456,7 @@ function applyStatus(def, fx){
   if (fx.defDown && Math.random() < fx.defDown){ def.defDown = 4; popText(def.x, def.y - 62, 'Défense −', '#c98a8a', 13); }
 }
 function hit(att, def, mv, mult){
-  if (def.hp <= 0 || def.buried) return;
+  if (def.hp <= 0 || def.buried || game.state === 'ko') return;   // pendant un K.O., personne ne peut bouger : plus aucun coup ne compte
   if (def.inv > 0){ popText(def.x, def.y - 34, 'Esquivé', '#a39bd0', 13, .6); return; }
   // hitsImmune (Poing Plasma…) : une immunité compte ×1 ; t2 : 2e type d'attaque ; une immunité n'annule plus l'attaque (×0,33)
   const raw = effMult(mv.t, typesOf(def), mv.hitsImmune)*(mv.t2 ? effMult(mv.t2, typesOf(def), mv.hitsImmune) : 1), e = typeScale(raw);

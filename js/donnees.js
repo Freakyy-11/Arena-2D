@@ -105,7 +105,7 @@ const MOVES = {
   repos:{n:'Repos',t:'Psychic',c:'st',k:'rest',cd:28},
   psyko:{n:'Psyko',t:'Psychic',c:'sp',p:135,k:'sig',sig:'psyko',cd:5,range:380,shape:['zone',64],anim:'Shoot',desc:"Zone visée : si l'ennemi est dedans quand elle se déclenche, il est soulevé (immobilisé) puis écrasé au sol."},
   // Fée
-  eclatmagique:{n:'Éclat Magique',t:'Fairy',c:'sp',p:85,k:'quake',max:140,dur:.35,cd:4,ring:'stars'},
+  eclatmagique:{n:'Éclat Magique',t:'Fairy',c:'sp',p:85,k:'quake',max:175,dur:.4,cd:4,ring:'stars'},
   pouvoirlunaire:{n:'Pouvoir Lunaire',t:'Fairy',c:'sp',p:130,k:'sig',sig:'pouvoirlunaire',cd:5,range:380,shape:['zone',72],anim:'Shoot',desc:"Une lune descend sur la zone visée et explose."},
   // Combat
   closecombat:{n:'Close Combat',t:'Fighting',c:'ph',p:6,k:'spec',sig:'closecombat',cd:5,range:80,shape:['lane',90,30],anim:'Attack',close:1,per:1,selfDown:3,aiP:110,desc:"Pendant 1 s, rafale de coups de poing devant soi (le lanceur peut se déplacer). Chaque coup qui touche bloque l'ennemi un instant et le ramène devant les poings : il reste pris dans le combo tant que le lanceur ne s'éloigne pas trop. Le dernier coup, plus gros, inflige 40 de puissance et repousse. Baisse ensuite les défenses du lanceur pendant 3 s."},
@@ -138,7 +138,7 @@ const MOVES = {
   danselames:{n:'Danse-Lames',t:'Normal',c:'st',k:'buff',buff:{atk:1.5},dur:10,cd:15},
   paresse:{n:'Paresse',t:'Normal',c:'st',k:'heal',pct:.3,cd:16,lock:.6},
   vitesseextreme:{n:'Vitesse Extrême',t:'Normal',c:'ph',p:60,k:'sig',sig:'vitesseextreme',cd:6,uses:3,per:1,range:280,shape:['lane',280,24],anim:'Attack',close:1,desc:"Traverse l'ennemi en un éclair. Utilisable 3 fois : 2 s pour relancer après chaque utilisation."},
-  plaquage:{n:'Plaquage',t:'Normal',c:'ph',p:130,k:'sig',sig:'plaquage',cd:3.5,range:330,shape:['leap',330,110],anim:'Attack',close:1,desc:"Saute sur la zone visée (en l'air, passe au-dessus des attaques) et retombe avec une onde de choc qui étourdit."},
+  plaquage:{n:'Plaquage',t:'Normal',c:'ph',p:130,k:'sig',sig:'plaquage',cd:3.5,range:270,shape:['leap',110],anim:'Attack',close:1,desc:"Saute sur la zone visée (en l'air, passe au-dessus des attaques) et retombe avec une onde de choc qui étourdit."},
   // Plante
   martobois:{n:'Martobois',t:'Grass',c:'ph',p:120,k:'melee',reach:64,cd:4,fx:{recoil:.33}},
   megafouet:{n:'Mégafouet',t:'Grass',c:'ph',p:120,k:'spec',sig:'megafouet',cd:4.2,range:170,shape:['lane',170,20],anim:'Attack',close:1,desc:"Une liane s'abat du haut vers le sol, sur une bande longue et étroite."},

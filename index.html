@@ -63,16 +63,17 @@
       <h2>Son</h2>
       <div class="row" id="pickS"></div>
     </div>
-    <button class="btn" id="openDex">Attaques des Pokémon</button>
+    <button class="btn" id="openDex">Attaques des Pokémon et ordre des boutons</button>
     <button class="go" id="start">Combattre</button>
     <p class="note kbd">Clavier + souris : ZQSD pour bouger, la souris vise · clic gauche, clic droit, A et E pour attaquer · Espace pour le Dash · 1 à 6 pour changer de Pokémon · Échap pour la pause. Clavier seul : J K L M attaquent en visée automatique. Maintiens une attaque pour voir le repère : elle part quand tu relâches.</p>
-    <p class="note">Manette : stick gauche pour bouger, stick droit pour viser (relâché = visée automatique) · L1, L2, R1, R2 pour attaquer (l'attaque part au relâchement) · ✕ pour le Dash · flèches gauche/droite pour choisir un Pokémon, Triangle pour l'envoyer · Options pour la pause.</p>
+    <p class="note">Manette : stick gauche pour bouger, stick droit pour viser (relâché = visée automatique) · L1, L2, R1, R2 pour attaquer (l'attaque part au relâchement) · ✕ pour le Dash · Carré / Rond (ou flèches gauche/droite) pour choisir un Pokémon, Triangle pour l'envoyer · visée aimantée sur l'adversaire, et les zones se posent à sa distance · Options pour la pause.</p>
     <p class="note">Sur téléphone : joystick à gauche, attaques et Dash à droite. Touche une attaque pour viser automatiquement, ou fais glisser le doigt depuis le bouton pour viser toi-même puis relâche, et la barre d'équipe au-dessus pour changer de Pokémon. S'ils ne chargent pas, des jetons aux couleurs des types remplacent les sprites.</p>
     <p class="note">Sprites animés en combat : <a href="https://sprites.pmdcollab.org" target="_blank" rel="noopener" style="color:var(--gold)">PMD SpriteCollab</a> (CC BY-NC 4.0, crédits par sprite sur le site). Portraits : PokéAPI. Projet de fan non officiel et non commercial.</p>
   </section>
 
   <section id="dex" class="dex" hidden>
     <header class="dexhead"><h2>Attaques des Pokémon</h2><button class="pause" id="closeDex" aria-label="Fermer">✕</button></header>
+    <p class="note">▲ ▼ : choisis sur quel bouton va chaque attaque (L1, L2, R1, R2 à la manette ; dans l'ordre de gauche à droite sur téléphone ; clic gauche, clic droit, A et E au clavier). Ton ordre est gardé sur cet appareil.</p>
     <div class="row" id="dexTabs"></div>
     <div id="dexList" class="dexlist"></div>
   </section>

@@ -27,7 +27,7 @@ function dimScreen(dur){ game.dim = Math.max(game.dim, dur); }
 // L'adversaire de f est-il dans le cercle (x,y,r) ? Peut-il être touché par mv ?
 function foeIn(f, x, y, r){ const e = foeOf(f); return e.hp > 0 && !e.buried && Math.hypot(e.x-x, e.y-y) < r + e.r*.6 ? e : null; }
 function typesOf(f){ if (f.grounded > 0 && f.d.types.includes('Flying')){ const t = f.d.types.filter(x => x !== 'Flying'); return t.length ? t : ['Normal']; } return f.d.types; }
-function canHit(f, e, mv){ return !!e && e.hp > 0 && e.inv <= 0 && !e.buried; }
+function canHit(f, e, mv){ return !!e && e.hp > 0 && e.inv <= 0 && !e.buried && game.state !== 'ko'; }
 // Frappe ce qui est dans le cercle (adversaire + rochers) ; renvoie l'adversaire s'il a pu être touché
 function zoneHit(f, mv, x, y, r, mult=1){
   const e = foeIn(f, x, y, r), ok = canHit(f, e, mv);
@@ -322,10 +322,10 @@ function bigSlash(f, a, R, half, col){
 function liveAimPoint(f, i, manual){
   const e = foeOf(f);
   if (f.isAI){ const a = Math.random()*TAU, r = Math.random()*game.diff.aimErr*150; return clampRange(f, e.x + Math.cos(a)*r, e.y + Math.sin(a)*r); }
-  if (manual && f.side === 'e' && game.vs2){ if (pad2.aimOn){ const p = dirPoint(f, Math.cos(pad2.aimA), Math.sin(pad2.aimA), pad2.aimMag, i); return clampRange(f, p.x, p.y); } }
+  if (manual && f.side === 'e' && game.vs2){ if (pad2.aimOn){ const p = dirPoint(f, Math.cos(pad2.aimA), Math.sin(pad2.aimA), pad2.aimMag, i, true); return clampRange(f, p.x, p.y); } }
   else if (manual){
     if (inputMode === 'mouse' && mouse.seen) return clampRange(f, mouse.x, mouse.y);
-    if (inputMode === 'pad' && pad.aimOn){ const p = dirPoint(f, Math.cos(pad.aimA), Math.sin(pad.aimA), pad.aimMag, i); return clampRange(f, p.x, p.y); }
+    if (inputMode === 'pad' && pad.aimOn){ const p = dirPoint(f, Math.cos(pad.aimA), Math.sin(pad.aimA), pad.aimMag, i, true); return clampRange(f, p.x, p.y); }
   }
   return clampRange(f, e.x, e.y);
 }

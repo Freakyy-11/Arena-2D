@@ -12,7 +12,7 @@ function stepFighter(f, ix, iy, dt){
   if (f.air){ f.air.t += dt; const k = Math.min(1, f.air.t/f.air.dur); f.h = f.air.h(k); if (k >= 1){ const a = f.air; f.air = null; f.h = 0; if (a.onLand) a.onLand(); } }
   if (f.act && (f.act.t += dt) >= f.act.dur) f.act = null;
   if (f.buffT <= 0) f.buff = {atk:1,spa:1,spe:1,spd:1};
-  if (f.hp > 0 && (f.burn > 0 || f.poison > 0)){
+  if (f.hp > 0 && game.state === 'fight' && (f.burn > 0 || f.poison > 0)){   // en pause pendant un K.O.
     f.dot += dt;
     if (f.dot >= 1){ f.dot -= 1; const d = Math.max(1, Math.round(f.max*((f.burn>0?.04:0)+(f.poison>0?.05:0))));
       damage(f, d); popText(f.x, f.y-30, '-'+d, f.burn>0 ? '#EE8130' : '#c06bd0', 16); }
@@ -144,7 +144,9 @@ function update(dt){
 
   if (g.state === 'fight' && (g.p.hp <= 0 || g.e.hp <= 0)){
     g.state = 'ko'; g.koT = 1.1; g.p.held.fill(false); g.e.held.fill(false);
-    for (const f of [g.p, g.e]) if (f.hp <= 0 && !f.koShown){ f.koShown = true; f.dash = null; AUDIO.ko(); if (!f.isAI) rumbleFor(f, 1, 260); burst(f.x, f.y, '#fff', 30, 240, 6); shake(14); popText(f.x, f.y - 60, 'K.O. !', '#e6b84c', 28, 1.3); }
+    for (const f of [g.p, g.e]) if (f.hp <= 0 && !f.koShown){ f.koShown = true; f.dash = null;
+      // ses projectiles et zones en cours disparaissent (l'adversaire ne peut plus bouger pour les esquiver)
+      g.projs = g.projs.filter(p => p.owner !== f); g.zones = g.zones.filter(z => z.owner !== f); g.rings = g.rings.filter(r => r.owner !== f); AUDIO.ko(); if (!f.isAI) rumbleFor(f, 1, 260); burst(f.x, f.y, '#fff', 30, 240, 6); shake(14); popText(f.x, f.y - 60, 'K.O. !', '#e6b84c', 28, 1.3); }
   }
 }
 
