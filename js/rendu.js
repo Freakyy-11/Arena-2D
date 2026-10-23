@@ -232,8 +232,11 @@ function render(){
   ctx.globalAlpha = 1;
   for (const e of g.ents) if (e.top) e.top();
   ctx.globalAlpha = 1;
+  for (const q of g.parts) if (!q.ghost){ if (q.glow === undefined) q.glow = hexLum(q.col) > .5; if (q.glow) drawGlow(q.x, q.y, q.size*(Math.max(0, q.life/q.max) + .3)*3.2, q.col, Math.max(0, q.life/q.max)*.45); }
+  ctx.lineCap = 'round';
   for (const q of g.parts) if (!q.ghost){ const k = Math.max(0, q.life/q.max); ctx.globalAlpha = k; ctx.fillStyle = q.col;
     if (q.star){ starPath(q.x, q.y, q.size*(k+.3)*1.4, q.size*(k+.3)*.5, 4, q.x*.1); ctx.fill(); }
+    else if (q.vx*q.vx + q.vy*q.vy > 25600){ ctx.strokeStyle = q.col; ctx.lineWidth = q.size*(k+.3)*1.3; ctx.beginPath(); ctx.moveTo(q.x - q.vx*.03, q.y - q.vy*.03); ctx.lineTo(q.x, q.y); ctx.stroke(); }   // étincelle rapide : petite traînée
     else { ctx.beginPath(); ctx.arc(q.x, q.y, q.size*(k+.3), 0, Math.PI*2); ctx.fill(); } }
   ctx.globalAlpha = 1;
   // effets d'écran : éclair, électricité, givre, soulèvement psychique

@@ -76,11 +76,28 @@ function glowBall(x, y, R, c0, c1, c2){ const g = ctx.createRadialGradient(x, y,
   g.addColorStop(0, c0); g.addColorStop(.3, c1); g.addColorStop(.62, c2); g.addColorStop(1, c2 + '00'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, R*1.6, 0, TAU); ctx.fill(); }
 function sparks(x, y, cols, n, sp, size, drag){ for (let i=0;i<n;i++){ const a = Math.random()*TAU, v = rand(.3,1)*sp;
   game.parts.push({x, y, vx:Math.cos(a)*v, vy:Math.sin(a)*v, life:rand(.3,.6), max:.6, col:pick(cols), size:rand(size*.5,size), drag}); } }
-// Impact d'un coup : petit gel, onde et étincelles du type
+// Halo lumineux (mélange additif) : un dégradé radial par couleur, mis en cache
+const GLOW = {};
+const isHex = c => typeof c === 'string' && /^#[0-9a-f]{6}$/i.test(c);
+const hexLum = c => isHex(c) ? (parseInt(c.slice(1,3),16)*.299 + parseInt(c.slice(3,5),16)*.587 + parseInt(c.slice(5,7),16)*.114)/255 : 0;
+function glowSprite(col){ let c = GLOW[col]; if (c) return c;
+  c = document.createElement('canvas'); c.width = c.height = 64; const x = c.getContext('2d'), g = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+  g.addColorStop(0, col); g.addColorStop(.35, col + '99'); g.addColorStop(1, col + '00'); x.fillStyle = g; x.fillRect(0, 0, 64, 64); return GLOW[col] = c; }
+function drawGlow(x, y, R, col, a){ if (!isHex(col) || a <= 0) return; const op = ctx.globalCompositeOperation, al = ctx.globalAlpha;
+  ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = Math.min(1, a); ctx.drawImage(glowSprite(col), x - R, y - R, R*2, R*2); ctx.globalCompositeOperation = op; ctx.globalAlpha = al; }
+// Impact d'un coup : petit gel, flash coloré du type, étoile d'impact blanche, ondes
 function impactFx(x, y, col, dmg, e){
   hitstop(Math.min(.09, .02 + dmg/450));
+  const big = e > 1, s = Math.min(1.6, .7 + dmg/50)*(big ? 1.3 : 1), rot = Math.random()*TAU, n = big ? 8 : 6;
   shockRing(x, y, 26 + Math.min(40, dmg), '#ffffff', .2, 4);
-  if (e > 1) screenFlash('#ffffff', .12, .12);
+  shockRing(x, y, (34 + Math.min(50, dmg))*(big ? 1.3 : 1), col, .28, big ? 6 : 3);
+  spawnFx({update(){ return this.t < .2; }, top(){ const k = this.t/.2;
+    drawGlow(x, y, 46*s*(.6 + .6*k), col, (1 - k)*.9); drawGlow(x, y, 22*s, '#ffffff', (1 - k)*.8);
+    ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.globalAlpha = 1 - k; ctx.fillStyle = '#ffffff';
+    for (let i=0;i<n;i++){ const a = i/n*TAU, L = (i % 2 ? 22 : 34)*s*(.5 + k*.8), w = 3.2*s*(1 - k);
+      ctx.beginPath(); ctx.moveTo(Math.cos(a)*L, Math.sin(a)*L); ctx.lineTo(-Math.sin(a)*w, Math.cos(a)*w); ctx.lineTo(Math.sin(a)*w, -Math.cos(a)*w); ctx.closePath(); ctx.fill(); }
+    ctx.restore(); ctx.globalAlpha = 1; }});
+  if (big){ screenFlash('#ffffff', .12, .12); zoomPunch(.015); sparks(x, y, ['#ffffff', col], 10, 260, 4); }
 }
 function drawPmdAt(pm, name, x, y, dirA, S){
   const A = pm.a[name] || pm.a.Walk || pm.a.Idle; if (!A) return;
@@ -91,6 +108,8 @@ function drawPmdAt(pm, name, x, y, dirA, S){
 // ---------- Rendu des projectiles selon leur type ----------
 function drawProj(p){
   const look = p.mv.look || p.mv.t, a = Math.atan2(p.vy, p.vx), r = p.r, t = game.t, tr = p.trail || [], n = tr.length;
+  if (isHex(p.col)){ drawGlow(p.x, p.y, r*3.2, p.col, .45);
+    if (Math.random() < .3) game.parts.push({x:p.x + rand(-r, r)*.6, y:p.y + rand(-r, r)*.6, vx:-p.vx*.1 + rand(-20,20), vy:-p.vy*.1 + rand(-20,20), life:.3, max:.3, col:hexLum(p.col) > .35 ? p.col : '#ffffff', size:rand(1.5, 3)}); }
   ctx.save();
   switch (look){
     case 'Fire':
@@ -662,8 +681,9 @@ const SIG = {
   },
   // Gardevoir : une lune descend sur la zone et explose
   pouvoirlunaire(f, mv, a, tx, ty){
-    const z = clampRange(f, tx, ty), r = 72, delay = .75;
-    spawnFx({update(){ if (!this.done){ danger(f, z.x, z.y, r);
+    const z = clampRange(f, tx, ty), r = 76, delay = .6;
+    spawnFx({update(dt){ if (!this.done){ danger(f, z.x, z.y, r);
+          const e = foeOf(f); if (e.hp > 0 && !e.buried){ const dx = e.x - z.x, dy = e.y - z.y, m = Math.hypot(dx, dy); if (m > 1){ const st = Math.min(m, 45*dt); z.x += dx/m*st; z.y += dy/m*st; } }   // la lune suit lentement l'ennemi (45 px/s)
           if (this.t >= delay){ this.done = true; zoneHit(f, mv, z.x, z.y, r); shake(11); screenFlash('#ffd0ee', .35, .3); zoomPunch(.03);
             shockRing(z.x, z.y, r*1.5, '#ffc2e6', .45, 14);
             for (let i=0;i<34;i++){ const aa = Math.random()*TAU, v = rand(120, 340); game.parts.push({x:z.x, y:z.y, vx:Math.cos(aa)*v, vy:Math.sin(aa)*v, life:rand(.4,.8), max:.8, col:pick(['#ffffff','#ffd0ee','#D685AD']), size:rand(4,8), star:1}); } } }
@@ -761,16 +781,20 @@ const SIG = {
   // Pyrax : tourbillon de flammes qui se dirige vers l'ennemi ; 50 % de chance d'augmenter l'Atq. Spé.
   dansedufeu(f, mv, a){
     if (Math.random() < .5){ f.buff = {...f.buff, spa:Math.min(1.6, f.buff.spa*1.3)}; f.buffT = Math.max(f.buffT, 6); popText(f.x, f.y - 62, 'Atq. Spé. +', '#e6b84c', 14); sparks(f.x, f.y, ['#e6b84c','#ffd25a'], 12, 120, 4); }
-    let vx = Math.cos(a)*280, vy = Math.sin(a)*280, tick = 0, n = 0;
+    let vx = Math.cos(a)*440, vy = Math.sin(a)*440, tick = 0, n = 0, cap = null, life = 1;
     spawnFx({x:f.x + Math.cos(a)*30, y:f.y + Math.sin(a)*30, update(dt){ const e = foeOf(f);
-        if (e.hp > 0){ const want = Math.atan2(e.y - this.y, e.x - this.x), cur = Math.atan2(vy, vx), d = Math.atan2(Math.sin(want-cur), Math.cos(want-cur)), c = cur + Math.max(-1.1*dt, Math.min(1.1*dt, d)); const sp = Math.hypot(e.x - this.x, e.y - this.y) < 50 ? 90 : 280; vx = Math.cos(c)*sp; vy = Math.sin(c)*sp; }
+        if (cap){ const sp = Math.hypot(vx, vy) || 1; vx = vx/sp*110; vy = vy/sp*110; }   // emporte l'ennemi, plus lentement
         this.x += vx*dt; this.y += vy*dt; const c = clampArena(this.x, this.y, 30); this.x = c.x; this.y = c.y;
         danger(f, this.x, this.y, 42); tick -= dt;
-        if (tick <= 0 && n < 5 && e.hp > 0 && !e.buried && Math.hypot(e.x - this.x, e.y - this.y) < 36 + e.r*.6){ tick = .28; n++; hit(f, e, mv, 1); }
+        // au contact, l'ennemi est pris dans la tornade : immobilisé et emporté, 5 coups rapides
+        if (!cap && e.hp > 0 && !e.buried && e.inv <= 0 && Math.hypot(e.x - this.x, e.y - this.y) < 36 + e.r*.6){ cap = this.t; life = this.t + 1; tick = 0; popText(e.x, e.y - 62, 'Emporté !', '#ff8a2a', 14); }
+        if (cap !== null){ if (e.hp > 0 && !e.buried){ e.stun = Math.max(e.stun, .12); e.dash = null; const k = Math.min(1, dt*12); e.x += (this.x - e.x)*k; e.y += (this.y - e.y)*k; }
+          if (tick <= 0 && n < 5 && e.hp > 0){ tick = .18; n++; hit(f, e, mv, 1); }
+          if (n >= 5 || e.hp <= 0){ if (e.hp > 0){ e.kx += vx*2.5; e.ky += vy*2.5; } sparks(this.x, this.y, ['#fff3b0','#ffb43a','#ff6a1a'], 20, 240, 5); return false; } }
         for (let i=0;i<3;i++){ const aa = Math.random()*TAU, rr = rand(6, 30); game.parts.push({x:this.x + Math.cos(aa)*rr, y:this.y + Math.sin(aa)*rr*.4, vx:-Math.sin(aa)*150, vy:-70 - Math.random()*90, life:.4, max:.4, col:pick(['#ffd25a','#ff8a2a','#e8432a']), size:rand(4,8)}); }
-        return this.t < 1.9; },
+        return this.t < life; },
       ground(){ ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(this.x, this.y, 30, 11, 0, 0, TAU); ctx.fill(); },
-      top(){ const al = Math.min(1, (1.9 - this.t)/.3);
+      top(){ const al = Math.min(1, (life - this.t)/.3);
         for (let i=0;i<8;i++){ const k = i/7, w = 32 - 16*k, yy = this.y - k*80, ph = game.t*14 + i*.7; ctx.globalAlpha = al*(.75 - k*.35);
           ctx.strokeStyle = i%2 ? '#ffd25a' : '#ff6a1a'; ctx.lineWidth = 7 - k*4; ctx.beginPath(); ctx.ellipse(this.x + Math.sin(ph*.4)*5, yy, w, w*.35, 0, ph % TAU, ph % TAU + 4.6); ctx.stroke(); }
         ctx.globalAlpha = 1; }});
@@ -806,12 +830,15 @@ const SIG = {
   },
   // Alakazam : soulève l'adversaire (immobilisé) puis l'écrase au sol
   psyko(f, mv, a, tx, ty){
-    const z = clampRange(f, tx, ty), r = 64, delay = .55;
-    spawnFx({update(){ if (!this.done){ danger(f, z.x, z.y, r);
+    const z = clampRange(f, tx, ty), r = 60, delay = .5;
+    spawnFx({update(dt){ if (!this.done){ danger(f, z.x, z.y, r);
+          const e = foeOf(f); if (e.hp > 0 && !e.buried){ const dx = e.x - z.x, dy = e.y - z.y, m = Math.hypot(dx, dy); if (m > 1){ const st = Math.min(m, 50*dt); z.x += dx/m*st; z.y += dy/m*st; } }   // suit lentement l'ennemi (50 px/s)
           if (this.t >= delay){ this.done = true; const e = foeIn(f, z.x, z.y, r); shockRing(z.x, z.y, r*1.3, '#F95587', .35, 6);
             if (canHit(f, e, mv)) liftAndSlam(f, e, mv); else sparks(z.x, z.y, ['#F95587','#ffa0c8'], 14, 160, 4); } }
         return this.t < delay + .1; },
-      ground(){ if (this.done) return; const k = this.t/delay; ctx.globalAlpha = .12 + .25*k; ctx.fillStyle = '#F95587'; ctx.beginPath(); ctx.arc(z.x, z.y, r, 0, TAU); ctx.fill();
+      ground(){ if (this.done) return; const k = this.t/delay, last = k > .78; ctx.globalAlpha = last ? .45 + .35*Math.sin(game.t*60) : .12 + .25*k; ctx.fillStyle = '#F95587'; ctx.beginPath(); ctx.arc(z.x, z.y, r, 0, TAU); ctx.fill();
+        // anneau blanc qui se referme : quand il touche le bord de la zone, l'attaque frappe
+        ctx.globalAlpha = .95; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(z.x, z.y, r*(1 + (1 - k)*.9), 0, TAU); ctx.stroke();
         ctx.globalAlpha = .8; ctx.strokeStyle = '#ffc0d8'; ctx.lineWidth = 2; ctx.setLineDash([10,8]);
         for (const s of [1, -1]){ ctx.beginPath(); ctx.arc(z.x, z.y, r*(s > 0 ? .9 : .6), game.t*3*s, game.t*3*s + TAU); ctx.stroke(); }
         ctx.setLineDash([]); ctx.globalAlpha = 1; }});
@@ -1167,7 +1194,17 @@ function kissFx(x, y){
 }
 Object.assign(SIG, {
   // Sylveroy Effroi : se dédouble ; 3 cavaliers chargent et traversent (ralentit), puis des branches maudites jaillissent des couloirs et les ralentissent 2 s
+  // préparation (comme Génusection) : les 3 couloirs s'affichent, le lanceur marque un court arrêt, puis les cavaliers partent
   sombreruade(f, mv, a){
+    const wind = .35, ux = Math.cos(a), uy = Math.sin(a), px = -uy, py = ux;
+    const lanes = [-62, 0, 62].map(o => { const s = clampArena(f.x + px*o, f.y + py*o, 20); return {sx:s.x, sy:s.y, L:laneEnd(s.x, s.y, ux, uy, 380)}; });
+    dimScreen(.6); f.act = {n:'Charge', t:0, dur:wind};
+    spawnFx({update(){ for (const l of lanes) for (let d = 30; d < l.L; d += 60) danger(f, l.sx + ux*d, l.sy + uy*d, 30); return this.t < wind; },
+      ground(){ const k = this.t/wind; for (const l of lanes){ ctx.save(); ctx.translate(l.sx, l.sy); ctx.rotate(a); ctx.globalAlpha = .2 + .3*k; ctx.fillStyle = '#3a2458'; ctx.fillRect(0, -22, l.L, 44);
+        ctx.globalAlpha = .8; ctx.strokeStyle = '#b08ae8'; ctx.lineWidth = 2; ctx.setLineDash([10, 8]); ctx.strokeRect(0, -22, l.L, 44); ctx.setLineDash([]); ctx.restore(); } ctx.globalAlpha = 1; }});
+    f.script = {t:0, update(dt){ this.t += dt; f.aimA = a; if (this.t < wind) return true; f.script = null; SIG.sombreruadeGo(f, mv, a); return false; }};
+  },
+  sombreruadeGo(f, mv, a){
     const ux = Math.cos(a), uy = Math.sin(a), px = -uy, py = ux, spd = 1050, wait = .3, slowT = 2, run = sub(mv, {fx:{slow:1}}), branchMv = sub(mv, {p:60, fx:{slow:1}});
     const lanes = [-62, 0, 62].map(o => { const s = clampArena(f.x + px*o, f.y + py*o, 20); return {sx:s.x, sy:s.y, L:laneEnd(s.x, s.y, ux, uy, 380), o}; });
     const runT = Math.max(...lanes.map(l => l.L))/spd, branches = [];

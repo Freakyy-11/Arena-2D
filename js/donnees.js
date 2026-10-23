@@ -52,7 +52,7 @@ const STAB = 1.25;
 const MOVES = {
   // Légendaires
   frappepsy:{n:'Frappe Psy',t:'Psychic',c:'sp',p:34,k:'sig',sig:'frappepsy',vsDef:1,cd:7,range:380,shape:['zone',80],anim:'Charge',per:1,aiP:170,desc:"Mewtwo s'immobilise et fait tomber 5 météores psychiques l'un après l'autre sur la zone visée (ils suivent la visée). Le dernier, énorme (puissance 90), étourdit 0,5 s. Calculée sur la Défense de la cible, pas sur sa Déf. Spé."},
-  sombreruade:{n:'Sombre Ruade',t:'Ghost',c:'sp',p:70,k:'sig',sig:'sombreruade',cd:7,range:360,shape:['lanes3',380,62],anim:'Attack',aiP:160,desc:"Le lanceur se dédouble à gauche et à droite : les trois cavaliers chargent en ligne droite et traversent l'ennemi, qui est ralenti. Peu après, des branches maudites jaillissent du sol sur les trois couloirs (puissance 60) et la zone ralentit pendant 2 s."},
+  sombreruade:{n:'Sombre Ruade',t:'Ghost',c:'sp',p:70,k:'sig',sig:'sombreruade',cd:7,range:360,shape:['lanes3',380,62],anim:'Attack',aiP:160,desc:"Après un court arrêt (les trois couloirs s'affichent), le lanceur se dédouble à gauche et à droite : les trois cavaliers chargent en ligne droite et traversent l'ennemi, qui est ralenti. Peu après, des branches maudites jaillissent du sol sur les trois couloirs (puissance 60) et la zone ralentit pendant 2 s."},
   machination:{n:'Machination',t:'Dark',c:'st',k:'buff',buff:{spa:1.6},dur:8,cd:15},
   vampibaiser:{n:'Vampibaiser',t:'Fairy',c:'sp',p:50,k:'spec',sig:'vampibaiser',cd:3.5,range:200,shape:['lane',190,24],anim:'Attack',close:1,fx:{drain:.75},desc:"Courte charge, puis un baiser qui vole 75 % des dégâts infligés en PV."},
   coupfulgurant:{n:'Coup Fulgurant',t:'Electric',c:'ph',p:50,k:'sig',sig:'coupfulgurant',uses:3,cd:6,range:260,shape:['lane',260,24],anim:'Attack',close:1,per:1,aiP:140,desc:"Utilisable 3 fois de suite (2 s pour enchaîner) : les deux premières fois, une charge fulgurante traverse l'ennemi ; la 3e, le lanceur bondit et s'écrase sur lui (puissance 85) en l'étourdissant 0,45 s."},
@@ -69,7 +69,7 @@ const MOVES = {
   deflagration:{n:'Déflagration',t:'Fire',c:'sp',p:120,k:'spec',sig:'deflagration',cd:4.5,range:420,shape:['lane',420,30],anim:'Shoot',fx:{burn:.3},desc:"Un grand pentagramme de flammes avance. Le sol qu'il traverse reste en flammes 3 s : rester dedans peut brûler."},
   feufollet:{n:'Feu Follet',t:'Fire',c:'st',p:0,k:'homing',cnt:1,spd:200,turn:2.4,r:13,life:3,cd:6,look:'wisp',fx:{burn:1,atkDown:1}},
   rafalefeu:{n:'Rafale Feu',t:'Fire',c:'sp',p:140,k:'sig',sig:'rafalefeu',cd:6,range:230,shape:['wedge',240,.55],anim:'Shoot',desc:"Après une courte préparation, énorme cône de feu. Le sol reste en flammes 3 s et brûle ceux qui s'y trouvent."},
-  dansedufeu:{n:'Danse du Feu',t:'Fire',c:'sp',p:32,k:'sig',sig:'dansedufeu',cd:5,range:380,shape:['lane',360,32],anim:'Charge',aiP:110,desc:"Tornade de flammes qui suit l'ennemi et le touche plusieurs fois (5 coups max). 50 % de chance d'augmenter l'Atq. Spé. pendant 6 s.",per:1},
+  dansedufeu:{n:'Danse du Feu',t:'Fire',c:'sp',p:32,k:'sig',sig:'dansedufeu',cd:5,range:380,shape:['lane',360,32],anim:'Charge',aiP:110,desc:"Tornade de flammes rapide qui file en ligne droite. Au contact, elle l'emporte avec elle (immobilisé) et le frappe 5 fois de suite, puis le relâche. 50 % de chance d'augmenter l'Atq. Spé.",per:1},
   chantflamboyant:{n:'Chant Flamboyant',t:'Fire',c:'sp',p:100,k:'sig',sig:'chantflamboyant',cd:4.5,range:190,shape:['self',200],anim:'Charge',desc:"Onde de flammes en cercle qui part du lanceur et s'éloigne jusqu'à 200 px. Si elle touche : Atq. Spé. augmentée pendant 6 s."},
   // Vol
   ventviolent:{n:'Vent Violent',t:'Flying',c:'sp',p:50,k:'spec',sig:'ventviolent',cd:6,range:380,shape:['wedge',380,.58],anim:'Shoot',per:1,aiP:110,fx:{stun:.2},desc:"3 tornades : deux partent en V, une au centre. Chacune touche une fois (20 % de chance d'étourdir)."},
@@ -103,10 +103,10 @@ const MOVES = {
   voilemiroir:{n:'Voile Miroir',t:'Psychic',c:'st',k:'mirror',dur:.9,cd:5.5},
   teleport:{n:'Téléport',t:'Psychic',c:'st',k:'blink',cd:4},
   repos:{n:'Repos',t:'Psychic',c:'st',k:'rest',cd:28},
-  psyko:{n:'Psyko',t:'Psychic',c:'sp',p:135,k:'sig',sig:'psyko',cd:5,range:380,shape:['zone',64],anim:'Shoot',desc:"Zone visée : si l'ennemi est dedans quand elle se déclenche, il est soulevé (immobilisé) puis écrasé au sol."},
+  psyko:{n:'Psyko',t:'Psychic',c:'sp',p:135,k:'sig',sig:'psyko',cd:5,range:380,shape:['zone',60],anim:'Shoot',desc:"Zone visée qui suit lentement l'ennemi pendant 0,5 s ; un anneau blanc se referme jusqu'au moment de l'impact. S'il est dedans quand elle se déclenche, il est soulevé (immobilisé) puis écrasé au sol. Un Dash permet d'y échapper."},
   // Fée
   eclatmagique:{n:'Éclat Magique',t:'Fairy',c:'sp',p:85,k:'quake',max:175,dur:.4,cd:4,ring:'stars'},
-  pouvoirlunaire:{n:'Pouvoir Lunaire',t:'Fairy',c:'sp',p:130,k:'sig',sig:'pouvoirlunaire',cd:5,range:380,shape:['zone',72],anim:'Shoot',desc:"Une lune descend sur la zone visée et explose."},
+  pouvoirlunaire:{n:'Pouvoir Lunaire',t:'Fairy',c:'sp',p:130,k:'sig',sig:'pouvoirlunaire',cd:5,range:380,shape:['zone',76],anim:'Shoot',desc:"Une lune descend sur la zone visée (en 0,6 s, en suivant lentement l'ennemi) et explose."},
   // Combat
   closecombat:{n:'Close Combat',t:'Fighting',c:'ph',p:6,k:'spec',sig:'closecombat',cd:5,range:80,shape:['lane',90,30],anim:'Attack',close:1,per:1,selfDown:3,aiP:110,desc:"Pendant 1 s, rafale de coups de poing devant soi (le lanceur peut se déplacer). Chaque coup qui touche bloque l'ennemi un instant et le ramène devant les poings : il reste pris dans le combo tant que le lanceur ne s'éloigne pas trop. Le dernier coup, plus gros, inflige 40 de puissance et repousse. Baisse ensuite les défenses du lanceur pendant 3 s."},
   exploforce:{n:'Exploforce',t:'Fighting',c:'sp',p:120,k:'proj',spd:230,r:24,life:2.4,cd:4.5,look:'focusblast',fx:{spdDown:.1}},
@@ -212,7 +212,7 @@ const ARENA_LIST = [['stade','Stade Pokémon'],['pilier','Pilier Céleste'],['co
 const STATUS = {atkDown:['Atq −','#c9a08a'],grounded:['Au sol','#E2BF65'],defDown:['Déf −','#c98a8a'],spdDown:['D.Spé −','#8a9ac9'],burn:['Brûlé','#EE8130'],poison:['Empois.','#A33EA1'],slow:['Ralenti','#96D9D6'],stun:['Étourdi','#F7D02C'],sleep:['Endormi','#a39bd0'],ring:['Anneau','#6390F0'],mirror:['Miroir','#F95587'],buffT:['Boost','#e6b84c']};
 const SWITCH_CD = 4, INV_ON_SWITCH = .8;
 // Dash : charges partagées par l'équipe, rechargées une par une
-const DASH_MAX = 3, DASH_REGEN = 2, DASH_SPD = 760, DASH_DUR = .17, DASH_INV = .2;
+const DASH_MAX = 3, DASH_REGEN = 3, DASH_SPD = 760, DASH_DUR = .17, DASH_INV = .2;
 
 const meleeCount = d => d.moves.filter(k => ['melee','dash'].includes(MOVES[k].k) || MOVES[k].close).length;
 for (const k in MONS){ const m = MONS[k]; m.key = k; m.ab = m.ab || m.name.slice(0,3).toUpperCase(); m.bst = m.base.reduce((a,b)=>a+b,0); m.pref = Math.max(70, 260 - 60*meleeCount(m)); }
