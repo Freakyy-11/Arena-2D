@@ -203,10 +203,13 @@ const TEAMS = [
   {id:'leg-sylveroy',name:'Équipe Sylveroy Effroi',legend:1,mons:['sylveroy','momartik','sinistrail','lanssorien','mammochon','ronflex']},
   {id:'leg-electhorgalar',name:'Équipe Électhor Galar',legend:1,mons:['electhorgalar','mammochon','togekiss','pyrax','gorythmic','metalosse']}
 ];
+// Difficultés de l'IA, en paliers réguliers : react = chance de réagir (esquiver, contrer), think = délai entre deux décisions (s),
+// lead = anticipation des déplacements, noise = hasard dans le choix des attaques, sw = changements de Pokémon,
+// dash = usage du Dash pour esquiver, aimErr = erreur de visée, dmg = force de ses attaques
 const DIFFS = {
-  facile:{label:'Facile',react:.1,think:1.1,lead:0,noise:.6,mirror:false,sw:0,dash:0,aimErr:.4,dmg:.65},
-  normal:{label:'Normal',react:.35,think:.6,lead:.25,noise:.35,mirror:true,sw:.25,dash:.2,aimErr:.25,dmg:.8},
-  champion:{label:'Champion',react:.7,think:.45,lead:.65,noise:.15,mirror:true,sw:.6,dash:.55,aimErr:.07,dmg:1},
+  facile:{label:'Facile',react:.2,think:.85,lead:.1,noise:.5,mirror:false,sw:.1,dash:.08,aimErr:.33,dmg:.72},
+  normal:{label:'Normal',react:.48,think:.52,lead:.42,noise:.27,mirror:true,sw:.38,dash:.32,aimErr:.16,dmg:.88},
+  champion:{label:'Champion',react:.64,think:.46,lead:.6,noise:.17,mirror:true,sw:.55,dash:.48,aimErr:.09,dmg:.95},
   enfer:{label:'Enfer',react:.92,think:.32,lead:.9,noise:.06,mirror:true,sw:.85,dash:.85,aimErr:.02,dmg:1.25}   // réagit presque toujours, anticipe tes déplacements, frappe plus fort
 };
 const ARENA_LIST = [['stade','Stade Pokémon'],['pilier','Pilier Céleste'],['colonnes','Colonnes Lance'],['couronne','Mont Couronné'],['chateau','Château de Ghetsis'],['tourbillon','Îles Tourbillon']];
