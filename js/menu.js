@@ -24,24 +24,30 @@ function hydrate(root){
 
 let legendWarn = false;
 function renderMenu(){
+  // Pokémon pas encore débloqués dans la Ligue : grisés, et les équipes qui en contiennent sont verrouillées
+  const un = unlockedSet(); sel.build = sel.build.filter(k => un.has(k));
+  const lockedN = t => t.mons.filter(k => !un.has(k)).length;
+  if (!renderMenu.done && sel.mode === 'teams' && TEAMS.every(t => lockedN(t) > 0)) sel.mode = 'build';   // à l'ouverture, si aucune équipe prête n'est débloquée : on compose la sienne
+  renderMenu.done = true;
   $('pickMode').innerHTML = [['teams','Équipes prêtes'],['build','Composer mon équipe']].map(([k,l]) => `<button class="pill" data-k="${k}" aria-pressed="${sel.mode===k}">${l}</button>`).join('');
   $('paneTeams').hidden = sel.mode !== 'teams'; $('paneBuild').hidden = sel.mode !== 'build';
-  const teamCard = t => `<button class="team" data-k="${t.id}" aria-pressed="${sel.team===t.id}">
-      <div class="th"><b>${t.name}</b><small>${t.mons.reduce((a,k)=>a+MONS[k].bst,0)} pts de stats</small></div>
+  const teamCard = t => `<button class="team${lockedN(t) ? ' locked' : ''}" data-k="${t.id}" aria-pressed="${sel.team===t.id}" ${lockedN(t) ? 'disabled' : ''}>
+      <div class="th"><b>${lockedN(t) ? '🔒 ' : ''}${t.name}</b><small>${lockedN(t) ? lockedN(t) + ' Pokémon à débloquer dans la Ligue' : t.mons.reduce((a,k)=>a+MONS[k].bst,0) + ' pts de stats'}</small></div>
       <div class="minis">${t.mons.map(k => `<div class="m">${pic(k,40)}<i>${MONS[k].name}</i></div>`).join('')}</div></button>`;
   // équipes classiques, puis équipes légendaires (un légendaire ★ chacune)
   const legTeams = TEAMS.filter(t => t.legend);
   $('pickTeam').innerHTML = TEAMS.filter(t => !t.legend).map(teamCard).join('') + (legTeams.length ? `<div class="teamsHead">Équipes légendaires <small>un légendaire ★ par équipe</small></div>` + legTeams.map(teamCard).join('') : '');
   $('pickBuild').innerHTML = Object.keys(MONS).sort((a,b)=>MONS[a].name.localeCompare(MONS[b].name,'fr')).map(k => { const i = sel.build.indexOf(k);
-    return `<button class="mon" data-k="${k}" aria-pressed="${i>=0}">${i>=0?`<span class="num">${i+1}</span>`:''}${MONS[k].legend ? '<span class="leg">★</span>' : ''}${pic(k,46)}<b>${MONS[k].name}</b><div class="types">${chips(MONS[k].types)}</div></button>`; }).join('');
+    return `<button class="mon" data-k="${k}" aria-pressed="${i>=0}" ${un.has(k) ? '' : 'disabled title="À débloquer dans la Ligue"'}>${un.has(k) ? '' : '<span class="lock">🔒</span>'}${i>=0?`<span class="num">${i+1}</span>`:''}${MONS[k].legend ? '<span class="leg">★</span>' : ''}${pic(k,46)}<b>${MONS[k].name}</b><div class="types">${chips(MONS[k].types)}</div></button>`; }).join('');
   $('buildCount').textContent = `${sel.build.length}/6`;
   $('pickVs').innerHTML = [['ai', "Contre l'IA"], ['p2', '2 joueurs'], ['spec', 'IA contre IA']].map(([k,l]) => `<button class="pill" data-k="${k}" aria-pressed="${(sel.vs || 'ai')===k}">${l}</button>`).join('');
   $('vsNote').hidden = sel.vs !== 'p2'; $('specNote').hidden = sel.vs !== 'spec'; $('stepD').hidden = sel.vs === 'p2'; $('eTitle').textContent = sel.vs === 'p2' ? 'Équipe du joueur 2' : sel.vs === 'spec' ? "Équipe de l'IA 2" : "Équipe de l'IA";
   $('pickE').innerHTML = [['random','Aléatoire'], ...TEAMS.map(t=>[t.id,(t.legend ? '★ ' : '') + t.name])].map(([k,l]) => `<button class="pill" data-k="${k}" aria-pressed="${sel.e===k}">${l}</button>`).join('');
   $('pickD').innerHTML = Object.keys(DIFFS).map(k => `<button class="pill" data-k="${k}" aria-pressed="${sel.d===k}">${DIFFS[k].label}</button>`).join('');
   $('pickA').innerHTML = [['random','Aléatoire'], ...ARENA_LIST].map(([k,l]) => `<button class="pill" data-k="${k}" aria-pressed="${(sel.arena || 'random')===k}">${l}</button>`).join('');
-  $('start').disabled = sel.mode === 'build' && sel.build.length !== 6;
-  $('start').textContent = $('start').disabled ? `Choisis encore ${6 - sel.build.length} Pokémon` : 'Combattre';
+  const teamLocked = sel.mode === 'teams' && lockedN(TEAMS.find(t => t.id === sel.team) || TEAMS[0]) > 0;
+  $('start').disabled = (sel.mode === 'build' && sel.build.length !== 6) || teamLocked;
+  $('start').textContent = teamLocked ? 'Équipe verrouillée : débloque-la dans la Ligue' : $('start').disabled ? `Choisis encore ${6 - sel.build.length} Pokémon` : 'Combattre';
   hydrate($('menu'));
 }
 $('menu').addEventListener('click', e => {
@@ -62,7 +68,6 @@ $('menu').addEventListener('click', e => {
   if (legendWarn){ legendWarn = false; const c = $('buildCount'); c.textContent = '1 légendaire max !'; c.style.color = 'var(--foe)';
     clearTimeout(c.tm); c.tm = setTimeout(() => { c.textContent = `${sel.build.length}/6`; c.style.color = ''; }, 1800); }
 });
-renderMenu();
 
 
 // ---------- Fiche des attaques ----------

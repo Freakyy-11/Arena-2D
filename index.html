@@ -64,12 +64,28 @@
       <h2>Son</h2>
       <div class="row" id="pickS"></div>
     </div>
+    <button class="btn main" id="openLeague">Ligue Pokémon</button>
     <button class="btn" id="openDex">Attaques des Pokémon et ordre des boutons</button>
     <button class="go" id="start">Combattre</button>
     <p class="note kbd">Clavier + souris : ZQSD pour bouger, la souris vise · clic gauche, clic droit, A et E pour attaquer · Espace pour le Dash · 1 à 6 pour changer de Pokémon · Échap pour la pause. Clavier seul : J K L M attaquent en visée automatique. Maintiens une attaque pour voir le repère : elle part quand tu relâches.</p>
     <p class="note">Manette : stick gauche pour bouger, stick droit pour viser (relâché = visée automatique) · L1, L2, R1, R2 pour attaquer (l'attaque part au relâchement) · ✕ pour le Dash · Carré / Rond (ou flèches gauche/droite) pour choisir un Pokémon, Triangle pour l'envoyer · visée aimantée sur l'adversaire, et les zones se posent à sa distance · Options pour la pause.</p>
     <p class="note">Sur téléphone : joystick à gauche, attaques et Dash à droite. Touche une attaque pour viser automatiquement, ou fais glisser le doigt depuis le bouton pour viser toi-même puis relâche, et la barre d'équipe au-dessus pour changer de Pokémon. S'ils ne chargent pas, des jetons aux couleurs des types remplacent les sprites.</p>
     <p class="note">Sprites animés en combat : <a href="https://sprites.pmdcollab.org" target="_blank" rel="noopener" style="color:var(--gold)">PMD SpriteCollab</a> (CC BY-NC 4.0, crédits par sprite sur le site). Portraits : PokéAPI. Projet de fan non officiel et non commercial.</p>
+  </section>
+
+  <section id="league" class="dex" hidden>
+    <header class="dexhead"><h2>Ligue Pokémon</h2><button class="pause" id="closeLeague" aria-label="Fermer">✕</button></header>
+    <p class="note">Bats le Conseil 4 puis le Maître de chaque région pour débloquer la suivante. Chaque victoire débloque des Pokémon jouables dans tous les modes. <b id="lgSummary"></b></p>
+    <div class="row" id="lgRegions"></div>
+    <div class="teams" id="lgList"></div>
+    <div id="lgChal"></div>
+    <h2>Difficulté</h2>
+    <div class="row" id="lgDiff"></div>
+    <h2>Ton équipe pour la Ligue <span id="lgTeamCount">0/6</span></h2>
+    <p class="note" id="lgHint"></p>
+    <div class="grid24" id="lgTeam"></div>
+    <div class="row" id="lgActions"></div>
+    <div class="row"><button class="btn" id="lgAll">Tout débloquer</button><button class="btn" id="lgReset">Réinitialiser la progression</button></div>
   </section>
 
   <section id="dex" class="dex" hidden>
@@ -114,5 +130,6 @@
 <script src="js/audio.js"></script>
 <script src="js/arenes.js"></script>
 <script src="js/rendu.js"></script>
+<script src="js/ligue.js"></script>
 </body>
 </html>

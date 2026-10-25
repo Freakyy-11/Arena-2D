@@ -190,6 +190,9 @@ function showEnd(pAlive, eAlive){
   $('endS').textContent = draw ? 'Les deux derniers Pokémon sont tombés en même temps.'
     : win ? `Tu bats ${game.es.name} avec ${n} Pokémon encore debout, en ${Math.round(game.fightT)} s.`
     : `${game.es.name} gagne avec ${n} Pokémon encore debout.`;
+  $('again').textContent = 'Revanche';
+  if (game.league){ const r = leagueResult(win, pAlive); if (r.msg) $('endS').textContent += ' ' + r.msg; $('again').textContent = r.label; }
+  $('toMenu').textContent = game.league ? 'Retour à la Ligue' : "Changer d'équipe";
   $('ovEnd').hidden = false;
   game.p.held.fill(false); AUDIO.stopMusic(); AUDIO.end(win);
 }

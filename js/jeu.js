@@ -44,7 +44,7 @@ function startMatch(m){
   const es = {team: m.ek.map(k => makeFighter(k,'e')), active:0, swCd:0, dashN:DASH_MAX, dashT:0, spawn:{x:CX,y:140}, name:m.eName};
   if (m.vs2) es.team.forEach(f => f.isAI = false);   // 2 joueurs : le joueur 2 remplace l'IA
   if (m.spec) ps.team.forEach(f => f.isAI = true);    // IA contre IA : ton équipe est jouée par l'IA, tu regardes
-  game = { ps, es, p:ps.team[0], e:es.team[0], diff: DIFFS[m.dk], arena: m.arena || 'stade', vs2: !!m.vs2, spectate: !!m.spec,
+  game = { ps, es, p:ps.team[0], e:es.team[0], diff: DIFFS[m.dk], arena: m.arena || 'stade', vs2: !!m.vs2, spectate: !!m.spec, league: m.league || null,
     projs:[], zones:[], rings:[], parts:[], texts:[], slashes:[], ents:[], decals:[], dangers:[], shake:0, t:0, fightT:0,
     sflash:null, elec:0, frost:0, dim:0, zoom:1, hitstop:0,
     state:'intro', introT:2.6, introBig:true, koT:0, paused:false,
@@ -57,8 +57,8 @@ function startMatch(m){
   resize(); AUDIO.music(game.arena); AUDIO.duck(false);
 }
 $('start').onclick = () => { if (!$('start').disabled) startMatch(resolveTeams()); };
-$('again').onclick = () => startMatch(sel.e === 'random' ? {...resolveTeams(), pk:lastMatch.pk, arena:lastMatch.arena} : lastMatch);   // la revanche garde l'arène
-const toMenu = () => { game = null; AUDIO.stopMusic(); $('battle').hidden = true; $('menu').hidden = false; renderMenu(); };
+$('again').onclick = () => lastMatch.league ? leagueAgain() : startMatch(sel.e === 'random' ? {...resolveTeams(), pk:lastMatch.pk, arena:lastMatch.arena} : lastMatch);   // la revanche garde l'arène
+const toMenu = () => { const lgBack = game && game.league; if (lgBack && game.state !== 'end') leagueAbandon(); game = null; AUDIO.stopMusic(); $('battle').hidden = true; $('menu').hidden = false; renderMenu(); if (lgBack) openLeague(); };   // Ligue : retour à l'écran de la Ligue ; quitter un combat en cours = abandonner la Ligue
 $('toMenu').onclick = toMenu; $('quit').onclick = toMenu;
 $('pauseBtn').onclick = () => setPause(true);
 $('resume').onclick = () => setPause(false);
@@ -107,7 +107,7 @@ const aliveIdx = side => side.team.map((f,i)=>f.hp>0?i:-1).filter(i=>i>=0);
 function buildHUD(){ buildCard('p'); buildCard('e'); }
 function buildCard(s){
   const side = s === 'p' ? game.ps : game.es, f = side.team[side.active], el = $(s === 'p' ? 'hudP' : 'hudE');
-  el.innerHTML = `<div class="top"><span class="nm">${f.d.name}</span><span class="who">${s==='p' ? (game.vs2 ? 'Joueur 1' : game.spectate ? 'IA 1 · ' + game.diff.label : 'Toi') : (game.vs2 ? 'Joueur 2' : (game.spectate ? 'IA 2 · ' : 'IA · ') + game.diff.label)}</span></div>
+  el.innerHTML = `<div class="top"><span class="nm">${f.d.name}</span><span class="who">${s==='p' ? (game.vs2 ? 'Joueur 1' : game.spectate ? 'IA 1 · ' + game.diff.label : 'Toi') : (game.vs2 ? 'Joueur 2' : (game.league ? game.league.name + ' · ' : game.spectate ? 'IA 2 · ' : 'IA · ') + game.diff.label)}</span></div>
     <div class="types">${chips(f.d.types)}</div>
     <div class="bar"><i></i></div><div class="meta"><span class="balls"></span><span class="hpn"></span><span class="sts"></span></div>`;
   side.hud = { bar: el.querySelector('.bar i'), hpn: el.querySelector('.hpn'), sts: el.querySelector('.sts'), balls: el.querySelector('.balls'), last:'', lastB:'' };

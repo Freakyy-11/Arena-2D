@@ -2,7 +2,7 @@
 // Les sprites et polices (sites externes) sont gardés en cache dès leur premier chargement.
 const VERSION = 'arene-1';
 const CORE = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'css/style.css',
-  ...['donnees', 'menu', 'jeu', 'attaques', 'ia', 'simulation', 'audio', 'arenes', 'rendu'].map(n => 'js/' + n + '.js'),
+  ...['donnees', 'menu', 'jeu', 'attaques', 'ia', 'simulation', 'audio', 'arenes', 'rendu', 'ligue'].map(n => 'js/' + n + '.js'),
   'arenes/stade.webp', 'arenes/pilier.jpg', 'arenes/colonnes.jpg', 'arenes/couronne.webp', 'arenes/chateau.jpg', 'arenes/tourbillon.jpg'];
 
 self.addEventListener('install', e => { e.waitUntil(caches.open(VERSION).then(c => c.addAll(CORE)).then(() => self.skipWaiting())); });
