@@ -26,7 +26,7 @@ function makeFighter(key, side){
     held:[false,false,false,false], ai:{think:1, strafe:1, strafeT:0, swT:2} };
 }
 // Vitesse de déplacement compressée : 160 (Vit 30) → 230 (Vit 143)
-const moveSpeed = f => (160 + ((game && game.trick > 0 ? 173 - f.d.base[5] : f.d.base[5])-30)/113*55) * f.buff.spe * (f.slow > 0 ? f.slowF : 1);   // Distorsion : vitesses inversées
+const moveSpeed = f => (160 + ((game && game.trick > 0 ? 173 - f.d.base[5] : f.d.base[5])-30)/113*55) * f.buff.spe * (f.slow > 0 ? f.slowF : 1) * (f.gyro > 0 ? 1.6 : 1);   // Distorsion : vitesses inversées
 
 function resolveTeams(){
   const pk = sel.mode === 'build' ? sel.build.slice() : TEAMS.find(t=>t.id===sel.team).mons.slice();
@@ -58,7 +58,7 @@ function startMatch(m){
 }
 $('start').onclick = () => { if (!$('start').disabled) startMatch(resolveTeams()); };
 $('again').onclick = () => lastMatch.league ? leagueAgain() : startMatch(sel.e === 'random' ? {...resolveTeams(), pk:lastMatch.pk, arena:lastMatch.arena} : lastMatch);   // la revanche garde l'arène
-const toMenu = () => { const lgBack = game && game.league; if (lgBack && game.state !== 'end') leagueAbandon(); game = null; AUDIO.stopMusic(); $('battle').hidden = true; $('menu').hidden = false; renderMenu(); if (lgBack) openLeague(); };   // Ligue : retour à l'écran de la Ligue ; quitter un combat en cours = abandonner la Ligue
+const toMenu = () => { const lgBack = game && game.league; if (lgBack && game.state !== 'end') leagueAbandon(); game = null; AUDIO.stopMusic(); $('battle').hidden = true; $('menu').hidden = false; if (lgBack) openLeague('main'); else goScreen('team'); };   // Ligue : retour à l'écran de la Ligue, sinon au choix de l'équipe ; quitter un combat en cours = abandonner la Ligue
 $('toMenu').onclick = toMenu; $('quit').onclick = toMenu;
 $('pauseBtn').onclick = () => setPause(true);
 $('resume').onclick = () => setPause(false);
@@ -71,7 +71,7 @@ function sendIn(side, idx, announce=true){
   const alive = old.hp > 0;
   f.x = alive ? old.x : side.spawn.x; f.y = alive ? old.y : side.spawn.y;
   f.vx = f.vy = f.kx = f.ky = 0; f.dash = null; f.roll = null; f.script = null; f.air = null; f.h = 0; f.buried = false; f.root = 0; f.act = null; f.hurtT = 0; f.stun = 0; f.recharge = 0; f.mirror = 0; f.ring = 0; f.slow = 0;
-  f.buff = {atk:1,spa:1,spe:1,spd:1}; f.buffT = 0; f.busy = 0; f.vanish = 0; f.doll = 0; f.shield = 0; f.inv = INV_ON_SWITCH; f.held.fill(false); f.defDown = f.spdDown = f.atkDown = f.grounded = f.healT = 0; f.recast.fill(0); f.recastN.fill(0);
+  f.buff = {atk:1,spa:1,spe:1,spd:1}; f.buffT = 0; f.busy = 0; f.vanish = 0; f.doll = 0; f.shield = 0; f.inv = INV_ON_SWITCH; f.held.fill(false); f.defDown = f.spdDown = f.atkDown = f.grounded = f.healT = f.gyro = 0; f.recast.fill(0); f.recastN.fill(0);
   if (alive){ old.dash = null; old.roll = null; old.script = null; old.air = null; old.h = 0; old.buried = false; old.buff = {atk:1,spa:1,spe:1,spd:1}; old.buffT = 0; old.mirror = 0; old.ring = 0; old.held.fill(false); }
   side.active = idx;
   if (side === game.ps){ game.p = f; buildMoves(); } else game.e = f;

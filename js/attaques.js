@@ -1794,9 +1794,11 @@ Object.assign(SIG, {
   picots(f, mv, a, tx, ty){ groundTraps(f, mv, clampRange(f, tx, ty), false); },
   pikstoxik(f, mv, a, tx, ty){ groundTraps(f, mv, clampRange(f, tx, ty), true); },
   // Gyroballe : tourne sur lui-même en se déplaçant ; plus fort contre un ennemi rapide
-  gyroballe(f, mv){
-    const T = 1.2, R = 62; let n = 0; f.busy = T;
-    spawnFx({update(){ if (f.hp <= 0) return false; while (n < 4 && this.t >= n*.3){ n++; const e = foeOf(f), k = Math.max(.6, Math.min(2.2, moveSpeed(e)/moveSpeed(f)));
+  gyroballe(f, mv, a){
+    const T = 1.6, R = 62; let n = 0; f.busy = T; f.gyro = T;   // vitesse ×1,6 pendant la rotation
+    f.dash = {vx:Math.cos(a)*560, vy:Math.sin(a)*560, t:.18, mv, trail:'#B7B7CE', onHit(){}};   // petite charge au départ (les coups viennent de la rotation)
+    const spe = x => x.d.base[5]*x.buff.spe*(x.slow > 0 ? x.slowF : 1);   // dégâts selon l'écart de Vitesse (sans le bonus de la rotation)
+    spawnFx({update(){ if (f.hp <= 0) return false; while (n < 5 && this.t >= n*.32){ n++; const e = foeOf(f), k = Math.max(.7, Math.min(2, 1 + (spe(e) - spe(f))/100));
         if (e.hp > 0 && !e.buried && dist(f, e) < R + e.r*.6){ const ok = canHit(f, e, sub(mv, {p:Math.round(mv.p*k)})); hit(f, e, sub(mv, {p:Math.round(mv.p*k)}), 1); if (ok){ const ang = Math.atan2(e.y - f.y, e.x - f.x); e.kx += Math.cos(ang)*260; e.ky += Math.sin(ang)*260; } } }
         danger(f, f.x, f.y, R); return this.t < T; },
       top(){ for (let i=0;i<3;i++){ const aa = game.t*14 + i*TAU/3; ctx.strokeStyle = i % 2 ? '#ffffff' : '#B7B7CE'; ctx.lineWidth = 4; ctx.globalAlpha = .8; ctx.beginPath(); ctx.arc(f.x, f.y - 6, R*.8, aa, aa + 1.2); ctx.stroke(); } ctx.globalAlpha = 1; }});

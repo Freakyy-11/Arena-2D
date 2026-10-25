@@ -49,19 +49,22 @@ function unlockedSet(){
 const isUnlocked = k => unlockedSet().has(k);
 // une région s'ouvre quand le Maître de la précédente est battu (au bout d'une Ligue complète)
 const regionOpen = i => i === 0 || lg.all || !!lg.beaten[LEAGUE[i-1].trainers.at(-1).id];
-// Ligue en cours : région, équipe et difficulté fixées, i = prochain dresseur ; une défaite y met fin (il faut recommencer)
+// Ligue en cours : région, équipe et difficulté fixées, i = prochain dresseur ; retry = seconde chance restante (1 par Ligue), ensuite une défaite y met fin
 const lgRun = () => lg.run && LEAGUE.some(r => r.id === lg.run.region) ? lg.run : null;
 function fightNext(){ const run = lgRun(), t = LEAGUE.find(r => r.id === run.region).trainers[run.i];
   $('league').hidden = true;
   startMatch({pk:run.team.slice(), ek:t.mons.slice(), eName:t.name, dk:run.dk, arena:t.arena, vs2:false, league:{id:t.id, name:t.name}}); }
-function startRun(region, team, dk){ lg.run = {region, i:0, team:team.slice(), dk}; lgSave(); fightNext(); }
+function startRun(region, team, dk){ lg.run = {region, i:0, team:team.slice(), dk, retry:1}; lgSave(); fightNext(); }
 function leagueAbandon(){ lg.run = null; lgSave(); }
 
 // ---------- écran de la Ligue ----------
-let lgRegion = null, lgNext = null;
+let lgRegion = null, lgNext = null, lgStep = 'diff';   // lgStep : écran de la difficulté, puis régions et équipe
 if (!Array.isArray(sel.lgTeam)) sel.lgTeam = [];
 function renderLeague(){
   const un = unlockedSet(), run = lgRun();
+  if (run) lgStep = 'main';
+  $('lgStepDiff').hidden = lgStep !== 'diff'; $('lgStepMain').hidden = lgStep !== 'main';
+  $('lgTitle').textContent = lgStep === 'diff' ? 'Difficulté' : run ? 'Ligue en cours · ' + DIFFS[run.dk].label : 'Région et équipe · ' + DIFFS[sel.d].label;
   sel.lgTeam = sel.lgTeam.filter(k => un.has(k));
   if (run) lgRegion = run.region;
   if (!lgRegion || !regionOpen(LEAGUE.findIndex(r => r.id === lgRegion))) lgRegion = LEAGUE[LEAGUE.reduce((m, r, i) => regionOpen(i) ? i : m, 0)].id;
@@ -76,23 +79,26 @@ function renderLeague(){
       ${t.reward.length ? `<small class="rw">${ever ? 'Débloqué' : 'Débloque'} : ${names(t.reward)}</small>` : ''}</div>`; }).join('');
   $('lgChal').innerHTML = R.challenges.length ? '<h3>Défis</h3>' + R.challenges.map(c => `<p class="note">${lg.chal[c.id] ? '✓' : '☆'} ${c.text} → débloque ${names(c.reward)}</p>`).join('') : '';
   const dk = run ? run.dk : sel.d;
-  $('lgDiff').innerHTML = Object.keys(DIFFS).map(k => `<button class="pill" data-lgd="${k}" aria-pressed="${dk === k}" ${run ? 'disabled' : ''}>${DIFFS[k].label}</button>`).join('');
+  $('lgDiff').innerHTML = diffCards(dk, 'data-lgd');
   $('lgTeamCount').textContent = `${team.length}/6`;
   $('lgTeam').innerHTML = [...un].sort((a, b) => MONS[a].name.localeCompare(MONS[b].name, 'fr')).map(k => { const i = team.indexOf(k);
     return `<button class="mon" data-lgm="${k}" aria-pressed="${i >= 0}" ${run ? 'disabled' : ''}>${i >= 0 ? `<span class="num">${i+1}</span>` : ''}${MONS[k].legend ? '<span class="leg">★</span>' : ''}${pic(k,46)}<b>${MONS[k].name}</b><div class="types">${chips(MONS[k].types)}</div></button>`; }).join('');
-  $('lgHint').textContent = run ? "Ligue en cours : équipe et difficulté sont fixées jusqu'à la fin. Une défaite fait recommencer depuis le début."
-    : 'Choisis 6 Pokémon (1 légendaire ★ maximum). Une défaite fera recommencer la Ligue depuis le premier membre du Conseil.';
-  $('lgActions').innerHTML = inRun ? `<button class="go" data-lga="next">Affronter ${R.trainers[run.i].name} (${run.i + 1}/${R.trainers.length})</button><button class="btn" data-lga="quit">Abandonner la Ligue</button>`
-    : `<button class="go" data-lga="start" ${ready ? '' : 'disabled'}>${ready ? 'Commencer la Ligue de ' + R.name : 'Choisis encore ' + (6 - team.length) + ' Pokémon'}</button>`;
+  $('lgHint').textContent = run ? `Ligue en cours : équipe et difficulté sont fixées jusqu'à la fin. ${(run.retry ?? 1) > 0 ? 'Seconde chance disponible : à la première défaite, tu pourras rejouer le combat.' : 'Seconde chance utilisée : une défaite fait recommencer depuis le début.'}`
+    : 'Choisis 6 Pokémon (1 légendaire ★ maximum). Tu as droit à une seconde chance par Ligue ; à la défaite suivante, il faut recommencer depuis le premier membre du Conseil.';
+  $('lgActions').innerHTML = inRun ? `<button class="go" data-lga="next">Affronter ${R.trainers[run.i].name} (${run.i + 1}/${R.trainers.length})${(run.retry ?? 1) > 0 ? ' · ♥ 1 seconde chance' : ''}</button><button class="btn" data-lga="quit">Abandonner la Ligue</button>`
+    : `<button class="btn" data-lga="diff">Difficulté : ${DIFFS[sel.d].label}</button><button class="go" data-lga="start" ${ready ? '' : 'disabled'}>${ready ? 'Commencer la Ligue de ' + R.name : 'Choisis encore ' + (6 - team.length) + ' Pokémon'}</button>`;
   hydrate($('league'));
 }
-function openLeague(){ renderLeague(); $('menu').hidden = true; $('league').hidden = false; }
-function closeLeague(){ $('league').hidden = true; $('menu').hidden = false; renderMenu(); }
+function openLeague(step){ lgStep = step === 'main' ? 'main' : 'diff'; renderLeague(); $('menu').hidden = true; $('league').hidden = false; $('league').scrollTop = 0; }
+function closeLeague(){ if (lgStep === 'main' && !lgRun()){ lgStep = 'diff'; renderLeague(); $('league').scrollTop = 0; return; }   // retour : régions → difficulté → accueil
+  $('league').hidden = true; $('menu').hidden = false; goScreen('home'); }
+addEventListener('keydown', e => { if (e.code === 'Escape' && !$('league').hidden) closeLeague(); });
 $('openLeague').onclick = openLeague; $('closeLeague').onclick = closeLeague;
 $('league').addEventListener('click', e => {
   const b = e.target.closest('[data-lgr],[data-lgm],[data-lgd],[data-lga]'); if (!b || b.disabled) return; const y = $('league').scrollTop;
   if (b.dataset.lgr) lgRegion = b.dataset.lgr;
-  else if (b.dataset.lgd){ sel.d = b.dataset.lgd; save(); }
+  else if (b.dataset.lgd){ sel.d = b.dataset.lgd; save(); lgStep = 'main'; renderLeague(); $('league').scrollTop = 0; return; }
+  else if (b.dataset.lga === 'diff'){ lgStep = 'diff'; renderLeague(); $('league').scrollTop = 0; return; }
   else if (b.dataset.lgm){ const k = b.dataset.lgm, i = sel.lgTeam.indexOf(k);
     if (i >= 0) sel.lgTeam.splice(i, 1); else if (MONS[k].legend && sel.lgTeam.some(x => MONS[x].legend)) return; else if (sel.lgTeam.length < 6) sel.lgTeam.push(k); save(); }
   else if (b.dataset.lga === 'start'){ startRun(lgRegion, sel.lgTeam, sel.d); return; }
@@ -107,6 +113,8 @@ $('lgReset').onclick = () => { if (confirm('Effacer toute ta progression dans la
 function leagueResult(win, pAlive){
   const run = lgRun(), t = LG_TRAINER[game.league.id], R = LEAGUE.find(r => r.id === t.region), msgs = [];
   if (!run){ lgNext = 'back'; return {msg:'', label:'Retour à la Ligue'}; }
+  if (!win && (run.retry ?? 1) > 0){ run.retry = 0; lgSave(); lgNext = 'next';   // seconde chance : on rejoue le même dresseur
+    return {msg:`Seconde chance utilisée : tu peux rejouer contre ${t.name}. La prochaine défaite fera recommencer la Ligue.`, label:`Réessayer contre ${t.name}`}; }
   if (!win){ lgNext = {region:run.region, team:run.team, dk:run.dk}; leagueAbandon();
     return {msg:`La Ligue de ${R.name} est perdue : il faut la recommencer depuis ${R.trainers[0].name}.`, label:'Recommencer la Ligue'}; }
   const before = unlockedSet(), first = !lg.beaten[t.id], res = {lost:game.ps.team.length - pAlive, time:game.fightT};

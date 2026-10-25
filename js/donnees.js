@@ -57,12 +57,12 @@ const MOVES = {
   explosion:{n:"Explosion",t:'Normal',c:'ph',p:170,k:'sig',sig:'explosion',cd:12,range:140,shape:['self',150],anim:'Attack',aiP:70,desc:"Se charge 1 s, puis explose sur une énorme zone ; Foretress perd 20 % de ses PV et doit récupérer 1 s."},
   picots:{n:"Picots",t:'Ground',c:'ph',p:45,k:'spec',sig:'picots',cd:8,range:380,shape:['zone3',18],anim:'Attack',desc:"Pose 3 pièges au sol : l'ennemi qui marche dessus est blessé."},
   pikstoxik:{n:"Pics Toxik",t:'Poison',c:'ph',p:20,k:'spec',sig:'pikstoxik',cd:8,range:380,shape:['zone3',18],anim:'Attack',desc:"Pose 3 pièges au sol : l'ennemi qui marche dessus est blessé et empoisonné."},
-  gyroballe:{n:"Gyroballe",t:'Steel',c:'ph',p:58,k:'spec',sig:'gyroballe',cd:5,range:70,shape:['self',62],anim:'Attack',desc:"Tourne sur lui-même pendant 1,2 s en se déplaçant : 4 coups autour de lui, plus forts si l'ennemi est plus rapide."},
+  gyroballe:{n:"Gyroballe",t:'Steel',c:'ph',p:50,k:'spec',sig:'gyroballe',cd:5,range:130,shape:['self',62],anim:'Attack',desc:"Petite charge, puis tourne sur lui-même pendant 1,6 s avec une vitesse ×1,6 : 5 coups autour de lui, d'autant plus forts que l'ennemi est plus rapide que lui (×0,7 à ×2)."},
   triplepied:{n:"Triple Pied",t:'Fighting',c:'ph',p:45,k:'sig',sig:'triplepied',cd:5,range:200,shape:['lane',140,24],anim:'Attack',aiP:100,close:1,per:1,desc:"3 charges courtes (redirigeables), de plus en plus fortes (35, 45, 65)."},
   machpunch:{n:'Mach Punch',t:'Fighting',c:'ph',p:55,k:'dash',spd:950,dur:.14,cd:2.2},
   aquajet:{n:'Aqua-Jet',t:'Water',c:'ph',p:55,k:'dash',spd:950,dur:.14,cd:2.2},
-  clairdelune:{n:'Clair de Lune',t:'Fairy',c:'st',k:'heal',pct:.4,cd:16},
-  ordresoin:{n:'Ordre Soin',t:'Bug',c:'st',k:'heal',pct:.4,cd:16},
+  clairdelune:{n:'Clair de Lune',t:'Fairy',c:'st',k:'heal',pct:.4,cd:22},
+  ordresoin:{n:'Ordre Soin',t:'Bug',c:'st',k:'heal',pct:.4,cd:22},
   dansepapillon:{n:'Danse Papillon',t:'Bug',c:'st',k:'buff',buff:{spa:1.3,spd:1.3,spe:1.2},dur:10,cd:15},
   queuedefer:{n:"Queue de Fer",t:'Steel',c:'ph',p:100,k:'sig',sig:'queuedefer',cd:5,range:140,shape:['wedge',150,1.25],anim:'Attack',aiP:130,close:1,desc:"Grand balayage de queue en arc qui repousse."},
   tricherie:{n:"Tricherie",t:'Dark',c:'ph',p:95,k:'sig',sig:'tricherie',cd:4.5,range:200,shape:['lane',180,24],anim:'Attack',aiP:125,close:1,foulPlay:1,desc:"Courte charge : frappe avec l'Attaque de l'ennemi (plus il est fort, plus ça fait mal)."},
@@ -77,7 +77,7 @@ const MOVES = {
   dracosouffle:{n:"Dracosouffle",t:'Dragon',c:'sp',p:70,k:'spec',sig:'dracosouffle',cd:4,range:560,shape:['lane',560,18],anim:'Attack',beam:1,fx:{stun:.3},desc:"Après 0,2 s de visée, laser draconique : 30 % de chance d'étourdir."},
   avalanche:{n:"Avalanche",t:'Ice',c:'ph',p:80,k:'sig',sig:'avalanche',cd:3.5,range:110,shape:['wedge',114,.9],anim:'Attack',aiP:100,close:1,desc:"Coup de glace devant soi, deux fois plus fort si Oniglali vient d'être touché (1,5 s)."},
   tempetesable:{n:"Tempête de Sable",t:'Ground',c:'sp',p:25,k:'sig',sig:'tempetesable',cd:7,range:380,shape:['lane',200,40],anim:'Attack',aiP:100,per:1,desc:"Tourbillon de sable qui suit l'ennemi pendant 3 s (jusqu'à 5 coups)."},
-  nuagedoux:{n:"Nuage Doux",t:'Fairy',c:'st',k:'sig',sig:'nuagedoux',cd:15,range:9999,shape:['self',40],anim:'Attack',aiP:70,desc:"Nuage protecteur pendant 3 s : soigne 30 % des PV et divise par deux les dégâts reçus."},
+  nuagedoux:{n:"Nuage Doux",t:'Fairy',c:'st',k:'sig',sig:'nuagedoux',cd:20,range:9999,shape:['self',40],anim:'Attack',aiP:70,desc:"Nuage protecteur pendant 3 s : soigne 30 % des PV et divise par deux les dégâts reçus."},
   ailedacier:{n:"Aile d'Acier",t:'Steel',c:'ph',p:55,k:'sig',sig:'ailedacier',cd:4,range:280,shape:['lane',280,22],anim:'Attack',aiP:100,per:1,desc:"Lance ses ailes d'acier comme un boomerang : touche à l'aller et au retour."},
   fracasstete:{n:"Fracass'Tête",t:'Rock',c:'ph',p:150,k:'sig',sig:'fracasstete',cd:6,range:300,shape:['lane',300,26],anim:'Attack',aiP:180,close:1,fx:{recoil:.5},desc:"Charge énorme qui brise tout et repousse ; gros dégâts de recul (la moitié)."},
   extrasenseur:{n:"Extrasenseur",t:'Psychic',c:'sp',p:55,k:'sig',sig:'extrasenseur',cd:5.5,range:380,shape:['zone',110],anim:'Attack',aiP:100,per:1,desc:"5 zones psychiques : sur la zone visée et tout autour."},
@@ -118,7 +118,7 @@ const MOVES = {
   bombeoeuf:{n:"Bomb'Œuf",t:'Normal',c:'ph',p:60,k:'sig',sig:'bombeoeuf',cd:5,range:380,shape:['zone3',46],anim:'Shoot',per:1,aiP:120,desc:"Lance 3 œufs qui explosent l'un après l'autre autour du point visé."},
   gigasangsue:{n:'Giga-Sangsue',t:'Grass',c:'sp',p:75,k:'spec',sig:'gigasangsue',cd:4,range:160,shape:['wedge',160,.5],anim:'Shoot',fx:{drain:.5},desc:"Cône devant soi qui vole la moitié des dégâts en PV."},
   lancesoleil:{n:'Lance-Soleil',t:'Grass',c:'sp',p:42,k:'spec',sig:'lancesoleil',cd:5,range:520,shape:['lane',520,30],anim:'Shoot',per:1,aiP:120,desc:"Après 0,55 s de préparation, rayon de soleil pendant 0,6 s : 4 coups qui repoussent."},
-  flemme:{n:'Flemme',t:'Psychic',c:'st',k:'sig',sig:'flemme',cd:18,range:9999,shape:['self',30],anim:'Charge',aiP:40,desc:"S'immobilise 1,2 s pour récupérer 35 % de ses PV ; renvoie les projectiles pendant ce temps."},
+  flemme:{n:'Flemme',t:'Psychic',c:'st',k:'sig',sig:'flemme',cd:24,range:9999,shape:['self',30],anim:'Charge',aiP:40,desc:"S'immobilise 1,2 s pour récupérer 35 % de ses PV ; renvoie les projectiles pendant ce temps."},
   bombebeurksig:{n:'Bombe Beurk',t:'Poison',c:'sp',p:90,k:'sig',sig:'bombebeurk',cd:4,range:380,shape:['zone',60],anim:'Shoot',fx:{poison:.3},aiP:120,desc:"Crache une boule de poison sur une zone : dégâts, 30 % de chance d'empoisonner, et une mare qui ralentit pendant 2,5 s."},
   // Ligue — lot 1 (aces des dresseurs)
   lyophilisation:{n:'Lyophilisation',t:'Ice',c:'sp',p:90,k:'sig',sig:'lyophilisation',freezeDry:1,cd:5.5,range:220,shape:['wedge',220,.5],anim:'Shoot',aiP:130,desc:"Cône de givre après une courte préparation : le sol gelé ralentit pendant 2 s. Super efficace sur les types Eau."},
@@ -165,7 +165,7 @@ const MOVES = {
   chantflamboyant:{n:'Chant Flamboyant',t:'Fire',c:'sp',p:100,k:'sig',sig:'chantflamboyant',cd:4.5,range:420,shape:['lane',420,46],anim:'Shoot',aiP:130,desc:"Une large vague de flammes et de notes part droit devant (on peut l'esquiver sur le côté). Si elle touche : Atq. Spé. augmentée pendant 6 s."},
   // Vol
   ventviolent:{n:'Vent Violent',t:'Flying',c:'sp',p:50,k:'spec',sig:'ventviolent',cd:6,range:380,shape:['wedge',380,.58],anim:'Shoot',per:1,aiP:110,fx:{stun:.2},desc:"3 tornades : deux partent en V, une au centre. Chacune touche une fois (20 % de chance d'étourdir)."},
-  atterrissage:{n:'Atterrissage',t:'Flying',c:'st',k:'heal',pct:.3,cd:16,roost:2,desc:"Soigne 30 % des PV en 2 s. Pendant ce temps, le lanceur perd le type Vol (les attaques Sol peuvent le toucher)."},
+  atterrissage:{n:'Atterrissage',t:'Flying',c:'st',k:'heal',pct:.3,cd:22,roost:2,desc:"Soigne 30 % des PV en 2 s. Pendant ce temps, le lanceur perd le type Vol (les attaques Sol peuvent le toucher)."},
   lamedair:{n:"Lame d'Air",t:'Flying',c:'sp',p:45,k:'sig',sig:'lamedair',cd:3.6,range:260,shape:['wedge',260,.4],anim:'Shoot',aiP:110,desc:"3 lames de vent qui reviennent comme des boomerangs. Chacune touche à l'aller et au retour.",per:1},
   // Dragon
   dracochoc:{n:'Draco-Choc',t:'Dragon',c:'sp',p:95,k:'proj',spd:430,r:22,life:1.4,cd:3,look:'dragonpulse',fx:{spdDown:.2}},
@@ -176,7 +176,7 @@ const MOVES = {
   // Eau
   vibraqua:{n:'Vibraqua',t:'Water',c:'sp',p:75,k:'proj',spd:430,r:22,life:1.4,cd:3.5,look:'waterpulse',fx:{stun:.2}},
   hydrocanon:{n:'Hydrocanon',t:'Water',c:'sp',p:38,k:'spec',sig:'hydrocanon',cd:4.5,range:520,shape:['lane',520,30],anim:'Shoot',per:1,aiP:120,desc:"Après 0,25 s de visée, énorme rayon d'eau pendant 0,6 s : 4 coups qui repoussent l'ennemi. Le lanceur ne bouge pas pendant le tir."},
-  anneauhydro:{n:'Anneau Hydro',t:'Water',c:'st',k:'ring',dur:6,cd:18},
+  anneauhydro:{n:'Anneau Hydro',t:'Water',c:'st',k:'ring',dur:6,cd:24},
   surf:{n:'Surf',t:'Water',c:'sp',p:120,k:'sig',sig:'surf',cd:5,range:500,shape:['lane',520,115],anim:'Charge',desc:"Une vague traverse toute l'arène et emporte l'ennemi avec elle."},
   cascade:{n:'Cascade',t:'Water',c:'ph',p:85,k:'sig',sig:'cascade',cd:5,range:300,shape:['lane',300,24],anim:'Attack',close:1,desc:"Charge. À l'impact, le lanceur plonge et projette l'ennemi en l'air : il ne peut rien faire avant de retomber."},
   sheauriken:{n:'Sheauriken',t:'Water',c:'sp',p:40,k:'sig',sig:'sheauriken',cd:4,range:520,shape:['lanezone',560,10,55],anim:'Shoot',aiP:90,desc:"3 shurikens d'eau rapides qui rebondissent une fois sur les murs, et un grand shuriken qui retombe sur la zone visée, dans la même direction (60 de puissance, ralentit).",per:1},
@@ -194,7 +194,7 @@ const MOVES = {
   psykoudboul:{n:"Psykoud'Boul",t:'Psychic',c:'ph',p:75,k:'dash',spd:760,dur:.35,cd:2.8,aura:'#F95587',fx:{stun:.2}},
   voilemiroir:{n:'Voile Miroir',t:'Psychic',c:'st',k:'mirror',dur:.9,cd:5.5},
   teleport:{n:'Téléport',t:'Psychic',c:'st',k:'blink',cd:4},
-  repos:{n:'Repos',t:'Psychic',c:'st',k:'rest',cd:28},
+  repos:{n:'Repos',t:'Psychic',c:'st',k:'rest',cd:34},
   psyko:{n:'Psyko',t:'Psychic',c:'sp',p:135,k:'sig',sig:'psyko',cd:5,range:380,shape:['zone',60],anim:'Shoot',desc:"Zone visée qui suit lentement l'ennemi pendant 0,5 s ; un anneau blanc se referme jusqu'au moment de l'impact. S'il est dedans quand elle se déclenche, il est soulevé (immobilisé) puis écrasé au sol. Un Dash permet d'y échapper."},
   // Fée
   eclatmagique:{n:'Éclat Magique',t:'Fairy',c:'sp',p:85,k:'quake',max:175,dur:.4,cd:4,ring:'stars'},
@@ -229,7 +229,7 @@ const MOVES = {
   // Normal
   gigaimpact:{n:'Giga Impact',t:'Normal',c:'ph',p:150,k:'dash',spd:820,dur:.48,cd:7,recharge:1.1},
   danselames:{n:'Danse-Lames',t:'Normal',c:'st',k:'buff',buff:{atk:1.5},dur:10,cd:15},
-  paresse:{n:'Paresse',t:'Normal',c:'st',k:'heal',pct:.3,cd:16,lock:.6},
+  paresse:{n:'Paresse',t:'Normal',c:'st',k:'heal',pct:.3,cd:22,lock:.6},
   vitesseextreme:{n:'Vitesse Extrême',t:'Normal',c:'ph',p:60,k:'sig',sig:'vitesseextreme',cd:6,uses:3,per:1,range:280,shape:['lane',280,24],anim:'Attack',close:1,desc:"Traverse l'ennemi en un éclair. Utilisable 3 fois : 2 s pour relancer après chaque utilisation."},
   plaquage:{n:'Plaquage',t:'Normal',c:'ph',p:130,k:'sig',sig:'plaquage',cd:3.5,range:270,shape:['leap',110],anim:'Attack',close:1,desc:"Saute sur la zone visée (en l'air, passe au-dessus des attaques) et retombe avec une onde de choc qui étourdit."},
   // Plante
