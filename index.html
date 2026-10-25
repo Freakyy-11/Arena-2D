@@ -27,50 +27,60 @@
       <p class="note">Sprites animés : PMD SpriteCollab (CC BY-NC 4.0, crédits par sprite sur sprites.pmdcollab.org) · Portraits : PokéAPI · Décors d'arène générés par IA · Sons et musiques créés pour le jeu.</p>
       <p class="note" lang="en">Unofficial free fan project, not affiliated with or endorsed by Nintendo, The Pokémon Company, Creatures Inc. or GAME FREAK inc. Pokémon © its respective owners, all rights reserved.</p>
       <button class="btn main" id="splashGo">Jouer</button>
+      <div class="splashbar"><i></i></div>
     </div>
   </section>
   <section id="menu">
     <div class="brand">
       <small>Combat temps réel · 6 contre 6</small>
       <h1>Arène Pokémon</h1>
-      <p>Déplace-toi, esquive et attaque en temps réel. Les attaques visent l'adversaire automatiquement, et tu peux changer de Pokémon pendant le combat.</p>
+      <p>Déplace-toi, esquive et attaque en temps réel, et change de Pokémon quand tu veux.</p>
     </div>
+    <div class="modes">
+      <button class="modecard league" id="openLeague"><b>Ligue Pokémon</b><span id="lgMenuInfo"></span><small>Bats les Conseils 4 et leurs Maîtres pour débloquer des Pokémon.</small></button>
+      <a class="modecard free" href="#freeStart"><b>Combat libre</b><span>Contre l'IA, à 2 joueurs ou IA contre IA</span><small>Choisis ton équipe, ton adversaire et l'arène ci-dessous.</small></a>
+    </div>
+
+    <h2 class="section" id="freeStart">Combat libre</h2>
     <div class="step">
-      <h2>Ton équipe</h2>
-      <div class="row" id="pickMode"></div>
-    </div>
-    <div class="step" id="paneTeams"><div class="teams" id="pickTeam"></div></div>
-    <div class="step" id="paneBuild" hidden>
-      <h2>Choisis 6 Pokémon, dans l'ordre d'envoi (1 légendaire ★ maximum) <span id="buildCount">0/6</span></h2>
-      <div class="grid24" id="pickBuild"></div>
-    </div>
-    <div class="step">
-      <h2>Adversaire</h2>
+      <h3><span class="num">1</span>Mode</h3>
       <div class="row" id="pickVs"></div>
       <p class="note" id="vsNote" hidden>Le joueur 2 joue à la manette. Avec deux manettes, la 1re est au joueur 1 ; avec une seule, le joueur 1 joue au clavier et à la souris, ou au tactile.</p>
       <p class="note" id="specNote" hidden>Tu regardes : ton équipe est jouée par l'IA 1, contre l'IA 2, avec la même difficulté. Échap ou Options pour la pause.</p>
-      <h2 id="eTitle" style="margin-top:14px">Équipe de l'IA</h2>
+    </div>
+    <div class="step">
+      <h3><span class="num">2</span>Ton équipe</h3>
+      <div class="row" id="pickMode"></div>
+      <div id="paneTeams"><div class="teams" id="pickTeam"></div></div>
+      <div id="paneBuild" hidden>
+        <p class="note">Choisis 6 Pokémon dans l'ordre d'envoi, 1 légendaire ★ au maximum. <b id="buildCount">0/6</b></p>
+        <div class="grid24" id="pickBuild"></div>
+      </div>
+    </div>
+    <div class="step">
+      <h3><span class="num">3</span><span id="eTitle">Équipe de l'IA</span></h3>
       <div class="row" id="pickE"></div>
     </div>
     <div class="step" id="stepD">
-      <h2>Difficulté</h2>
+      <h3><span class="num">4</span>Difficulté</h3>
       <div class="row" id="pickD"></div>
     </div>
     <div class="step">
-      <h2>Arène</h2>
+      <h3><span class="num">5</span>Arène</h3>
       <div class="row" id="pickA"></div>
     </div>
-    <div class="step">
-      <h2>Son</h2>
-      <div class="row" id="pickS"></div>
+    <div class="startbar"><small id="startSummary"></small><button class="go" id="start">Combattre</button></div>
+
+    <div class="more">
+      <button class="btn" id="openDex">Attaques des Pokémon et ordre des boutons</button>
+      <details><summary>Son et vibrations</summary><div class="row" id="pickS"></div></details>
+      <details><summary>Commandes</summary>
+        <p class="note kbd"><b>Clavier + souris :</b> ZQSD pour bouger, la souris vise · clic gauche, clic droit, A et E pour attaquer · Espace pour le Dash · R pour la Méga-évolution · 1 à 6 pour changer de Pokémon · Échap pour la pause. Clavier seul : J K L M attaquent en visée automatique. Maintiens une attaque pour voir le repère : elle part quand tu relâches.</p>
+        <p class="note"><b>Manette :</b> stick gauche pour bouger, stick droit pour viser (relâché = visée automatique) · L1, L2, R1, R2 pour attaquer (l'attaque part au relâchement) · ✕ pour le Dash · Carré / Rond (ou flèches gauche/droite) pour choisir un Pokémon, Triangle pour l'envoyer · flèche du haut pour la Méga-évolution · visée aimantée sur l'adversaire, et les zones se posent à sa distance · Options pour la pause.</p>
+        <p class="note"><b>Téléphone :</b> joystick à gauche, attaques et Dash à droite. Touche une attaque pour viser automatiquement, ou fais glisser le doigt depuis le bouton pour viser toi-même puis relâche ; la barre d'équipe au-dessus sert à changer de Pokémon, sans lâcher le joystick ; le bouton Méga apparaît en bas à droite de l'arène quand ton Pokémon peut méga-évoluer.</p>
+      </details>
+      <p class="note">Sprites animés : <a href="https://sprites.pmdcollab.org" target="_blank" rel="noopener" style="color:var(--gold)">PMD SpriteCollab</a> (CC BY-NC 4.0) · Portraits : PokéAPI · Projet de fan non officiel et non commercial.</p>
     </div>
-    <button class="btn main" id="openLeague">Ligue Pokémon</button>
-    <button class="btn" id="openDex">Attaques des Pokémon et ordre des boutons</button>
-    <button class="go" id="start">Combattre</button>
-    <p class="note kbd">Clavier + souris : ZQSD pour bouger, la souris vise · clic gauche, clic droit, A et E pour attaquer · Espace pour le Dash · 1 à 6 pour changer de Pokémon · Échap pour la pause. Clavier seul : J K L M attaquent en visée automatique. Maintiens une attaque pour voir le repère : elle part quand tu relâches.</p>
-    <p class="note">Manette : stick gauche pour bouger, stick droit pour viser (relâché = visée automatique) · L1, L2, R1, R2 pour attaquer (l'attaque part au relâchement) · ✕ pour le Dash · Carré / Rond (ou flèches gauche/droite) pour choisir un Pokémon, Triangle pour l'envoyer · visée aimantée sur l'adversaire, et les zones se posent à sa distance · Options pour la pause.</p>
-    <p class="note">Sur téléphone : joystick à gauche, attaques et Dash à droite. Touche une attaque pour viser automatiquement, ou fais glisser le doigt depuis le bouton pour viser toi-même puis relâche, et la barre d'équipe au-dessus pour changer de Pokémon. S'ils ne chargent pas, des jetons aux couleurs des types remplacent les sprites.</p>
-    <p class="note">Sprites animés en combat : <a href="https://sprites.pmdcollab.org" target="_blank" rel="noopener" style="color:var(--gold)">PMD SpriteCollab</a> (CC BY-NC 4.0, crédits par sprite sur le site). Portraits : PokéAPI. Projet de fan non officiel et non commercial.</p>
   </section>
 
   <section id="league" class="dex" hidden>
@@ -101,7 +111,7 @@
       <button class="pause" id="pauseBtn" aria-label="Pause">II</button>
       <div class="card right" id="hudE"></div>
     </header>
-    <div class="stage" id="stage"><canvas id="cv"></canvas></div>
+    <div class="stage" id="stage"><canvas id="cv"></canvas><button class="megab" id="megaBtn" hidden aria-label="Méga-évolution">Méga</button></div>
     <div class="bench" id="bench"></div>
     <div class="pad">
       <div class="stick" id="stick"><div class="knob" id="knob"></div></div>

@@ -24,6 +24,28 @@ button:disabled{cursor:default}
 .step{display:flex;flex-direction:column;gap:8px}
 .step h2{margin:0;font-family:var(--font-d);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-weight:500;display:flex;justify-content:space-between;gap:8px}
 .step h2 span{color:var(--gold)}
+/* menu : deux grands modes, étapes numérotées, barre « Combattre » collée en bas */
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:10px}
+.modecard{display:flex;flex-direction:column;gap:4px;text-align:left;text-decoration:none;color:var(--fg);border-radius:14px;padding:14px 16px;border:1px solid var(--line);background:var(--panel)}
+.modecard b{font-family:var(--font-d);font-size:20px}
+.modecard span{color:var(--gold);font-size:13px;font-weight:600}
+.modecard small{color:var(--mute);font-size:12px;line-height:1.4}
+.modecard.league{background:linear-gradient(135deg,#3a2a6a,#1d1838);border-color:var(--gold)}
+h2.section{margin:6px 0 0;font-family:var(--font-d);font-size:22px}
+.step h3{margin:0;font-family:var(--font-d);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);font-weight:600;display:flex;align-items:center;gap:8px}
+.step h3 .num{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--gold);color:var(--gold-ink);font-size:11px;letter-spacing:0}
+.startbar{position:sticky;bottom:0;z-index:2;display:flex;flex-direction:column;gap:6px;padding:10px 0 6px;background:linear-gradient(transparent,var(--bg) 18%)}
+.startbar small{color:var(--mute);font-size:12px;text-align:center}
+.startbar .go{margin-top:0}
+.more{display:flex;flex-direction:column;gap:10px;padding-top:4px;border-top:1px solid var(--line)}
+.more details{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+.more summary{cursor:pointer;font-family:var(--font-d);font-weight:600}
+.more details[open] summary{margin-bottom:8px}
+.more details .note{margin-bottom:6px}
+.splashbar{width:180px;height:3px;border-radius:2px;background:var(--line);overflow:hidden}
+.splashbar i{display:block;height:100%;background:var(--gold);animation:splashbar 5s linear forwards}
+@keyframes splashbar{from{width:100%}to{width:0}}
+.splash.out{opacity:0;transition:opacity .4s}
 .row{display:flex;flex-wrap:wrap;gap:6px}
 .pill{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-size:13px;font-weight:600}
 .pill[aria-pressed="true"]{background:var(--gold);color:var(--gold-ink);border-color:var(--gold)}
@@ -108,6 +130,8 @@ button:disabled{cursor:default}
 .st{font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:1px 4px;border-radius:3px;color:#17122b}
 .pause{background:var(--panel);border:1px solid var(--line);border-radius:8px;width:36px;height:36px;display:grid;place-items:center;font-family:var(--font-d);font-weight:700}
 .stage{position:relative;min-height:0;touch-action:none}
+.megab{position:absolute;right:8px;bottom:8px;z-index:3;border:2px solid #fff;border-radius:50%;width:58px;height:58px;font-family:var(--font-d);font-weight:700;font-size:13px;color:#fff;background:conic-gradient(#ff6a6a,#ffd25a,#7AC74C,#6390F0,#c070ff,#ff6a6a);box-shadow:0 0 14px rgba(255,255,255,.5);text-shadow:0 1px 2px #000}
+.megab .k{display:block;font-size:9px;opacity:.85}
 @media (pointer:fine){.stage{cursor:crosshair}}
 body.pad .mv em,body.pad .dashb em{display:block}
 .choose button.focus{border-color:var(--gold);background:var(--panel-2);box-shadow:0 0 0 1px var(--gold) inset}

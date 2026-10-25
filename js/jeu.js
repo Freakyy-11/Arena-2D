@@ -26,7 +26,7 @@ function makeFighter(key, side){
     held:[false,false,false,false], ai:{think:1, strafe:1, strafeT:0, swT:2} };
 }
 // Vitesse de déplacement compressée : 160 (Vit 30) → 230 (Vit 143)
-const moveSpeed = f => (160 + ((game && game.trick > 0 ? 173 - f.d.base[5] : f.d.base[5])-30)/113*70)   // Distorsion : vitesses inversées * f.buff.spe * (f.slow > 0 ? f.slowF : 1);
+const moveSpeed = f => (160 + ((game && game.trick > 0 ? 173 - f.d.base[5] : f.d.base[5])-30)/113*55) * f.buff.spe * (f.slow > 0 ? f.slowF : 1);   // Distorsion : vitesses inversées
 
 function resolveTeams(){
   const pk = sel.mode === 'build' ? sel.build.slice() : TEAMS.find(t=>t.id===sel.team).mons.slice();
@@ -80,6 +80,21 @@ function sendIn(side, idx, announce=true){
   burst(f.x, f.y, '#ffffff', 16, 160, 4);
   if (announce) AUDIO.swap();
   if (announce) popText(f.x, f.y - 52, (alive ? 'Changement : ' : 'Go ! ') + f.d.name, side === game.ps ? '#e6b84c' : '#ef5050', 14, 1);
+}
+// Méga-évolution : le Pokémon actif prend sa forme Méga (stats, types, sprite) jusqu'à la fin du combat ; une par équipe
+const canMega = side => !!(game && game.state === 'fight' && !side.megaUsed && side.team[side.active].hp > 0 && MEGA[side.team[side.active].key] && !side.team[side.active].mega);
+function tryMega(side){
+  if (!canMega(side)) return false;
+  const f = side.team[side.active], M = MEGA[f.key], b = M.base, s = v => Math.floor((2*v+31)/2)+5, ratio = f.hp/f.max;
+  side.megaUsed = true; f.mega = true; f.pmdKey = M.pmd ? 'mega-' + f.key : null;
+  f.d = {...f.d, name:M.name, types:M.types, base:b};
+  f.max = Math.floor((2*b[0]+31)/2)+60; f.hp = Math.max(1, Math.round(f.max*ratio)); f.st = {atk:s(b[1]), def:s(b[2]), spa:s(b[3]), spd:s(b[4])};
+  f.inv = Math.max(f.inv, .5); popText(f.x, f.y - 70, M.name + ' !', '#ffe08a', 18, 1.5);
+  screenFlash('#ffffff', .4, .35); zoomPunch(.05); shake(10);
+  for (const [i, c] of ['#ff6a6a','#ffd25a','#7AC74C','#6390F0','#c070ff'].entries()) shockRing(f.x, f.y, 70 + i*22, c, .5, 6);
+  sparks(f.x, f.y, ['#ffffff','#ffd25a','#6390F0','#ff6a6a','#c070ff'], 40, 300, 6);
+  buildCard(side === game.ps ? 'p' : 'e'); if (side === game.ps) buildMoves();
+  return true;
 }
 function trySwitch(side, idx){
   if (!game || game.state !== 'fight' || game.paused) return false;
@@ -142,9 +157,12 @@ function buildBench(){
   hydrate($('bench'));
   game.ps.benchBtns = [...$('bench').querySelectorAll('button')];
 }
-$('bench').addEventListener('click', e => { const b = e.target.closest('button'); if (b && game && !game.spectate) trySwitch(game.ps, +b.dataset.i); });
+// pointerdown (et non click) : sur téléphone, on peut changer de Pokémon sans lâcher le joystick
+$('bench').addEventListener('pointerdown', e => { e.preventDefault(); const b = e.target.closest('button'); if (b && game && !game.spectate) trySwitch(game.ps, +b.dataset.i); });
+$('megaBtn').addEventListener('pointerdown', e => { e.preventDefault(); if (game) tryMega(game.ps); });
 function hpColor(r){ return r > .5 ? 'var(--hp)' : r > .2 ? 'var(--hp-mid)' : 'var(--hp-low)'; }
 function updateHUD(){
+  const mb = $('megaBtn'), can = !game.spectate && canMega(game.ps); if (mb.hidden === can){ mb.hidden = !can; if (can) mb.innerHTML = 'Méga<span class="k">' + (inputMode === 'pad' ? '↑' : inputMode === 'touch' ? '' : 'R') + '</span>'; }
   for (const sd of [game.ps, game.es]) if (sd.swSel != null && ((sd.swSelT -= 1/60) <= 0 || sd.swSel === sd.active || sd.team[sd.swSel].hp <= 0)) sd.swSel = null;
   for (const side of [game.ps, game.es]){
     const f = side.team[side.active], r = f.hp / f.max, h = side.hud;
@@ -231,6 +249,7 @@ addEventListener('keydown', e => {
   if (!game) return;
   if (e.code === 'Escape' || e.code === 'KeyP'){ setPause(!game.paused); return; }
   if (game.spectate) return;   // IA contre IA : seule la pause répond
+  if (e.code === 'KeyR' && !e.repeat){ tryMega(game.ps); e.preventDefault(); return; }
   if (MOVE_KEYS[e.code]){ keys.add(e.code); e.preventDefault(); }
   if (ATK_KEYS[e.code] !== undefined){ setMode('kb'); press(ATK_KEYS[e.code], 'auto'); e.preventDefault(); }
   if (AIM_KEYS[e.code] !== undefined){ setMode('mouse'); press(AIM_KEYS[e.code], 'mouse'); e.preventDefault(); }
@@ -308,6 +327,7 @@ function pollPad(){
   if (down(0)) tryRoll(g.p, ...playerInput());
   // flèches gauche/droite : présélection d'un Pokémon de la barre d'équipe ; Triangle : changement
   if (down(14) || down(15) || down(2) || down(1)) preselect(g.ps, down(15) || down(1));   // flèches, ou Carré (gauche) / Rond (droite)
+  if (down(12)) tryMega(g.ps);   // flèche du haut : Méga-évolution
   if (down(3) && g.ps.swSel != null && trySwitch(g.ps, g.ps.swSel)) g.ps.swSel = null;
   pad.prev = b;
 }
@@ -323,6 +343,7 @@ function pollPad2(gp){
   PAD_ATK.forEach((bi,i) => { if (down(bi)) press(i, 'pad2', g.e); else if (!b[bi]) release(i, 'pad2', g.e); });
   if (down(0)) tryRoll(g.e, pad2.lx, pad2.ly);
   if (down(14) || down(15) || down(2) || down(1)) preselect(g.es, down(15) || down(1));
+  if (down(12)) tryMega(g.es);
   if (down(3) && g.es.swSel != null && trySwitch(g.es, g.es.swSel)) g.es.swSel = null;
 }
 const playerInput2 = () => [pad2.lx, pad2.ly];
@@ -473,6 +494,7 @@ function hit(att, def, mv, mult){
   if (att.burn > 0 && mv.c === 'ph') dmg *= .5;
   if (att.isAI) dmg *= game.diff.dmg;   // force de l'IA selon la difficulté
   if (def.shield > 0) dmg *= .5;   // Nuage Doux, Ordre Défense
+  if (att.mega && mv.k === 'sig') dmg *= 1.15;   // forme Méga : attaque emblématique renforcée
   dmg = Math.max(1, Math.round(dmg));
   damage(def, dmg);
   AUDIO.hit(mv.t, dmg, e); if (!def.isAI) rumbleFor(def, .25 + dmg/50, 40 + Math.min(120, dmg*2));

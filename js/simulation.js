@@ -1,7 +1,7 @@
 // Simulation d'une image de jeu, K.O., fin de match
 // ---------- Simulation ----------
 function stepFighter(f, ix, iy, dt){
-  const foe = foeOf(f);
+  const foe = foeOf(f); f.inX = ix; f.inY = iy;   // dernière direction de déplacement demandée (pour diriger Chute Libre)
   // recharges en pause pendant un K.O. et pendant le choix du Pokémon suivant (l'adversaire ne profite pas de ce temps)
   const frozen = game.state === 'ko' || game.state === 'choose';
   if (!frozen) for (let i=0;i<4;i++) f.cds[i] = Math.max(0, f.cds[i]-dt);
@@ -78,11 +78,12 @@ function update(dt){
   if (g.state === 'fight') for (const side of [g.ps, g.es]) if (side.dashN < DASH_MAX && (side.dashT -= dt) <= 0){
     side.dashN++; side.dashT = side.dashN < DASH_MAX ? DASH_REGEN : 0; }
   const [px,py] = g.spectate ? aiInput(g.p, dt) : playerInput();
+  for (const side of g.vs2 ? [] : g.spectate ? [g.ps, g.es] : [g.es]) if (g.diff.dmg > .75 && canMega(side) && (side.team[side.active].hp/side.team[side.active].max < .8 || g.fightT > 8)) tryMega(side);
   const [ax,ay] = g.vs2 ? playerInput2() : aiInput(g.e, dt);
   stepFighter(g.p, px, py, dt);
   stepFighter(g.e, ax, ay, dt);
   // les deux Pokémon ne se chevauchent pas, sauf pendant une charge qui traverse ou sous terre
-  const passThrough = f => (f.dash && f.dash.pierce) || f.buried;
+  const passThrough = f => (f.dash && f.dash.pierce) || f.buried || f.air;   // en l'air (Chute Libre) : pas de poussée
   if (g.p.hp > 0 && g.e.hp > 0 && !passThrough(g.p) && !passThrough(g.e)){ const dx = g.e.x-g.p.x, dy = g.e.y-g.p.y, d = Math.hypot(dx,dy) || 1, min = g.p.r + g.e.r;
     if (d < min){ const o = (min-d)/2; g.p.x -= dx/d*o; g.p.y -= dy/d*o; g.e.x += dx/d*o; g.e.y += dy/d*o; } }
 

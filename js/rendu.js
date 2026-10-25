@@ -84,7 +84,8 @@ function drawFighter(f){
   if (f.vanish > 0) return;   // disparu (Coupe Fatale)
   const alpha = f.hp > 0 ? 1 : Math.max(0, 1 - f.dead*1.2);
   if (alpha <= 0) return;
-  const t = game.t, pm = PMD[f.key], pmOk = pm.st === 'ok';
+  const t = game.t, pmM = f.pmdKey && PMD[f.pmdKey], pm = pmM && pmM.st === 'ok' ? pmM : PMD[f.key], pmOk = pm.st === 'ok';
+  if (f.mega){ const hue = (t*120) % 360; ctx.globalAlpha = .35; ctx.strokeStyle = `hsl(${hue},90%,65%)`; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(f.x, f.y + f.r*.6, f.r + 8, (f.r + 8)*.4, 0, 0, Math.PI*2); ctx.stroke(); ctx.globalAlpha = 1; }   // forme Méga
   // sous terre (Tunnel, plongée de Cascade) : seulement un monticule qui avance
   if (f.buried){ ctx.fillStyle = '#5a4026'; ctx.beginPath(); ctx.ellipse(f.x, f.y + f.r*.6, f.r*.9, f.r*.4, 0, 0, TAU); ctx.fill();
     ctx.fillStyle = '#8a6a3a'; ctx.beginPath(); ctx.ellipse(f.x, f.y + f.r*.45, f.r*.6, f.r*.28, 0, 0, TAU); ctx.fill(); return; }

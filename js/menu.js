@@ -46,6 +46,10 @@ function renderMenu(){
   $('pickD').innerHTML = Object.keys(DIFFS).map(k => `<button class="pill" data-k="${k}" aria-pressed="${sel.d===k}">${DIFFS[k].label}</button>`).join('');
   $('pickA').innerHTML = [['random','Aléatoire'], ...ARENA_LIST].map(([k,l]) => `<button class="pill" data-k="${k}" aria-pressed="${(sel.arena || 'random')===k}">${l}</button>`).join('');
   const teamLocked = sel.mode === 'teams' && lockedN(TEAMS.find(t => t.id === sel.team) || TEAMS[0]) > 0;
+  const teamName = sel.mode === 'build' ? 'Ton équipe composée' : (TEAMS.find(t => t.id === sel.team) || TEAMS[0]).name, foe = sel.e === 'random' ? 'adversaire au hasard' : (TEAMS.find(t => t.id === sel.e) || {}).name;
+  $('startSummary').textContent = `${teamName} contre ${foe}${sel.vs === 'p2' ? ' (joueur 2)' : sel.vs === 'spec' ? ' (IA contre IA)' : ' · IA ' + DIFFS[sel.d].label} · ${sel.arena && sel.arena !== 'random' ? ARENA_LIST.find(a => a[0] === sel.arena)[1] : 'arène au hasard'}`;
+  if (typeof LEAGUE !== 'undefined'){ const done = LEAGUE.filter(r => lg.beaten[r.trainers.at(-1).id]).length, cur = LEAGUE[Math.min(done, LEAGUE.length - 1)];
+    $('lgMenuInfo').textContent = (lgRun() ? 'Ligue en cours : ' + LEAGUE.find(r => r.id === lgRun().region).name : done >= LEAGUE.length ? 'Toutes les Ligues terminées !' : 'Prochaine : ' + cur.name) + ` · ${un.size}/${Object.keys(MONS).length} Pokémon`; }
   $('start').disabled = (sel.mode === 'build' && sel.build.length !== 6) || teamLocked;
   $('start').textContent = teamLocked ? 'Équipe verrouillée : débloque-la dans la Ligue' : $('start').disabled ? `Choisis encore ${6 - sel.build.length} Pokémon` : 'Combattre';
   hydrate($('menu'));
@@ -143,4 +147,7 @@ $('openDex').onclick = openDex; $('closeDex').onclick = closeDex;
 addEventListener('keydown', e => { if (e.code === 'Escape' && !$('dex').hidden) closeDex(); });
 
 // ---------- Avertissement à l'ouverture ----------
-$('splashGo').addEventListener('click', () => { $('splash').hidden = true; });
+// l'avertissement disparaît tout seul au bout de 5 s (ou au clic sur « Jouer »)
+function hideSplash(){ const el = $('splash'); if (el.hidden || el.classList.contains('out')) return; el.classList.add('out'); setTimeout(() => { el.hidden = true; }, 400); }
+$('splashGo').addEventListener('click', hideSplash);
+setTimeout(hideSplash, 5000);

@@ -27,6 +27,8 @@ Le jeu s'installe comme une appli (icône sur l'écran d'accueil, plein écran) 
 - Mode 2 joueurs en local.
 - Sons et musiques synthétisés (une musique par arène), vibrations du téléphone et de la manette quand ton Pokémon encaisse ; réglables dans le menu et la pause.
 - Types adoucis pour un jeu d'action : immunité ×0,33, double résistance ×0,5, résistance ×0,75, super efficace ×1,33, double faiblesse ×1,66 ; bonus de type du lanceur ×1,25.
+- **Méga-évolutions** (et Primo-Résurgences de Groudon et Kyogre) pour 28 Pokémon : une par équipe et par combat, quand tu veux (R au clavier, flèche du haut à la manette, bouton Méga sur téléphone). Stats et types de la forme Méga, attaque ★ renforcée ; l'IA méga-évolue aussi (sauf en Facile).
+- Stats des Pokémon non légendaires rapprochées d'un total commun pour l'équilibre (Vitesse officielle conservée).
 - Dash : 3 charges partagées par l'équipe, une charge rendue toutes les 3 s, invulnérable pendant la ruée.
 - Changement de Pokémon en combat (4 s de recharge), mort subite après 3 minutes.
 
