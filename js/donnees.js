@@ -57,7 +57,7 @@ const MOVES = {
   explosion:{n:"Explosion",t:'Normal',c:'ph',p:170,k:'sig',sig:'explosion',cd:12,range:140,shape:['self',150],anim:'Attack',aiP:70,desc:"Se charge 1 s, puis explose sur une énorme zone ; Foretress perd 20 % de ses PV et doit récupérer 1 s."},
   picots:{n:"Picots",t:'Ground',c:'ph',p:45,k:'spec',sig:'picots',cd:8,range:380,shape:['zone3',18],anim:'Attack',desc:"Pose 3 pièges au sol : l'ennemi qui marche dessus est blessé."},
   pikstoxik:{n:"Pics Toxik",t:'Poison',c:'ph',p:20,k:'spec',sig:'pikstoxik',cd:8,range:380,shape:['zone3',18],anim:'Attack',desc:"Pose 3 pièges au sol : l'ennemi qui marche dessus est blessé et empoisonné."},
-  gyroballe:{n:"Gyroballe",t:'Steel',c:'ph',p:50,k:'spec',sig:'gyroballe',cd:5,range:130,shape:['self',62],anim:'Attack',desc:"Petite charge, puis tourne sur lui-même pendant 1,6 s avec une vitesse ×1,6 : 5 coups autour de lui, d'autant plus forts que l'ennemi est plus rapide que lui (×0,7 à ×2)."},
+  gyroballe:{n:"Gyroballe",t:'Steel',c:'ph',p:42,k:'spec',sig:'gyroballe',cd:5,range:130,shape:['self',62],anim:'Attack',desc:"Petite charge, puis tourne sur lui-même pendant 1,6 s avec une vitesse ×1,6 : 5 coups autour de lui, d'autant plus forts que l'ennemi est plus rapide que lui (×0,7 à ×1,5)."},
   triplepied:{n:"Triple Pied",t:'Fighting',c:'ph',p:45,k:'sig',sig:'triplepied',cd:5,range:200,shape:['lane',140,24],anim:'Attack',aiP:100,close:1,per:1,desc:"3 charges courtes (redirigeables), de plus en plus fortes (35, 45, 65)."},
   machpunch:{n:'Mach Punch',t:'Fighting',c:'ph',p:55,k:'dash',spd:950,dur:.14,cd:2.2},
   aquajet:{n:'Aqua-Jet',t:'Water',c:'ph',p:55,k:'dash',spd:950,dur:.14,cd:2.2},
