@@ -26,7 +26,7 @@ function makeFighter(key, side){
     held:[false,false,false,false], ai:{think:1, strafe:1, strafeT:0, swT:2} };
 }
 // Vitesse de déplacement compressée : 160 (Vit 30) → 230 (Vit 143)
-const moveSpeed = f => (160 + (f.d.base[5]-30)/113*70) * f.buff.spe * (f.slow > 0 ? f.slowF : 1);
+const moveSpeed = f => (160 + ((game && game.trick > 0 ? 173 - f.d.base[5] : f.d.base[5])-30)/113*70)   // Distorsion : vitesses inversées * f.buff.spe * (f.slow > 0 ? f.slowF : 1);
 
 function resolveTeams(){
   const pk = sel.mode === 'build' ? sel.build.slice() : TEAMS.find(t=>t.id===sel.team).mons.slice();
@@ -71,7 +71,7 @@ function sendIn(side, idx, announce=true){
   const alive = old.hp > 0;
   f.x = alive ? old.x : side.spawn.x; f.y = alive ? old.y : side.spawn.y;
   f.vx = f.vy = f.kx = f.ky = 0; f.dash = null; f.roll = null; f.script = null; f.air = null; f.h = 0; f.buried = false; f.root = 0; f.act = null; f.hurtT = 0; f.stun = 0; f.recharge = 0; f.mirror = 0; f.ring = 0; f.slow = 0;
-  f.buff = {atk:1,spa:1,spe:1,spd:1}; f.buffT = 0; f.busy = 0; f.inv = INV_ON_SWITCH; f.held.fill(false); f.defDown = f.spdDown = f.atkDown = f.grounded = f.healT = 0; f.recast.fill(0); f.recastN.fill(0);
+  f.buff = {atk:1,spa:1,spe:1,spd:1}; f.buffT = 0; f.busy = 0; f.vanish = 0; f.doll = 0; f.shield = 0; f.inv = INV_ON_SWITCH; f.held.fill(false); f.defDown = f.spdDown = f.atkDown = f.grounded = f.healT = 0; f.recast.fill(0); f.recastN.fill(0);
   if (alive){ old.dash = null; old.roll = null; old.script = null; old.air = null; old.h = 0; old.buried = false; old.buff = {atk:1,spa:1,spe:1,spd:1}; old.buffT = 0; old.mirror = 0; old.ring = 0; old.held.fill(false); }
   side.active = idx;
   if (side === game.ps){ game.p = f; buildMoves(); } else game.e = f;
@@ -462,14 +462,17 @@ function applyStatus(def, fx){
 function hit(att, def, mv, mult){
   if (def.hp <= 0 || def.buried || game.state === 'ko') return;   // pendant un K.O., personne ne peut bouger : plus aucun coup ne compte
   if (def.inv > 0){ popText(def.x, def.y - 34, 'Esquivé', '#a39bd0', 13, .6); return; }
+  if (def.doll > 0){ popText(def.x, def.y - 34, 'Absorbé par la poupée', '#b08ae8', 13, .6); return; }   // Poupée Maudite
+  def.lastHit = game.t;   // Avalanche
   // hitsImmune (Poing Plasma…) : une immunité compte ×1 ; t2 : 2e type d'attaque ; une immunité n'annule plus l'attaque (×0,33)
-  const raw = effMult(mv.t, typesOf(def), mv.hitsImmune)*(mv.t2 ? effMult(mv.t2, typesOf(def), mv.hitsImmune) : 1), e = typeScale(raw);
+  const raw = effMult(mv.t, typesOf(def), mv.hitsImmune)*(mv.t2 ? effMult(mv.t2, typesOf(def), mv.hitsImmune) : 1)*(mv.freezeDry && typesOf(def).includes('Water') ? 4 : 1), e = typeScale(raw);   // freezeDry : Lyophilisation, super efficace sur Eau
   const fx = mv.fx || {};
   if (!mv.p){ applyStatus(def, fx); burst(def.x, def.y, TYPES[mv.t][1], 8, 100, 3); return; }
-  const A = mv.c === 'ph' ? att.st.atk*att.buff.atk*(att.atkDown > 0 ? .75 : 1) : att.st.spa*att.buff.spa, D = mv.c === 'ph' || mv.vsDef ? def.st.def*(def.defDown > 0 ? .75 : 1) : def.st.spd*(def.spdDown > 0 ? .75 : 1)*(def.buff.spd || 1);   // vsDef : Frappe Psy
+  const A = mv.foulPlay ? def.st.atk*def.buff.atk : mv.c === 'ph' ? att.st.atk*att.buff.atk*(att.atkDown > 0 ? .75 : 1) : att.st.spa*att.buff.spa, D = mv.c === 'ph' || mv.vsDef ? def.st.def*(def.defDown > 0 ? .75 : 1) : def.st.spd*(def.spdDown > 0 ? .75 : 1)*(def.buff.spd || 1);   // vsDef : Frappe Psy
   let dmg = ((22*mv.p*A/D)/50 + 2) * (att.d.types.includes(mv.t) || (mv.t2 && att.d.types.includes(mv.t2)) ? STAB : 1) * e * rand(.88,1) * .3 * mult * suddenDeath();
   if (att.burn > 0 && mv.c === 'ph') dmg *= .5;
   if (att.isAI) dmg *= game.diff.dmg;   // force de l'IA selon la difficulté
+  if (def.shield > 0) dmg *= .5;   // Nuage Doux, Ordre Défense
   dmg = Math.max(1, Math.round(dmg));
   damage(def, dmg);
   AUDIO.hit(mv.t, dmg, e); if (!def.isAI) rumbleFor(def, .25 + dmg/50, 40 + Math.min(120, dmg*2));

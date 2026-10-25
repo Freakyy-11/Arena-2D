@@ -81,6 +81,7 @@ function drawPmd(f, pm, fy, x = f.x){
   return fy - (ref.fh*.5 + 4)*S;
 }
 function drawFighter(f){
+  if (f.vanish > 0) return;   // disparu (Coupe Fatale)
   const alpha = f.hp > 0 ? 1 : Math.max(0, 1 - f.dead*1.2);
   if (alpha <= 0) return;
   const t = game.t, pm = PMD[f.key], pmOk = pm.st === 'ok';

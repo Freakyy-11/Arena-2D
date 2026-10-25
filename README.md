@@ -18,7 +18,7 @@ Le jeu s'installe comme une appli (icône sur l'écran d'accueil, plein écran) 
 ## Contenu
 
 - **Ligue Pokémon** : Kanto, Johto, Hoenn et Sinnoh, chacune avec son Conseil 4 et son Maître, à affronter d'affilée avec la difficulté de ton choix : une défaite fait recommencer la Ligue. Chaque victoire débloque des Pokémon jouables dans tous les modes, des défis bonus débloquent des légendaires ; on commence avec 8 Pokémon. Progression gardée sur l'appareil (bouton « Tout débloquer » pour tester).
-- 30 Pokémon avec leurs stats officielles et 4 attaques chacun, dont 6 légendaires ★ (Mewtwo, Groudon, Kyogre, Shifours Style Poing Final, Sylveroy Cavalier d'Effroi, Électhor de Galar) : 1 au maximum dans une équipe composée.
+- 92 Pokémon avec leurs stats officielles et 4 attaques chacun, dont 6 légendaires ★ (Mewtwo, Groudon, Kyogre, Shifours Style Poing Final, Sylveroy Cavalier d'Effroi, Électhor de Galar) : 1 au maximum dans une équipe composée.
 - Une attaque emblématique ★ par Pokémon, avec son propre effet (Rafale Feu, Pouvoir Lunaire, Génusection, Poing Plasma, Tunnel, Surf…), et un rendu propre à chaque type pour les autres attaques.
 - Effets de combat : tremblement et éclair d'écran, écran électrisé ou givré, gel d'image à l'impact, marques au sol, adversaire soulevé ou projeté en l'air.
 - 4 équipes prêtes classiques (Dracolosse, Carchacrok, Lanssorien, Naganadel) et 6 équipes légendaires (une par légendaire), ou équipe composée ; avec « Aléatoire », l'adversaire est tiré dans la même catégorie que ton équipe ; le bouton « Attaques des Pokémon » du menu détaille les 4 attaques de chacun (puissance, recharge, effet).

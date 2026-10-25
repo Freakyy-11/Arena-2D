@@ -6,32 +6,32 @@ const LEAGUE_START = ['dracaufeu','leviator','gorythmic','pyrax','lucario','ronf
 // adversaires dans l'ordre ; reward = Pokémon débloqués en gagnant ; arena = arène du combat
 const LEAGUE = [
   {id:'kanto', name:'Kanto', trainers:[
-    {id:'kanto-olga', name:'Olga', title:'Conseil 4 · Glace', arena:'couronne', mons:['momartik','mammochon','milobellus','leviator'], reward:['mammochon']},
-    {id:'kanto-aldo', name:'Aldo', title:'Conseil 4 · Combat', arena:'stade', mons:['lucario','tyranocif','minotaupe','ronflex'], reward:['tyranocif']},
-    {id:'kanto-agatha', name:'Agatha', title:'Conseil 4 · Spectre', arena:'chateau', mons:['sinistrail','flamigator','momartik','naganadel','lanssorien'], reward:['sinistrail']},
-    {id:'kanto-peter', name:'Peter', title:'Conseil 4 · Dragon', arena:'pilier', mons:['dracolosse','carchacrok','lanssorien','naganadel','dracaufeu'], reward:['dracolosse']},
-    {id:'kanto-blue', name:'Blue', title:'Maître de Kanto', arena:'stade', champion:1, mons:['dracaufeu','alakazam','tyranocif','leviator','gorythmic','ronflex'], reward:['alakazam','mewtwo']}],
+    {id:'kanto-olga', name:'Olga', title:'Conseil 4 · Glace', arena:'couronne', mons:['crustabri','lippoutou','lamantine','momartik','mammochon','lokhlass'], reward:['mammochon','lamantine','lokhlass']},
+    {id:'kanto-aldo', name:'Aldo', title:'Conseil 4 · Combat', arena:'stade', mons:['kicklee','tygnon','grolem','lucario','tyranocif','mackogneur'], reward:['tyranocif','mackogneur']},
+    {id:'kanto-agatha', name:'Agatha', title:'Conseil 4 · Spectre', arena:'chateau', mons:['arbok','sinistrail','flamigator','momartik','naganadel','ectoplasma'], reward:['sinistrail','arbok','ectoplasma']},
+    {id:'kanto-peter', name:'Peter', title:'Conseil 4 · Dragon', arena:'pilier', mons:['ptera','leviator','carchacrok','lanssorien','dracaufeu','dracolosse'], reward:['ptera','dracolosse']},
+    {id:'kanto-blue', name:'Blue', title:'Maître de Kanto', arena:'stade', champion:1, mons:['roucarnage','alakazam','rhinoferos','arcanin','mewtwo','tortank'], reward:['alakazam','arcanin','tortank','mewtwo']}],
    challenges:[{id:'kanto-def', trainer:'kanto-blue', text:'Battre Blue sans perdre un seul Pokémon', test:r => r.lost === 0, reward:['electhorgalar']}]},
   {id:'johto', name:'Johto', trainers:[
-    {id:'johto-clement', name:'Clément', title:'Conseil 4 · Psy', arena:'colonnes', mons:['alakazam','gardevoir','metalosse','togekiss','milobellus'], reward:['metalosse']},
-    {id:'johto-koga', name:'Koga', title:'Conseil 4 · Poison', arena:'tourbillon', mons:['naganadel','amphinobi','scalpereur','pyrax','zeraora'], reward:['naganadel']},
-    {id:'johto-aldo', name:'Aldo', title:'Conseil 4 · Combat', arena:'stade', mons:['lucario','tyranocif','minotaupe','mammochon','ronflex','gorythmic'], reward:['minotaupe']},
-    {id:'johto-marion', name:'Marion', title:'Conseil 4 · Ténèbres', arena:'chateau', mons:['tyranocif','scalpereur','amphinobi','sinistrail','flamigator','lanssorien'], reward:['amphinobi']},
-    {id:'johto-peter', name:'Peter', title:'Maître de Johto', arena:'pilier', champion:1, mons:['dracolosse','carchacrok','lanssorien','naganadel','dracaufeu','leviator'], reward:['carchacrok']}],
+    {id:'johto-clement', name:'Clément', title:'Conseil 4 · Psy', arena:'colonnes', mons:['lippoutou','flagadoss','noadkoko','alakazam','gardevoir','xatu'], reward:['metalosse','lippoutou','noadkoko','xatu']},
+    {id:'johto-koga', name:'Koga', title:'Conseil 4 · Poison', arena:'tourbillon', mons:['migalos','foretress','grotadmorv','amphinobi','naganadel','nostenfer'], reward:['naganadel','grotadmorv','migalos','foretress','nostenfer']},
+    {id:'johto-aldo', name:'Aldo', title:'Conseil 4 · Combat', arena:'stade', mons:['kapoera','steelix','tygnon','kicklee','lucario','mackogneur'], reward:['minotaupe','tygnon','kicklee','kapoera','steelix']},
+    {id:'johto-marion', name:'Marion', title:'Conseil 4 · Ténèbres', arena:'chateau', mons:['noctali','corboss','tyranocif','scalpereur','ectoplasma','demolosse'], reward:['amphinobi','noctali','corboss','demolosse']},
+    {id:'johto-peter', name:'Peter', title:'Maître de Johto', arena:'pilier', champion:1, mons:['ptera','hyporoi','carchacrok','electhorgalar','leviator','dracolosse'], reward:['carchacrok','roucarnage','hyporoi']}],
    challenges:[{id:'johto-def', trainer:'johto-peter', text:'Battre Peter en moins de 3 minutes', test:r => r.time < 180, reward:['shifours']}]},
   {id:'hoenn', name:'Hoenn', trainers:[
-    {id:'hoenn-damien', name:'Damien', title:'Conseil 4 · Ténèbres', arena:'chateau', mons:['tyranocif','scalpereur','amphinobi','minotaupe','pyrax','zeraora'], reward:['scalpereur']},
-    {id:'hoenn-spectra', name:'Spectra', title:'Conseil 4 · Spectre', arena:'colonnes', mons:['flamigator','momartik','sinistrail','lanssorien','alakazam','gardevoir'], reward:['flamigator']},
-    {id:'hoenn-glacia', name:'Glacia', title:'Conseil 4 · Glace', arena:'couronne', mons:['momartik','mammochon','milobellus','leviator','amphinobi','togekiss'], reward:['momartik']},
-    {id:'hoenn-aragon', name:'Aragon', title:'Conseil 4 · Dragon', arena:'pilier', mons:['dracolosse','carchacrok','naganadel','lanssorien','dracaufeu','leviator'], reward:['lanssorien']},
-    {id:'hoenn-pierre', name:'Pierre Rochard', title:'Maître de Hoenn', arena:'tourbillon', champion:1, mons:['metalosse','minotaupe','scalpereur','lucario','carchacrok','milobellus'], reward:['milobellus','kyogre']}],
+    {id:'hoenn-damien', name:'Damien', title:'Conseil 4 · Ténèbres', arena:'chateau', mons:['tengalice','cacturne','colhomard','grahyena','tyranocif','absol'], reward:['scalpereur','tengalice','cacturne','colhomard','grahyena','absol']},
+    {id:'hoenn-spectra', name:'Spectra', title:'Conseil 4 · Spectre', arena:'colonnes', mons:['branette','tenefix','momartik','sinistrail','flamigator','noctunoir'], reward:['flamigator','branette','tenefix','noctunoir']},
+    {id:'hoenn-glacia', name:'Glacia', title:'Conseil 4 · Glace', arena:'couronne', mons:['oniglali','crustabri','lamantine','lokhlass','mammochon','kaimorse'], reward:['momartik','crustabri','oniglali','kaimorse']},
+    {id:'hoenn-aragon', name:'Aragon', title:'Conseil 4 · Dragon', arena:'pilier', mons:['libegon','altaria','carchacrok','dracolosse','lanssorien','drattak'], reward:['lanssorien','libegon','altaria','drattak']},
+    {id:'hoenn-pierre', name:'Pierre Rochard', title:'Maître de Hoenn', arena:'tourbillon', champion:1, mons:['airmure','galeking','kaorine','armaldo','groudon','metalosse'], reward:['milobellus','flagadoss','airmure','galeking','kaorine','vacilys','armaldo','kyogre']}],
    challenges:[{id:'hoenn-def', trainer:'hoenn-pierre', text:'Battre Pierre Rochard en perdant au plus 1 Pokémon', test:r => r.lost <= 1, reward:['groudon']}]},
   {id:'sinnoh', name:'Sinnoh', trainers:[
-    {id:'sinnoh-aaron', name:'Aaron', title:'Conseil 4 · Insecte', arena:'pilier', mons:['pyrax','scalpereur','lucario','gorythmic','togekiss','minotaupe'], reward:['togekiss']},
-    {id:'sinnoh-terry', name:'Terry', title:'Conseil 4 · Sol', arena:'couronne', mons:['minotaupe','carchacrok','mammochon','tyranocif','ronflex','metalosse'], reward:[]},
-    {id:'sinnoh-adrien', name:'Adrien', title:'Conseil 4 · Feu', arena:'chateau', mons:['dracaufeu','flamigator','pyrax','ronflex','zeraora','gorythmic'], reward:[]},
-    {id:'sinnoh-lucio', name:'Lucio', title:'Conseil 4 · Psy', arena:'colonnes', mons:['alakazam','gardevoir','metalosse','togekiss','momartik','milobellus'], reward:[]},
-    {id:'sinnoh-cynthia', name:'Cynthia', title:'Maîtresse de Sinnoh', arena:'stade', champion:1, mons:['carchacrok','togekiss','lucario','milobellus','flamigator','scalpereur'], reward:['sylveroy']}],
+    {id:'sinnoh-aaron', name:'Aaron', title:'Conseil 4 · Insecte', arena:'pilier', mons:['scarhino','apireine','cizayox','charmillon','pyrax','drascore'], reward:['togekiss','scarhino','apireine','cizayox','charmillon','drascore']},
+    {id:'sinnoh-terry', name:'Terry', title:'Conseil 4 · Sol', arena:'couronne', mons:['hippodocus','scorvol','grolem','rhinoferos','minotaupe','rhinastoc'], reward:['grolem','rhinoferos','hippodocus','scorvol','rhinastoc']},
+    {id:'sinnoh-adrien', name:'Adrien', title:'Conseil 4 · Feu', arena:'chateau', mons:['simiabraz','pyroli','arcanin','demolosse','dracaufeu','maganon'], reward:['simiabraz','pyroli','maganon']},
+    {id:'sinnoh-lucio', name:'Lucio', title:'Conseil 4 · Psy', arena:'colonnes', mons:['mentali','archeodong','alakazam','gardevoir','metalosse','gallame'], reward:['mentali','archeodong','gallame']},
+    {id:'sinnoh-cynthia', name:'Cynthia', title:'Maîtresse de Sinnoh', arena:'stade', champion:1, mons:['spiritomb','roserade','sylveroy','togekiss','lucario','carchacrok'], reward:['spiritomb','roserade','sylveroy']}],
    challenges:[]}
 ];
 const LG_TRAINER = {}; for (const r of LEAGUE) for (const t of r.trainers) LG_TRAINER[t.id] = {...t, region:r.id};

@@ -5,7 +5,7 @@ function stepFighter(f, ix, iy, dt){
   // recharges en pause pendant un K.O. et pendant le choix du Pokémon suivant (l'adversaire ne profite pas de ce temps)
   const frozen = game.state === 'ko' || game.state === 'choose';
   if (!frozen) for (let i=0;i<4;i++) f.cds[i] = Math.max(0, f.cds[i]-dt);
-  for (const k of ['burn','poison','slow','stun','sleep','mirror','ring','recharge','flash','inv','buffT','hurtT','root','defDown','spdDown','atkDown','grounded','busy']) f[k] = Math.max(0, f[k]-dt);
+  for (const k of ['burn','poison','slow','stun','sleep','mirror','ring','recharge','flash','inv','buffT','hurtT','root','defDown','spdDown','atkDown','grounded','busy','doll','shield']) f[k] = Math.max(0, f[k]-dt);
   if (f.healT > 0 && f.hp > 0){ const st = Math.min(dt, f.healT); f.healT -= st; f.hp = Math.min(f.max, f.hp + f.healRate*st); }
   // Change Éclair : fenêtre de 2 s pour la 2e charge ; si elle n'est pas utilisée, la recharge démarre
   if (!frozen) for (let i=0;i<4;i++) if (f.recast[i] > 0 && (f.recast[i] -= dt) <= 0){ f.recast[i] = 0; f.cds[i] = Math.max(f.cds[i], MOVES[f.d.moves[i]].cd - 2); }
@@ -66,7 +66,8 @@ function stepFighter(f, ix, iy, dt){
 
 function update(dt){
   const g = game;
-  g.t += dt; g.dangersPrev = g.dangers; g.dangers = [];   // l'IA lit les zones signalées à l'image précédente
+  g.t += dt; g.dangersPrev = g.dangers; g.dangers = [];
+  if (g.trick > 0) g.trick -= dt;   // Distorsion   // l'IA lit les zones signalées à l'image précédente
   if (g.state === 'intro'){ g.introT -= dt; if (g.introT <= 0) g.state = 'fight';
     if (g.introBig){ const n = Math.max(0, Math.ceil(g.introT - .6)); if (n !== g.countN){ g.countN = n; AUDIO.count(n === 0); } } }
   if (g.state === 'fight'){ const before = g.fightT; g.fightT += dt;
