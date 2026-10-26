@@ -259,3 +259,8 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .bonus.taken{opacity:.55}
 .bonus:disabled{cursor:default}
 .tourpick .go{margin-top:2px}
+.teamhp{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.thp{display:flex;flex-direction:column;align-items:center;gap:2px;width:54px}
+.thp i{display:block;width:100%;height:6px;border-radius:3px;background:#0008;overflow:hidden}
+.thp i b{display:block;height:100%}
+.thp small{font-size:11px;color:var(--mute);font-variant-numeric:tabular-nums}

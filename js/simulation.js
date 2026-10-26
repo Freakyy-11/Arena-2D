@@ -78,7 +78,7 @@ function update(dt){
   if (g.state === 'fight') for (const side of [g.ps, g.es]) if (side.dashN < DASH_MAX && (side.dashT -= dt) <= 0){
     side.dashN++; side.dashT = side.dashN < DASH_MAX ? DASH_REGEN : 0; }
   const [px,py] = g.spectate ? aiInput(g.p, dt) : playerInput();
-  for (const side of g.vs2 || g.tuto ? [] : g.spectate ? [g.ps, g.es] : [g.es]) if (g.diff.dmg > .75 && canMega(side) && (side.team[side.active].hp/side.team[side.active].max < .8 || g.fightT > 8)) tryMega(side);
+  for (const side of g.vs2 || g.tuto || (g.tour && g.tour.floor % 5) ? [] : g.spectate ? [g.ps, g.es] : [g.es]) if (g.diff.dmg > .75 && canMega(side) && (side.team[side.active].hp/side.team[side.active].max < .8 || g.fightT > 8)) tryMega(side);
   const [ax,ay] = g.vs2 ? playerInput2() : g.tuto ? [0, 0] : aiInput(g.e, dt);   // tutoriel : le Ronflex d'entraînement ne fait rien
   if (g.tuto) tutoTick(dt);
   stepFighter(g.p, px, py, dt);

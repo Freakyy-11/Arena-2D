@@ -81,6 +81,7 @@ const tourSave = () => { try { localStorage.setItem('arene-tour', String(tourBes
 const shuffled = a => a.map(v => [Math.random(), v]).sort((x, y) => x[0] - y[0]).map(x => x[1]);
 const TOUR_BONUS = [
   {id:'heal', n:'Soins complets', d:"Toute l'équipe récupère tous ses PV.", apply:t => { t.hp = t.hp.map(() => 1); }},
+  {id:'soin', n:'Soin ciblé', d:'Un Pokémon de ton choix récupère 25 % de ses PV.', target:true, apply:(t, i) => { t.hp[i] = Math.min(1, t.hp[i] + .25); }},   // target : on choisit ensuite le Pokémon
   {id:'atk', n:'Puissance +10 %', d:"Attaque et Atq. Spé. de toute l'équipe +10 % jusqu'à la fin de la Tour.", apply:t => { t.b.atk *= 1.1; }},
   {id:'def', n:'Résistance +10 %', d:"Défense et Déf. Spé. de toute l'équipe +10 %.", apply:t => { t.b.def *= 1.1; }},
   {id:'hp', n:'Vitalité +12 %', d:"PV max de toute l'équipe +12 %.", apply:t => { t.b.hp *= 1.12; }},
@@ -124,32 +125,43 @@ function tourResult(win){
     return {msg:`Tu as vaincu le Maître de la Tour : Tour terminée en ${DIFFS[tour.dk].label} !${first ? ' Essaie la difficulté au-dessus !' : ''}`, label:'Nouvelle Tour'}; }
   const earn = Math.round(game.ps.team.reduce((a, f) => a + (f.dmgDone || 0), 0)/5) + 5*tour.floor, boss = tour.floor % 5 === 0;
   tour.money += earn;
-  tour.hp = game.ps.team.map(f => f.hp > 0 ? Math.min(1, f.hp/f.max + .15) : .25);   // entre deux étages : +15 % de PV, les K.O. reviennent à 25 %
+  tour.hp = boss ? game.ps.team.map(() => 1) : game.ps.team.map(f => f.hp > 0 ? Math.min(1, f.hp/f.max + .15) : .25);   // après un gardien : soin complet ; sinon +15 % de PV, les K.O. reviennent à 25 %
   if (tour.floor > tourBest){ tourBest = tour.floor; tourSave(); }
   tour.floor++;
   tour.phase = boss && tour.team.length < 6 ? 'mon' : 'bonus';
   tour.monOffer = shuffled(tourPool(tour.team)).slice(0, 3);
-  tour.offer = shuffled(TOUR_BONUS).slice(0, 3); tour.taken = []; tour.free = true;
+  tour.offer = [...shuffled(TOUR_BONUS.filter(b => b.id !== 'soin' && !(boss && b.id === 'heal'))).slice(0, 3), ...(tour.hp.some(h => h < 1) ? [TOUR_BONUS.find(b => b.id === 'soin')] : [])]; tour.taken = [];   // 3 bonus au hasard + le Soin ciblé, toujours proposé
+  tour.free = true; tour.pending = null;
   renderTourPick(); $('tourPick').hidden = false;
-  return {msg:`Étage ${tour.floor - 1}/${TOUR_FLOORS} réussi : +${earn} ₽.`, label:null};
+  return {msg:`Étage ${tour.floor - 1}/${TOUR_FLOORS} réussi : +${earn} ₽.${boss ? ' Gardien vaincu : toute ton équipe est soignée.' : ''}`, label:null};
 }
 function renderTourPick(){
-  const t = tour, head = `<p class="money">Argent : <b>${t.money} ₽</b></p>`;
+  const t = tour, head = `<p class="money">Argent : <b>${t.money} ₽</b></p>` + `<div class="teamhp">${t.team.map((k, i) => { const r = t.hp[i]; return `<div class="thp" title="${MONS[k].name}">${pic(k, 34)}<i><b style="width:${Math.round(r*100)}%;background:${hpColor(r)}"></b></i><small>${Math.round(r*100)} %</small></div>`; }).join("")}</div>`;   // PV de l'équipe pour l'étage suivant
   if (t.phase === 'mon'){
     $('tourPick').innerHTML = head + `<p class="note">Gardien vaincu ! Un nouveau Pokémon rejoint ton équipe (${t.team.length + 1}/6) : choisis-le.</p><div class="monpick">`
       + t.monOffer.map(k => `<button class="mon" data-tmon="${k}">${pic(k, 46)}<b>${MONS[k].name}</b><div class="types">${chips(MONS[k].types)}</div></button>`).join('') + '</div>';
+    hydrate($('tourPick')); return; }
+  if (t.pending){   // Soin ciblé : choix du Pokémon
+    $('tourPick').innerHTML = head + `<p class="note">${TOUR_BONUS.find(x => x.id === t.pending).n} : choisis le Pokémon à soigner.</p><div class="monpick">`
+      + t.team.map((k, i) => `<button class="mon" data-ttarget="${i}" ${t.hp[i] >= 1 ? 'disabled' : ''}>${pic(k, 46)}<b>${MONS[k].name}</b><small>${Math.round(t.hp[i]*100)} % des PV</small></button>`).join('')
+      + `</div><button class="btn" data-tcancel>Annuler</button>`;
     hydrate($('tourPick')); return; }
   $('tourPick').innerHTML = head + `<p class="note">${t.free ? 'Choisis un bonus gratuit.' : `Achète d'autres bonus si tu veux (le prix augmente à chaque achat), puis passe à l'étage ${t.floor}${t.floor === TOUR_FLOORS ? ' : le Maître de la Tour et ses deux légendaires t\'attendent' : t.floor % 5 === 0 ? ' : un gardien légendaire t\'attend' : ''}.`}</p>`
     + t.offer.map(b => { const taken = t.taken.includes(b.id), cost = t.free ? 0 : t.price;
       return `<button class="bonus${taken ? ' taken' : ''}" data-bonus="${b.id}" ${taken || (!t.free && t.money < cost) ? 'disabled' : ''}><b>${b.n}<em>${taken ? 'Pris' : t.free ? 'Gratuit' : cost + ' ₽'}</em></b><small>${b.d}</small></button>`; }).join('')
     + `<button class="go" data-tnext ${t.free ? 'disabled' : ''}>Étage ${t.floor}</button>`;
+  hydrate($('tourPick'));
 }
 $('tourPick').addEventListener('click', e => { const t = tour; if (!t) return;
   const m = e.target.closest('[data-tmon]'), b = e.target.closest('[data-bonus]'), nx = e.target.closest('[data-tnext]');
   if (m){ t.team.push(m.dataset.tmon); t.hp.push(1); t.phase = 'bonus'; renderTourPick(); return; }
+  const pay = () => { if (t.free){ t.free = false; return true; } if (t.money < t.price) return false; t.money -= t.price; t.price = Math.round(t.price*1.6/5)*5; return true; };
+  const tg = e.target.closest('[data-ttarget]');
+  if (e.target.closest('[data-tcancel]')){ t.pending = null; renderTourPick(); return; }
+  if (tg && !tg.disabled && t.pending){ const bo = TOUR_BONUS.find(x => x.id === t.pending); if (pay()){ bo.apply(t, +tg.dataset.ttarget); t.taken.push(bo.id); } t.pending = null; renderTourPick(); return; }
   if (b && !b.disabled){ const bo = TOUR_BONUS.find(x => x.id === b.dataset.bonus);
-    if (t.free) t.free = false; else { if (t.money < t.price) return; t.money -= t.price; t.price = Math.round(t.price*1.6/5)*5; }
-    bo.apply(t); t.taken.push(bo.id); renderTourPick(); return; }
+    if (bo.target){ t.pending = bo.id; renderTourPick(); return; }   // on paie une fois le Pokémon choisi
+    if (!pay()) return; bo.apply(t); t.taken.push(bo.id); renderTourPick(); return; }
   if (nx && !nx.disabled){ $('tourPick').hidden = true; tourFight(); } });
 function renderTourInfo(){ const el = $('tourInfo'); if (!el) return; const done = Object.keys(DIFFS).filter(k => tourDone[k]).map(k => DIFFS[k].label);
   el.textContent = done.length ? `Terminée en ${done.join(', ')} ✓` : tourBest ? `Record : étage ${tourBest}/${TOUR_FLOORS}` : `${TOUR_FLOORS} étages · nouveau mode`; }
