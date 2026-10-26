@@ -136,21 +136,35 @@ button:disabled{cursor:default}
 .card.right{align-items:flex-end;text-align:right}
 .card .top{display:flex;gap:6px;align-items:baseline;max-width:100%}
 .card.right .top{flex-direction:row-reverse}
-.card .nm{font-family:var(--font-d);font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .nm{font-family:var(--font-d);font-weight:700;font-size:18px;font-style:italic;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .card .who{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);white-space:nowrap}
 .balls{display:flex;gap:3px}
 .balls i{width:8px;height:8px;border-radius:50%;background:var(--gold)}
 .balls i.ko{background:#ffffff22}
 .card.right .balls i{background:var(--foe)}
 .card.right .balls i.ko{background:#ffffff22}
-.bar{width:100%;height:9px;background:#0007;border-radius:5px;overflow:hidden;box-shadow:inset 0 0 0 1px var(--line)}
-.bar i{display:block;height:100%;width:100%;background:var(--hp);transform-origin:left}
-.card.right .bar i{transform-origin:right}
+/* barre de vie : épaisse, en biseau, PV écrits dedans, traînée blanche des dégâts récents */
+.bar{position:relative;width:100%;height:20px;background:#000a;overflow:hidden;box-shadow:inset 0 0 0 1px #fff3;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
+.bar i,.bar b{position:absolute;inset:0;display:block;transform-origin:left}
+.bar b{background:#fff;opacity:.85}
+.bar i{background:var(--hp);box-shadow:inset 0 -6px 0 #0003,inset 0 3px 0 #fff4}
+.card.right .bar i,.card.right .bar b{transform-origin:right}
+.bar .hpn{position:absolute;inset:0;display:flex;align-items:center;padding:0 14px;font-family:var(--font-d);font-weight:700;font-size:13px;color:#fff;text-shadow:0 1px 2px #000,0 0 3px #000;font-variant-numeric:tabular-nums}
+.card.right .bar .hpn{justify-content:flex-end}
 .meta{display:flex;gap:4px;align-items:center;font-size:11px;color:var(--mute);font-variant-numeric:tabular-nums;flex-wrap:wrap;min-height:16px}
 .card.right .meta{justify-content:flex-end}
 .st{font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:1px 4px;border-radius:3px;color:#17122b}
 .pause{background:var(--panel);border:1px solid var(--line);border-radius:8px;width:36px;height:36px;display:grid;place-items:center;font-family:var(--font-d);font-weight:700}
 .stage{position:relative;min-height:0;touch-action:none}
+/* bandeau des attaques, en haut de l'arène */
+.co{position:absolute;top:8px;z-index:2;max-width:46%;display:flex;flex-direction:column;padding:4px 16px 5px;background:linear-gradient(90deg,var(--tc,#444),color-mix(in srgb,var(--tc,#444) 55%,#000));color:#fff;text-shadow:0 1px 2px #000a;pointer-events:none;opacity:0;transition:opacity .25s,transform .25s}
+.co.p{left:0;clip-path:polygon(0 0,100% 0,calc(100% - 12px) 100%,0 100%);transform:translateX(-24px)}
+.co.e{right:0;text-align:right;align-items:flex-end;clip-path:polygon(0 0,100% 0,100% 100%,12px 100%);transform:translateX(24px);background:linear-gradient(270deg,var(--tc,#444),color-mix(in srgb,var(--tc,#444) 55%,#000))}
+.co.on{opacity:1;transform:none}
+.co small{font-size:10px;letter-spacing:.14em;text-transform:uppercase;opacity:.85}
+.co b{font-family:var(--font-d);font-size:clamp(15px,4.2vw,21px);font-style:italic;text-transform:uppercase;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.co.sig{box-shadow:inset 0 0 0 2px #ffe9a8}
+.co.sig b{color:#ffe9a8}
 .megab{position:absolute;right:8px;bottom:8px;z-index:3;border:2px solid #fff;border-radius:50%;width:58px;height:58px;font-family:var(--font-d);font-weight:700;font-size:13px;color:#fff;background:conic-gradient(#ff6a6a,#ffd25a,#7AC74C,#6390F0,#c070ff,#ff6a6a);box-shadow:0 0 14px rgba(255,255,255,.5);text-shadow:0 1px 2px #000}
 .megab .k{display:block;font-size:9px;opacity:.85}
 @media (pointer:fine){.stage{cursor:crosshair}}

@@ -58,7 +58,7 @@ function aiInput(f, dt){
     if (ai.dashRoll){ ix += -uy*ai.strafe*2.6; iy += ux*ai.strafe*2.6;
       if (d < 170){ if (ai.dashDodge === undefined) ai.dashDodge = Math.random() < D.dash;
         if (ai.dashDodge && tryRoll(f, -uy*ai.strafe, ux*ai.strafe)) ai.dashDodge = false; } } } else { ai.dashRoll = undefined; ai.dashDodge = undefined; }
-  for (const rk of game.rocks){ const rx = rk.x-f.x, ry = rk.y-f.y, rd = Math.hypot(rx,ry) || 1;
+  for (const rk of game.rocks){ if (rk.owner === f) continue; const rx = rk.x-f.x, ry = rk.y-f.y, rd = Math.hypot(rx,ry) || 1;
     if (rd < rk.r + f.r + 28){ ix -= rx/rd*1.2; iy -= ry/rd*1.2; } }
   const m = Math.hypot(ix,iy); if (m > 1){ ix /= m; iy /= m; }
   if (threat && D.mirror){ const i = f.d.moves.indexOf('voilemiroir');

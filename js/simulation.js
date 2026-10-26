@@ -36,7 +36,7 @@ function stepFighter(f, ix, iy, dt){
     const end = () => { if (f.dash === dsh) f.dash = null; if (mv.recharge) f.recharge = mv.recharge; };
     if (dsh.pierce){
       if (!dsh.struck && foe.hp > 0 && !foe.buried && dist(f,foe) < f.r + foe.r + 6){ dsh.struck = true; dsh.onHit ? dsh.onHit(foe) : hit(f, foe, mv, 1); }
-      let blocked = false; for (const rk of game.rocks){ if (Math.hypot(f.x-rk.x, f.y-rk.y) < rk.r + f.r){ hitRock(rk, mv.p*.8, TYPES[mv.t][1]); blocked = true; break; } }
+      let blocked = false; for (const rk of game.rocks){ if (rk.owner !== f && Math.hypot(f.x-rk.x, f.y-rk.y) < rk.r + f.r){ hitRock(rk, mv.p*.8, TYPES[mv.t][1]); blocked = true; break; } }
       if (blocked || dsh.t <= 0){ end(); if (dsh.onEnd) dsh.onEnd(); }
     } else if (foe.hp > 0 && !foe.buried && dist(f,foe) < f.r + foe.r + 6){
       end();
@@ -44,7 +44,7 @@ function stepFighter(f, ix, iy, dt){
       else { hit(f, foe, mv, 1); const a = Math.atan2(foe.y-f.y, foe.x-f.x); foe.kx += Math.cos(a)*320; foe.ky += Math.sin(a)*320; }
     } else {
       let blocked = false;
-      for (const rk of game.rocks){ if (Math.hypot(f.x-rk.x, f.y-rk.y) < rk.r + f.r){ hitRock(rk, mv.p*.8, TYPES[mv.t][1]); blocked = true; break; } }
+      for (const rk of game.rocks){ if (rk.owner !== f && Math.hypot(f.x-rk.x, f.y-rk.y) < rk.r + f.r){ hitRock(rk, mv.p*.8, TYPES[mv.t][1]); blocked = true; break; } }
       if (blocked || dsh.t <= 0){ end(); if (dsh.onEnd) dsh.onEnd(); }
     }
     if (f.dash === dsh){ f.vx = 0; f.vy = 0; }
@@ -57,7 +57,7 @@ function stepFighter(f, ix, iy, dt){
   }
   f.x += f.kx*dt; f.y += f.ky*dt;
   const decay = Math.exp(-7*dt); f.kx *= decay; f.ky *= decay;
-  for (const rk of game.rocks){ const dx = f.x-rk.x, dy = f.y-rk.y, d = Math.hypot(dx,dy) || 1, min = rk.r + f.r;
+  for (const rk of game.rocks){ if (rk.owner === f) continue; const dx = f.x-rk.x, dy = f.y-rk.y, d = Math.hypot(dx,dy) || 1, min = rk.r + f.r;
     if (d < min){ f.x = rk.x + dx/d*min; f.y = rk.y + dy/d*min; } }
   f.x = Math.max(WALL+f.r, Math.min(W-WALL-f.r, f.x));
   f.y = Math.max(WALL+f.r, Math.min(H-WALL-f.r, f.y));
@@ -112,7 +112,7 @@ function update(dt){
         burst(p.x, p.y, '#F95587', 10, 140, 4); popText(foe.x, foe.y-50, 'Renvoyé !', '#F95587', 15);
       } else if (d < foe.r + p.r){ hit(p.owner, foe, p.mv, p.mult); dead = true; }
     }
-    if (!dead) for (const rk of g.rocks){ if (Math.hypot(p.x-rk.x, p.y-rk.y) < rk.r + p.r){ hitRock(rk, (p.mv.p||20)*.3*p.mult, p.col); dead = true; break; } }
+    if (!dead) for (const rk of g.rocks){ if (rk.owner !== p.owner && Math.hypot(p.x-rk.x, p.y-rk.y) < rk.r + p.r){ hitRock(rk, (p.mv.p||20)*.3*p.mult, p.col); dead = true; break; } }
     if (dead){ if (p.life > 0) burst(p.x, p.y, p.col, 6, 100, 3); g.projs.splice(i,1); }
   }
   for (let i = g.zones.length-1; i >= 0; i--){

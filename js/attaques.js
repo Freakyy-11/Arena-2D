@@ -739,7 +739,7 @@ const SIG = {
       while (i < n && this.t >= i*.075){ const p = clampArena(sx + ux*(f.r + 26 + i*gap), sy + uy*(f.r + 26 + i*gap), 20); i++;
         shake(4); sparks(p.x, p.y, ['#d8c890','#B6A136','#6e5f34'], 12, 220, 5); crackDecal(p.x, p.y, 34);
         if (!struck){ const e = zoneHit(f, mv, p.x, p.y, 30); if (e){ struck = true; if (e.hp > 0) launch(e, .8, 95); } }
-        if (!game.rocks.some(rk => Math.hypot(rk.x-p.x, rk.y-p.y) < rk.r + 18)) game.rocks.push({x:p.x, y:p.y, r:17, hp:70, max:70, spike:true, life:1.5, age:0}); }
+        if (!game.rocks.some(rk => Math.hypot(rk.x-p.x, rk.y-p.y) < rk.r + 18)) game.rocks.push({x:p.x, y:p.y, r:17, hp:70, max:70, spike:true, life:1.5, age:0, owner:f}); }   // owner : le lanceur traverse ses propres piliers
       for (let j=i;j<n;j++) danger(f, sx + ux*(f.r + 26 + j*gap), sy + uy*(f.r + 26 + j*gap), 30);
       return i < n; }});
   },

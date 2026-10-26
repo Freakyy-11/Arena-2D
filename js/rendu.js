@@ -8,7 +8,7 @@ function resize(){
   // zoom constant d'une arène à l'autre (calculé avec le décor de fond par défaut) ;
   // le décor de fond plus haut d'une image (backdrop) n'est montré que s'il reste de la place (téléphone en hauteur)
   const s = Math.min(r.width/W, r.height/(H + BACKDROP_DEFAULT)), vb = Math.max(BACKDROP_DEFAULT, Math.min(BACKDROP, r.height/s - H));
-  view = {s, ox:(r.width - W*s)/2, oy:(r.height - (H + vb)*s)/2 + vb*s, dpr};
+  view = {s, ox:(r.width - W*s)/2, oy:(r.height - (H + vb)*s)/2 + vb*s, top:(r.height - (H + vb)*s)/2, dpr};   // top : haut du décor (bandeau des attaques)
 }
 new ResizeObserver(() => { if (game) resize(); }).observe($('stage'));
 

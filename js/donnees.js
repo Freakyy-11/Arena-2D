@@ -217,7 +217,7 @@ const MOVES = {
   tunnel:{n:'Tunnel',t:'Ground',c:'ph',p:120,k:'sig',sig:'tunnel',cd:5,range:320,shape:['leap',320,80],anim:'Attack',close:1,desc:"S'enterre (invulnérable) et avance sous terre, puis ressort sous la zone visée en projetant l'ennemi en l'air."},
   // Roche
   eboulement:{n:'Éboulement',t:'Rock',c:'ph',p:75,k:'spec',sig:'eboulement',cd:3.4,range:380,shape:['zone3',42],anim:'Shoot',fx:{stun:.25},desc:"3 zones en même temps autour du point visé : des rochers tombent du ciel. 25 % de chance d'étourdir."},
-  lamederoc:{n:'Lame de Roc',t:'Rock',c:'ph',p:110,k:'sig',sig:'lamederoc',cd:5.5,range:300,shape:['lane',310,26],anim:'Attack',desc:"Ligne de piliers de roche qui jaillissent du sol les uns après les autres. Ils restent 1,5 s comme obstacles. L'ennemi touché est projeté en l'air."},
+  lamederoc:{n:'Lame de Roc',t:'Rock',c:'ph',p:110,k:'sig',sig:'lamederoc',cd:5.5,range:300,shape:['lane',310,26],anim:'Attack',desc:"Ligne de piliers de roche qui jaillissent du sol les uns après les autres. Ils restent 1,5 s comme obstacles pour l'ennemi (le lanceur les traverse). L'ennemi touché est projeté en l'air."},
   // Glace
   poingglace:{n:'Poing Glace',t:'Ice',c:'ph',p:80,k:'spec',sig:'poingglace',cd:3.5,range:280,shape:['lane',266,24],anim:'Attack',close:1,fx:{slow:.3},desc:"Charge, puis coup de poing glacé à l'impact ou au bout de la course. 30 % de chance de ralentir."},
   crocsgivre:{n:'Crocs Givre',t:'Ice',c:'ph',p:70,k:'melee',reach:58,cd:2,jaw:'ice',fx:{slow:.3}},
@@ -246,7 +246,7 @@ const MOVES = {
   papillodanse:{n:'Papillodanse',t:'Bug',c:'st',k:'buff',buff:{spa:1.4,spe:1.2},dur:10,cd:15},
   bourdon:{n:'Bourdon',t:'Bug',c:'sp',p:90,k:'quake',max:160,dur:.45,cd:5,ring:'sound',fx:{spdDown:.2}},
   // Poison
-  doubledard:{n:'Double Dard',t:'Poison',c:'sp',p:55,k:'sig',sig:'doubledard',cd:4,range:320,shape:['lane',340,14],anim:'Attack',aiP:120,desc:"Lance un dard (empoisonne à coup sûr) et charge en même temps. Si la charge touche : vole la moitié des dégâts en PV, étourdit 0,5 s, et le lanceur bondit en arrière.",per:1}
+  doubledard:{n:'Double Dard',t:'Poison',c:'sp',p:55,k:'sig',sig:'doubledard',cd:5.5,range:320,shape:['lane',340,14],anim:'Attack',aiP:120,desc:"Lance un dard (empoisonne à coup sûr) et charge en même temps. Si la charge touche : vole la moitié des dégâts en PV, étourdit 0,5 s, et le lanceur bondit en arrière.",per:1}
 };
 
 // base = [PV, Atq, Déf, AtqSpé, DéfSpé, Vit] (stats officielles)
@@ -408,7 +408,7 @@ const MEGA = {
 // (×0,9 à ×1,35) ; la Vitesse reste officielle (elle règle les déplacements). baseOfficial garde les stats d'origine.
 const BST_TARGET = 540;
 // corrections au cas par cas, d'après les simulations IA contre IA (total visé)
-const BST_ADJUST = {arcanin:490, maganon:470, foretress:690, archeodong:660, arbok:580, noadkoko:575, zeraora:620, libegon:610, kicklee:565};
+const BST_ADJUST = {arcanin:490, maganon:470, foretress:690, archeodong:660, arbok:580, noadkoko:575, zeraora:620, libegon:610, kicklee:565, naganadel:500};
 for (const k in MONS){ const m = MONS[k]; m.baseOfficial = m.base.slice(); if (m.legend) continue;
   const bst = m.base.reduce((a,b)=>a+b,0), f = Math.max(.85, Math.min(1.5, (BST_ADJUST[k] || BST_TARGET)/bst));
   m.base = m.base.map((v, i) => i === 5 ? v : Math.round(v*f));

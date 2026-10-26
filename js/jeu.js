@@ -124,8 +124,18 @@ function buildCard(s){
   const side = s === 'p' ? game.ps : game.es, f = side.team[side.active], el = $(s === 'p' ? 'hudP' : 'hudE');
   el.innerHTML = `<div class="top"><span class="nm">${f.d.name}</span><span class="who">${s==='p' ? (game.vs2 ? 'Joueur 1' : game.spectate ? 'IA 1 · ' + game.diff.label : 'Toi') : (game.vs2 ? 'Joueur 2' : (game.league ? game.league.name + ' · ' : game.spectate ? 'IA 2 · ' : 'IA · ') + game.diff.label)}</span></div>
     <div class="types">${chips(f.d.types)}</div>
-    <div class="bar"><i></i></div><div class="meta"><span class="balls"></span><span class="hpn"></span><span class="sts"></span></div>`;
-  side.hud = { bar: el.querySelector('.bar i'), hpn: el.querySelector('.hpn'), sts: el.querySelector('.sts'), balls: el.querySelector('.balls'), last:'', lastB:'' };
+    <div class="bar"><b></b><i></i><span class="hpn"></span></div><div class="meta"><span class="balls"></span><span class="sts"></span></div>`;
+  side.hud = { bar: el.querySelector('.bar i'), lag: el.querySelector('.bar b'), hpn: el.querySelector('.hpn'), sts: el.querySelector('.sts'), balls: el.querySelector('.balls'), last:'', lastB:'', lagR:f.hp/f.max, lagT:0 };
+}
+// bandeau en haut de l'arène : nom de l'attaque utilisée, à gauche pour toi, à droite pour l'adversaire
+function callout(f, mv){
+  const el = $(f.side === 'p' ? 'coP' : 'coE'); if (!el) return;
+  if (view){ const w = W*view.s; el.style.top = (view.top || 0) + 8 + 'px'; el.style.maxWidth = w*.48 + 'px';   // calé sur l'arène dessinée (centrée dans la zone)
+    if (f.side === 'p') el.style.left = view.ox + 'px'; else el.style.right = $('stage').clientWidth - view.ox - w + 'px'; }
+  el.style.setProperty('--tc', TYPES[mv.t][1]); el.classList.toggle('sig', mv.k === 'sig');
+  el.innerHTML = `<small>${f.d.name}</small><b>${mv.k === 'sig' ? '★ ' : ''}${mv.n}</b>`;
+  el.classList.remove('on'); void el.offsetWidth; el.classList.add('on');
+  clearTimeout(el.tm); el.tm = setTimeout(() => el.classList.remove('on'), mv.k === 'sig' ? 1600 : 1100);
 }
 function buildMoves(){
   $('moves').innerHTML = game.p.d.moves.map((k,i) => { const mv = MOVES[k];
@@ -167,6 +177,8 @@ function updateHUD(){
   for (const side of [game.ps, game.es]){
     const f = side.team[side.active], r = f.hp / f.max, h = side.hud;
     h.bar.style.transform = `scaleX(${r})`; h.bar.style.background = hpColor(r);
+    if (r >= h.lagR){ h.lagR = r; h.lagT = 0; } else if ((h.lagT += 1/60) > .45) h.lagR = Math.max(r, h.lagR - .9/60);
+    h.lag.style.transform = `scaleX(${h.lagR})`;
     h.hpn.textContent = `${Math.ceil(f.hp)}/${f.max}`;
     const s = Object.keys(STATUS).filter(k => f[k] > 0).map(k => `<span class="st" style="background:${STATUS[k][1]}">${STATUS[k][0]}</span>`).join('');
     if (s !== h.last){ h.sts.innerHTML = s; h.last = s; }
@@ -463,7 +475,7 @@ function use(f, i, aim, opts){
       f.x = nx; f.y = ny; f.vx = f.vy = f.kx = f.ky = 0; f.inv = .6;
       burst(f.x, f.y, TYPES.Psychic[1], 14, 140, 4); break; }
   }
-  popText(f.x, f.y - 46, (mv.k === 'sig' ? '★ ' : '') + mv.n, mv.k === 'sig' ? '#ffe9a8' : TYPES[mv.t][1], mv.k === 'sig' ? 16 : 13, mv.k === 'sig' ? 1 : .8);
+  callout(f, mv);
   return true;
 }
 function spawnProj(f, mv, a, mult, target=null){
