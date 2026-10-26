@@ -52,13 +52,14 @@ function startMatch(m){
   Object.assign(game.p, ps.spawn); Object.assign(game.e, es.spawn);
   buildHUD(); buildMoves(); buildBench();
   $('menu').hidden = true; $('battle').hidden = false;
-  for (const o of ['ovEnd','ovPause','ovChoose']) $(o).hidden = true;
+  for (const o of ['ovEnd','ovPause','ovChoose','tourPick']) $(o).hidden = true;
+  $('again').hidden = false; $('tutoBox').hidden = !m.tuto; if (!m.tuto) tuto = null; if (!m.tour && typeof tour !== 'undefined') tour = null;
   $('battle').classList.toggle('spectate', game.spectate);
   resize(); AUDIO.music('combat'); AUDIO.duck(false);   // un morceau au hasard à chaque combat
 }
 $('start').onclick = () => { if (!$('start').disabled) startMatch(resolveTeams()); };
-$('again').onclick = () => lastMatch.league ? leagueAgain() : startMatch(sel.e === 'random' ? {...resolveTeams(), pk:lastMatch.pk, arena:lastMatch.arena} : lastMatch);   // la revanche garde l'arène
-const toMenu = () => { const lgBack = game && game.league; if (lgBack && game.state !== 'end') leagueAbandon(); game = null; AUDIO.music('menu'); $('battle').hidden = true; $('menu').hidden = false; if (lgBack) openLeague('main'); else goScreen('team'); };   // Ligue : retour à l'écran de la Ligue, sinon au choix de l'équipe ; quitter un combat en cours = abandonner la Ligue
+$('again').onclick = () => lastMatch.tuto ? (toMenu(), openLeague()) : lastMatch.tour ? (toMenu(), goScreen('tour'), rollTourDraft()) : lastMatch.league ? leagueAgain() : startMatch(sel.e === 'random' ? {...resolveTeams(), pk:lastMatch.pk, arena:lastMatch.arena} : lastMatch);   // la revanche garde l'arène
+const toMenu = () => { const lgBack = game && game.league; if (lgBack && game.state !== 'end') leagueAbandon(); game = null; AUDIO.music('menu'); $('battle').hidden = true; $('menu').hidden = false; $('tutoBox').hidden = true; if (lgBack) openLeague('main'); else goScreen(lastMatch && (lastMatch.tour || lastMatch.tuto) ? 'home' : 'team'); renderTourInfo(); };   // Ligue : retour à l'écran de la Ligue, sinon au choix de l'équipe ; quitter un combat en cours = abandonner la Ligue
 $('toMenu').onclick = toMenu; $('quit').onclick = toMenu;
 $('pauseBtn').onclick = () => setPause(true);
 $('resume').onclick = () => setPause(false);
@@ -242,17 +243,15 @@ function aimPoint(src, i, f = game.p){
   return null;
 }
 // direction (dx,dy) → point visé ; pour une zone (Psyko…), la distance vient du glissé ou de l'inclinaison du stick (0..1)
-// assist (manette) : visée aimantée sur l'ennemi quand le stick pointe à peu près vers lui,
-// et les zones se posent à la distance de l'ennemi dans la direction visée (plus besoin de doser l'inclinaison du stick)
-const AIM_MAGNET = .22;   // ~12°
+// assist (manette) : les zones se posent à la distance de l'ennemi dans la direction visée (plus besoin de doser l'inclinaison du stick) ;
+// la direction, elle, reste exactement celle du stick (pas d'aimantation sur l'ennemi)
 function dirPoint(f, dx, dy, mag, i, assist){
   const m = Math.hypot(dx,dy) || 1, mv = MOVES[f.d.moves[i]];
   const zone = mv.k === 'psy' || (mv.shape && ['zone','zone3','leap','lanezone'].includes(mv.shape[0])), R = mv.shape && mv.shape[0] === 'leap' ? mv.range : PSY_RANGE;
   let ux = dx/m, uy = dy/m, d = zone ? PSY_MIN + (mag != null ? mag : 1)*(R - PSY_MIN) : 200;
   if (assist && game){ const e = foeOf(f);
     if (e.hp > 0){ const ex = e.x - f.x, ey = e.y - f.y, ed = Math.hypot(ex, ey) || 1, cos = (ex*ux + ey*uy)/ed;
-      const snap = cos > Math.cos(AIM_MAGNET); if (snap){ ux = ex/ed; uy = ey/ed; }
-      if (zone && cos > 0) d = Math.max(PSY_MIN, Math.min(R, snap ? ed : ed*cos)); } }
+      if (zone && cos > 0) d = Math.max(PSY_MIN, Math.min(R, ed*cos)); } }
   return {x: f.x + ux*d, y: f.y + uy*d};
 }
 
@@ -412,7 +411,7 @@ function use(f, i, aim, opts){
   if (!game || game.state !== 'fight') return false;
   const mv = MOVES[f.d.moves[i]], foe = foeOf(f);
   if (f.cds[i] > 0 || !canAct(f)) return false;
-  f.cds[i] = mv.cd;
+  f.cds[i] = mv.cd*(game.tour && f.side === 'p' ? game.tour.b.cd : 1);   // Tour de combat : bonus de recharge
   // plusieurs utilisations : 2 s pour relancer après chacune ; la recharge démarre après la dernière
   if (mv.uses){ if (f.recast[i] > 0 && --f.recastN[i] > 0){ f.recast[i] = 2; f.cds[i] = 0; } else if (f.recast[i] > 0) f.recast[i] = 0; else { f.recastN[i] = mv.uses - 1; f.recast[i] = 2; f.cds[i] = 0; } }
   if (f.iceSpike) f.iceSpike.explode();   // Mammochon : sa prochaine attaque fait exploser la stalactite plantée
@@ -508,7 +507,8 @@ function hit(att, def, mv, mult){
   if (def.shield > 0) dmg *= .5;   // Nuage Doux, Ordre Défense
   if (att.mega && mv.k === 'sig') dmg *= 1.15;   // forme Méga : attaque emblématique renforcée
   dmg = Math.max(1, Math.round(dmg));
-  damage(def, dmg);
+  const before = def.hp; damage(def, dmg);
+  att.dmgDone = (att.dmgDone || 0) + before - def.hp; att.hits = (att.hits || 0) + 1; if (e > 1) att.seHits = (att.seHits || 0) + 1; if (before > 0 && def.hp <= 0) att.kos = (att.kos || 0) + 1;   // statistiques de fin de combat
   AUDIO.hit(mv.t, dmg, e); if (!def.isAI) rumbleFor(def, .25 + dmg/50, 40 + Math.min(120, dmg*2));
   def.flash = .22; def.hurtT = .3;
   if (def.sleep > 0){ def.sleep = 0; }

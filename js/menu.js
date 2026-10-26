@@ -23,20 +23,20 @@ function hydrate(root){
 }
 
 // Écrans du menu, comme un jeu de combat : mode → difficulté → équipe → adversaire et arène
-const VS_NAME = {ai:'Combat libre', p2:'2 joueurs', spec:'IA contre IA'};
+const VS_NAME = {ai:'Combat libre', p2:'2 joueurs', spec:'IA contre IA', tour:'Tour de combat'};
 const DIFF_DESC = {facile:"L'IA réagit lentement et vise mal : idéal pour découvrir le jeu.", normal:"Un adversaire correct, qui esquive de temps en temps.",
   champion:"L'IA esquive souvent, anticipe tes déplacements et change de Pokémon au bon moment.", enfer:"Réagit presque toujours, lit tes mouvements et frappe plus fort."};
 const diffCards = (cur, attr) => Object.keys(DIFFS).map(k => `<button class="dc d-${k}" ${attr}="${k}" aria-pressed="${cur === k}"><b>${DIFFS[k].label}</b><small>${DIFF_DESC[k] || ''}</small></button>`).join('');
 let curScr = 'home';
 function goScreen(name){
-  curScr = name; for (const n of ['home', 'diff', 'team', 'foe']) $('scr' + n[0].toUpperCase() + n.slice(1)).hidden = n !== name;
+  curScr = name; for (const n of ['home', 'diff', 'team', 'foe', 'tour']) $('scr' + n[0].toUpperCase() + n.slice(1)).hidden = n !== name;
   renderMenu(); $('menu').scrollTop = 0;
   const first = $('scr' + name[0].toUpperCase() + name.slice(1)).querySelector(name === 'diff' ? '[aria-pressed="true"]' : 'button'); if (first && name !== 'home') first.focus({preventScroll:true});
 }
-function screenBack(){ goScreen(curScr === 'foe' ? 'team' : curScr === 'team' ? (sel.vs === 'p2' ? 'home' : 'diff') : 'home'); }
-document.querySelectorAll('#menu [data-vs]').forEach(b => b.onclick = () => { sel.vs = b.dataset.vs; save(); goScreen(sel.vs === 'p2' ? 'team' : 'diff'); });
+function screenBack(){ goScreen(curScr === 'foe' ? 'team' : curScr === 'team' ? (sel.vs === 'p2' || sel.vs === 'tour' ? 'home' : 'diff') : 'home'); }
+document.querySelectorAll('#menu [data-vs]').forEach(b => b.onclick = () => { sel.vs = b.dataset.vs; save(); if (sel.vs === 'tour'){ goScreen('tour'); rollTourDraft(); } else goScreen(sel.vs === 'p2' ? 'team' : 'diff'); });   // Tour de combat : tirage des 2 premiers Pokémon
 document.querySelectorAll('#menu [data-back]').forEach(b => b.onclick = screenBack);
-$('teamNext').onclick = () => goScreen('foe');
+$('teamNext').onclick = () => sel.vs === 'tour' ? startTour(resolveTeams().pk) : goScreen('foe');
 addEventListener('keydown', e => { if (e.code === 'Escape' && !$('menu').hidden && curScr !== 'home') screenBack(); });
 
 let legendWarn = false;
@@ -57,7 +57,7 @@ function renderMenu(){
   $('pickBuild').innerHTML = Object.keys(MONS).sort((a,b)=>MONS[a].name.localeCompare(MONS[b].name,'fr')).map(k => { const i = sel.build.indexOf(k);
     return `<button class="mon" data-k="${k}" aria-pressed="${i>=0}" ${un.has(k) ? '' : 'disabled title="À débloquer dans la Ligue"'}>${un.has(k) ? '' : '<span class="lock">🔒</span>'}${i>=0?`<span class="num">${i+1}</span>`:''}${MONS[k].legend ? '<span class="leg">★</span>' : ''}${pic(k,46)}<b>${MONS[k].name}</b><div class="types">${chips(MONS[k].types)}</div></button>`; }).join('');
   $('buildCount').textContent = `${sel.build.length}/6`;
-  document.querySelectorAll('#menu .modeTag').forEach(el => el.textContent = VS_NAME[sel.vs || 'ai'] + (sel.vs === 'p2' || curScr === 'diff' ? '' : ' · ' + DIFFS[sel.d].label));
+  document.querySelectorAll('#menu .modeTag').forEach(el => el.textContent = VS_NAME[sel.vs || 'ai'] + (sel.vs === 'p2' || sel.vs === 'tour' || curScr === 'diff' ? '' : ' · ' + DIFFS[sel.d].label));
   $('vsNote').hidden = sel.vs !== 'p2'; $('specNote').hidden = sel.vs !== 'spec'; $('eTitle').textContent = sel.vs === 'p2' ? 'Équipe du joueur 2' : sel.vs === 'spec' ? "Équipe de l'IA 2" : "Équipe de l'IA";
   $('pickE').innerHTML = [['random','Aléatoire'], ...TEAMS.map(t=>[t.id,(t.legend ? '★ ' : '') + t.name])].map(([k,l]) => `<button class="pill" data-k="${k}" aria-pressed="${sel.e===k}">${l}</button>`).join('');
   $('pickD').innerHTML = diffCards(sel.d, 'data-k');
@@ -68,7 +68,7 @@ function renderMenu(){
   if (typeof LEAGUE !== 'undefined'){ const done = LEAGUE.filter(r => lg.beaten[r.trainers.at(-1).id]).length, cur = LEAGUE[Math.min(done, LEAGUE.length - 1)];
     $('lgMenuInfo').textContent = (lgRun() ? 'Ligue en cours : ' + LEAGUE.find(r => r.id === lgRun().region).name : done >= LEAGUE.length ? 'Toutes les Ligues terminées !' : 'Prochaine : ' + cur.name) + ` · ${un.size}/${Object.keys(MONS).length} Pokémon`; }
   $('start').disabled = $('teamNext').disabled = (sel.mode === 'build' && sel.build.length !== 6) || teamLocked;
-  $('teamNext').textContent = teamLocked ? 'Équipe verrouillée : débloque-la dans la Ligue' : $('teamNext').disabled ? `Choisis encore ${6 - sel.build.length} Pokémon` : 'Suivant';
+  $('teamNext').textContent = teamLocked ? 'Équipe verrouillée : débloque-la dans la Ligue' : $('teamNext').disabled ? `Choisis encore ${6 - sel.build.length} Pokémon` : sel.vs === 'tour' ? 'Commencer la Tour' : 'Suivant';
   hydrate($('menu'));
 }
 $('menu').addEventListener('click', e => {

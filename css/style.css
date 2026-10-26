@@ -229,3 +229,33 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .splash p{font-size:14px;line-height:1.5}
 .splash .note{font-size:12px}
 .splash .btn{margin-top:6px;min-width:180px;font-size:17px}
+
+/* écran de fin : statistiques, meilleur Pokémon, bonus de la Tour */
+#endStats{width:100%;display:flex;flex-direction:column;gap:8px;margin:6px 0 10px}
+.stats{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+.stats th{text-align:left;font-weight:500;color:var(--mute);padding:3px 6px}
+.stats td{text-align:right;font-weight:700;padding:3px 6px;width:30%}
+.stats thead td{font-family:var(--font-d);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+.stats tbody tr:nth-child(odd){background:#ffffff08}
+.mvp{display:flex;align-items:center;gap:10px;text-align:left;background:linear-gradient(90deg,#e6b84c22,transparent);border-left:3px solid var(--gold);padding:6px 10px}
+.mvp small{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.mvp b{display:block;font-family:var(--font-d);font-size:17px}
+.mvp span{font-size:12px;color:var(--mute)}
+.tourpick{display:flex;flex-direction:column;gap:8px;width:100%;margin-bottom:10px}
+.bonus{display:flex;flex-direction:column;gap:2px;text-align:left;border:1px solid var(--gold);border-radius:10px;background:var(--panel-2);padding:10px 14px}
+.bonus b{font-family:var(--font-d);font-size:16px;color:var(--gold)}
+.bonus small{color:var(--mute);font-size:12px}
+.bonus:hover,.bonus:focus-visible{background:#3a2a6a;outline:none}
+/* tutoriel : consigne en haut de l'arène */
+.tutobox{position:absolute;left:50%;top:56px;transform:translateX(-50%);z-index:3;width:min(92%,520px);box-sizing:border-box;background:#110e22e8;border:2px solid var(--gold);border-radius:12px;padding:10px 14px;text-align:center;box-shadow:0 6px 24px #0008}
+.tutobox small{font-family:var(--font-d);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.tutobox p{margin:4px 0 8px;font-size:14px;line-height:1.4}
+.tutobox .btn{font-size:12px;padding:4px 10px}
+.money{margin:0;font-family:var(--font-d);font-size:15px}
+.money b{color:var(--gold)}
+.monpick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.bonus b{display:flex;justify-content:space-between;gap:8px}
+.bonus em{font-style:normal;font-size:13px;color:var(--fg);background:#ffffff14;border-radius:6px;padding:1px 8px}
+.bonus.taken{opacity:.55}
+.bonus:disabled{cursor:default}
+.tourpick .go{margin-top:2px}

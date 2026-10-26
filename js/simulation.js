@@ -78,8 +78,9 @@ function update(dt){
   if (g.state === 'fight') for (const side of [g.ps, g.es]) if (side.dashN < DASH_MAX && (side.dashT -= dt) <= 0){
     side.dashN++; side.dashT = side.dashN < DASH_MAX ? DASH_REGEN : 0; }
   const [px,py] = g.spectate ? aiInput(g.p, dt) : playerInput();
-  for (const side of g.vs2 ? [] : g.spectate ? [g.ps, g.es] : [g.es]) if (g.diff.dmg > .75 && canMega(side) && (side.team[side.active].hp/side.team[side.active].max < .8 || g.fightT > 8)) tryMega(side);
-  const [ax,ay] = g.vs2 ? playerInput2() : aiInput(g.e, dt);
+  for (const side of g.vs2 || g.tuto ? [] : g.spectate ? [g.ps, g.es] : [g.es]) if (g.diff.dmg > .75 && canMega(side) && (side.team[side.active].hp/side.team[side.active].max < .8 || g.fightT > 8)) tryMega(side);
+  const [ax,ay] = g.vs2 ? playerInput2() : g.tuto ? [0, 0] : aiInput(g.e, dt);   // tutoriel : le Ronflex d'entraînement ne fait rien
+  if (g.tuto) tutoTick(dt);
   stepFighter(g.p, px, py, dt);
   stepFighter(g.e, ax, ay, dt);
   // les deux Pokémon ne se chevauchent pas, sauf pendant une charge qui traverse ou sous terre
@@ -188,13 +189,15 @@ function showEnd(pAlive, eAlive){
   $('endT').textContent = draw ? 'Égalité' : game.vs2 ? (win ? 'Le joueur 1 gagne !' : 'Le joueur 2 gagne !') : game.spectate ? (win ? "L'IA 1 gagne !" : "L'IA 2 gagne !") : win ? 'Victoire !' : 'Défaite…';
   $('endT').style.color = win ? 'var(--gold)' : game.vs2 ? '#ef5050' : 'var(--fg)';
   const n = win ? pAlive : eAlive;
+  renderEndStats();
   if ((game.vs2 || game.spectate) && !draw){ $('endS').textContent = `Avec ${n} Pokémon encore debout, en ${Math.round(game.fightT)} s.`; $('ovEnd').hidden = false; game.p.held.fill(false); AUDIO.stopMusic(); AUDIO.end(true); return; }
   $('endS').textContent = draw ? 'Les deux derniers Pokémon sont tombés en même temps.'
     : win ? `Tu bats ${game.es.name} avec ${n} Pokémon encore debout, en ${Math.round(game.fightT)} s.`
     : `${game.es.name} gagne avec ${n} Pokémon encore debout.`;
   $('again').textContent = 'Revanche';
   if (game.league){ const r = leagueResult(win, pAlive); if (r.msg) $('endS').textContent += ' ' + r.msg; $('again').textContent = r.label; }
-  $('toMenu').textContent = game.league ? 'Retour à la Ligue' : "Changer d'équipe";
+  if (game.tour){ const r = tourResult(win); $('endS').textContent += ' ' + r.msg; if (r.label) $('again').textContent = r.label; $('again').hidden = !r.label; }
+  $('toMenu').textContent = game.league ? 'Retour à la Ligue' : game.tour ? 'Quitter la Tour' : "Changer d'équipe";
   $('ovEnd').hidden = false;
   game.p.held.fill(false); AUDIO.stopMusic(); AUDIO.end(win);
 }

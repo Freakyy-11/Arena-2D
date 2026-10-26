@@ -39,20 +39,32 @@
       </div>
       <nav class="mainmodes" aria-label="Modes de jeu">
         <button class="mm big" id="openLeague"><em>Mode principal</em><b>Ligue Pokémon</b><span id="lgMenuInfo"></span><small>Bats les Conseils 4 et leurs Maîtres pour débloquer des Pokémon.</small></button>
+        <button class="mm" data-vs="tour"><b>Tour de combat</b><span id="tourInfo"></span><small>Commence en 2 contre 2, recrute après chaque gardien, achète des bonus</small></button>
         <button class="mm" data-vs="ai"><b>Combat libre</b><small>Ton équipe contre l'IA</small></button>
         <button class="mm" data-vs="p2"><b>2 joueurs</b><small>Le joueur 2 joue à la manette</small></button>
         <button class="mm" data-vs="spec"><b>IA contre IA</b><small>Regarde deux IA s'affronter</small></button>
+        <button class="mm sub" id="openTuto"><b>Tutoriel</b><small>Apprendre les commandes en 2 minutes</small></button>
         <button class="mm sub" id="openDex"><b>Attaques</b><small>Fiches des Pokémon et ordre des boutons</small></button>
       </nav>
       <div class="more">
         <details><summary>Son et vibrations</summary><div class="row" id="pickS"></div></details>
         <details><summary>Commandes</summary>
           <p class="note kbd"><b>Clavier + souris :</b> ZQSD pour bouger, la souris vise · clic gauche, clic droit, A et E pour attaquer · Espace pour le Dash · R pour la Méga-évolution · 1 à 6 pour changer de Pokémon · Échap pour la pause. Clavier seul : J K L M attaquent en visée automatique. Maintiens une attaque pour voir le repère : elle part quand tu relâches.</p>
-          <p class="note"><b>Manette :</b> stick gauche pour bouger, stick droit pour viser (relâché = visée automatique) · L1, L2, R1, R2 pour attaquer (l'attaque part au relâchement) · ✕ pour le Dash · Carré / Rond (ou flèches gauche/droite) pour choisir un Pokémon, Triangle pour l'envoyer · flèche du haut pour la Méga-évolution · visée aimantée sur l'adversaire, et les zones se posent à sa distance · Options pour la pause.</p>
+          <p class="note"><b>Manette :</b> stick gauche pour bouger, stick droit pour viser (relâché = visée automatique) · L1, L2, R1, R2 pour attaquer (l'attaque part au relâchement) · ✕ pour le Dash · Carré / Rond (ou flèches gauche/droite) pour choisir un Pokémon, Triangle pour l'envoyer · flèche du haut pour la Méga-évolution · les zones se posent à la distance de l'adversaire, dans la direction visée · Options pour la pause.</p>
           <p class="note"><b>Téléphone :</b> joystick à gauche, attaques et Dash à droite. Touche une attaque pour viser automatiquement, ou fais glisser le doigt depuis le bouton pour viser toi-même puis relâche ; la barre d'équipe au-dessus sert à changer de Pokémon, sans lâcher le joystick ; le bouton Méga apparaît en bas à droite de l'arène quand ton Pokémon peut méga-évoluer.</p>
         </details>
         <p class="note">Sprites animés : <a href="https://sprites.pmdcollab.org" target="_blank" rel="noopener" style="color:var(--gold)">PMD SpriteCollab</a> (CC BY-NC 4.0) · Portraits : PokéAPI · Musique du menu : <a href="https://opengameart.org/content/boss-theme" target="_blank" rel="noopener" style="color:var(--gold)">« Boss Theme » par remaxim</a> (CC BY-SA 3.0) · Musique des combats : <a href="https://opengameart.org/content/battle-theme-a" target="_blank" rel="noopener" style="color:var(--gold)">« Battle Theme A » par cynicmusic</a> et <a href="https://opengameart.org/content/jrpg-pack-5-action" target="_blank" rel="noopener" style="color:var(--gold)">« JRPG Music Pack #5 » par Juhani Junkala</a>, <a href="https://opengameart.org/content/jrpg-epic-rock-battle-theme-1" target="_blank" rel="noopener" style="color:var(--gold)">« JRPG Epic Rock Battle Theme #1 » par HydroGene</a> (CC0) · Bruitages : <a href="https://kenney.nl" target="_blank" rel="noopener" style="color:var(--gold)">Kenney</a> et <a href="https://opengameart.org/content/80-cc0-rpg-sfx" target="_blank" rel="noopener" style="color:var(--gold)">rubberduck</a> (CC0) · Projet de fan non officiel et non commercial.</p>
       </div>
+    </div>
+
+    <!-- Tour de combat : choix des 2 premiers Pokémon -->
+    <div class="scr" id="scrTour" hidden>
+      <header class="scrhead"><button class="back" data-back aria-label="Retour">‹</button><div><small>Tour de combat</small><h2>Tes 2 premiers Pokémon</h2></div></header>
+      <div class="step"><h3>Difficulté (la même pour toute la Tour)</h3><div class="row" id="tourDiff"></div></div>
+      <p class="note">25 étages. Tu commences en 2 contre 2. Après chaque gardien (tous les 5 étages), un nouveau Pokémon rejoint ton équipe, jusqu'à 6 ; à l'étage 25, le Maître de la Tour t'attend avec deux légendaires. Les PV sont gardés d'un étage à l'autre ; les dégâts infligés rapportent de l'argent pour acheter des bonus. <b id="tourDraftN">0/2</b></p>
+      <div class="grid24" id="tourDraft"></div>
+      <div class="row"><button class="btn" id="tourReroll">Nouveau tirage</button></div>
+      <div class="startbar"><button class="go" id="tourGo" disabled>Choisis 2 Pokémon</button></div>
     </div>
 
     <!-- écran 2 : difficulté (sauté à 2 joueurs) -->
@@ -126,7 +138,7 @@
       <button class="pause" id="pauseBtn" aria-label="Pause">II</button>
       <div class="card right" id="hudE"></div>
     </header>
-    <div class="stage" id="stage"><canvas id="cv"></canvas><div class="co p" id="coP"></div><div class="co e" id="coE"></div><button class="megab" id="megaBtn" hidden aria-label="Méga-évolution">Méga</button></div>
+    <div class="stage" id="stage"><canvas id="cv"></canvas><div class="tutobox" id="tutoBox" hidden><small id="tutoN"></small><p id="tutoTxt"></p><button class="btn" id="tutoSkip">Passer le tutoriel</button></div><div class="co p" id="coP"></div><div class="co e" id="coE"></div><button class="megab" id="megaBtn" hidden aria-label="Méga-évolution">Méga</button></div>
     <div class="bench" id="bench"></div>
     <div class="pad">
       <div class="stick" id="stick"><div class="knob" id="knob"></div></div>
@@ -140,7 +152,7 @@
       <div class="box"><h3 id="chooseT">K.O. !</h3><p>Choisis ton prochain Pokémon.</p><div class="choose" id="chooseList"></div></div>
     </div>
     <div class="overlay" id="ovEnd" hidden>
-      <div class="box"><h3 id="endT"></h3><p id="endS"></p><div class="row"><button class="btn main" id="again">Revanche</button><button class="btn" id="toMenu">Changer d'équipe</button></div></div>
+      <div class="box"><h3 id="endT"></h3><p id="endS"></p><div id="endStats"></div><div class="tourpick" id="tourPick" hidden></div><div class="row"><button class="btn main" id="again">Revanche</button><button class="btn" id="toMenu">Changer d'équipe</button></div></div>
     </div>
   </section>
 </div>
@@ -156,5 +168,6 @@
 <script src="js/arenes.js"></script>
 <script src="js/rendu.js"></script>
 <script src="js/ligue.js"></script>
+<script src="js/modes.js"></script>
 </body>
 </html>
