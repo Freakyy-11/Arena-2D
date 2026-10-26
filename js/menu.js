@@ -43,7 +43,7 @@ let legendWarn = false;
 function renderMenu(){
   // Pokémon pas encore débloqués dans la Ligue : grisés, et les équipes qui en contiennent sont verrouillées
   const un = unlockedSet(); sel.build = sel.build.filter(k => un.has(k));
-  const lockedN = t => t.mons.filter(k => !un.has(k)).length;
+  const lockedN = t => teamFree(t) ? 0 : t.mons.filter(k => !un.has(k)).length;   // équipe débloquée en entier par la Ligue
   if (!renderMenu.done && sel.mode === 'teams' && TEAMS.every(t => lockedN(t) > 0)) sel.mode = 'build';   // à l'ouverture, si aucune équipe prête n'est débloquée : on compose la sienne
   renderMenu.done = true;
   $('pickMode').innerHTML = [['teams','Équipes prêtes'],['build','Composer mon équipe']].map(([k,l]) => `<button class="pill" data-k="${k}" aria-pressed="${sel.mode===k}">${l}</button>`).join('');

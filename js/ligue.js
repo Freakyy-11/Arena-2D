@@ -2,14 +2,18 @@
 // =====================================================================
 // LIGUE
 // =====================================================================
-const LEAGUE_START = ['dracaufeu','leviator','gorythmic','pyrax','lucario','ronflex','gardevoir','zeraora'];
+const LEAGUE_START = ['dracaufeu','leviator','gorythmic','pyrax','lucario','ronflex','gardevoir','zeraora'];   // départ imposé des anciennes sauvegardes
+// Pokémon de départ : le joueur en choisit START_N parmi cette sélection (tous les types, sans les pseudo-légendaires)
+const START_N = 10;
+const START_POOL = ['dracaufeu','demolosse','flamigator','tortank','leviator','amphinobi','gorythmic','roserade','zeraora','lokhlass','mammochon','lucario','mackogneur',
+  'nostenfer','arbok','hippodocus','libegon','roucarnage','togekiss','gardevoir','alakazam','pyrax','cizayox','ptera','ectoplasma','absol','noctali','ronflex','steelix'];
 // adversaires dans l'ordre ; reward = Pokémon débloqués en gagnant ; arena = arène du combat
 const LEAGUE = [
   {id:'kanto', name:'Kanto', trainers:[
-    {id:'kanto-olga', name:'Olga', title:'Conseil 4 · Glace', arena:'couronne', mons:['crustabri','lippoutou','lamantine','momartik','mammochon','lokhlass'], reward:['mammochon','lamantine','lokhlass']},
-    {id:'kanto-aldo', name:'Aldo', title:'Conseil 4 · Combat', arena:'stade', mons:['kicklee','tygnon','grolem','lucario','tyranocif','mackogneur'], reward:['tyranocif','mackogneur']},
-    {id:'kanto-agatha', name:'Agatha', title:'Conseil 4 · Spectre', arena:'chateau', mons:['arbok','sinistrail','flamigator','momartik','naganadel','ectoplasma'], reward:['sinistrail','arbok','ectoplasma']},
-    {id:'kanto-peter', name:'Peter', title:'Conseil 4 · Dragon', arena:'pilier', mons:['ptera','leviator','carchacrok','lanssorien','dracaufeu','dracolosse'], reward:['ptera','dracolosse']},
+    {id:'kanto-olga', team:'dracolosse', name:'Olga', title:'Conseil 4 · Glace', arena:'couronne', mons:['crustabri','lippoutou','lamantine','momartik','mammochon','lokhlass'], reward:['mammochon','lamantine','lokhlass']},
+    {id:'kanto-aldo', team:'carchacrok', name:'Aldo', title:'Conseil 4 · Combat', arena:'stade', mons:['kicklee','tygnon','grolem','lucario','tyranocif','mackogneur'], reward:['tyranocif','mackogneur']},
+    {id:'kanto-agatha', team:'lanssorien', name:'Agatha', title:'Conseil 4 · Spectre', arena:'chateau', mons:['arbok','sinistrail','flamigator','momartik','naganadel','ectoplasma'], reward:['sinistrail','arbok','ectoplasma']},
+    {id:'kanto-peter', team:'naganadel', name:'Peter', title:'Conseil 4 · Dragon', arena:'pilier', mons:['ptera','leviator','carchacrok','lanssorien','dracaufeu','dracolosse'], reward:['ptera','dracolosse']},
     {id:'kanto-blue', name:'Blue', title:'Maître de Kanto', arena:'stade', champion:1, mons:['roucarnage','alakazam','rhinoferos','arcanin','mewtwo','tortank'], reward:['alakazam','arcanin','tortank','mewtwo']}],
    challenges:[{id:'kanto-def', trainer:'kanto-blue', text:'Battre Blue sans perdre un seul Pokémon', test:r => r.lost === 0, reward:['electhorgalar']}]},
   {id:'johto', name:'Johto', trainers:[
@@ -42,11 +46,30 @@ try { Object.assign(lg, JSON.parse(localStorage.getItem('arene-ligue') || '{}'))
 const lgSave = () => { try { localStorage.setItem('arene-ligue', JSON.stringify(lg)); } catch(e){} };
 function unlockedSet(){
   if (lg.all) return new Set(Object.keys(MONS));
-  const s = new Set(LEAGUE_START);
+  const s = new Set(lg.start || LEAGUE_START);
   for (const r of LEAGUE){ for (const t of r.trainers) if (lg.beaten[t.id]) t.reward.forEach(k => s.add(k)); for (const c of r.challenges) if (lg.chal[c.id]) c.reward.forEach(k => s.add(k)); }
   return s;
 }
 const isUnlocked = k => unlockedSet().has(k);
+// équipe prête jouable en entier : débloquée par un membre du Conseil 4 (même si ses Pokémon ne le sont pas un par un)
+const teamFree = t => lg.all || LEAGUE.some(r => r.trainers.some(tr => tr.team === t.id && lg.beaten[tr.id]));
+// anciennes sauvegardes (progression sans choix de départ) : les 8 imposés restent, on en choisit 2 de plus
+const lgLegacy = () => !lg.start && (Object.keys(lg.beaten).length > 0 || !!lg.run);
+// équipe conseillée : parmi les Pokémon disponibles, les 6 qui contrent le mieux les types de la région (1 légendaire max, types variés)
+function recommendTeam(region, pool){
+  const foes = [...new Set(LEAGUE.find(r => r.id === region).trainers.flatMap(t => t.mons))];
+  const off = k => { const ts = [...new Set(MONS[k].moves.map(m => MOVES[m]).filter(m => m.p).map(m => m.t))];
+    return foes.reduce((a, f) => a + (ts.length ? Math.max(...ts.map(t => typeScale(effMult(t, MONS[f].types))*(MONS[k].types.includes(t) ? 1.25 : 1))) : 1), 0)/foes.length; };
+  const def = k => foes.reduce((a, f) => a + Math.max(...MONS[f].types.map(t => typeScale(effMult(t, MONS[k].types)))), 0)/foes.length;
+  const base = Object.fromEntries(pool.map(k => [k, off(k) - .8*def(k) + .6*MONS[k].bst/600]));
+  const team = [];
+  while (team.length < 6){ let best = null, bv = -1e9;
+    for (const k of pool){ if (team.includes(k) || (MONS[k].legend && team.some(x => MONS[x].legend))) continue;
+      const v = base[k] - .15*team.reduce((a, x) => a + MONS[k].types.filter(t => MONS[x].types.includes(t)).length, 0);
+      if (v > bv){ bv = v; best = k; } }
+    if (!best) break; team.push(best); }
+  return team;
+}
 // une région s'ouvre quand le Maître de la précédente est battu (au bout d'une Ligue complète)
 const regionOpen = i => i === 0 || lg.all || !!lg.beaten[LEAGUE[i-1].trainers.at(-1).id];
 // Ligue en cours : région, équipe et difficulté fixées, i = prochain dresseur ; retry = seconde chance restante (1 par Ligue), ensuite une défaite y met fin
@@ -58,14 +81,17 @@ function startRun(region, team, dk){ lg.run = {region, i:0, team:team.slice(), d
 function leagueAbandon(){ lg.run = null; lgSave(); }
 
 // ---------- écran de la Ligue ----------
-let lgRegion = null, lgNext = null, lgStep = 'diff';   // lgStep : écran de la difficulté, puis régions et équipe
+let lgRegion = null, lgNext = null, lgStep = 'diff', lgPick = [];   // lgStep : départ (une seule fois), difficulté, puis régions et équipe
 if (!Array.isArray(sel.lgTeam)) sel.lgTeam = [];
 function renderLeague(){
   const un = unlockedSet(), run = lgRun();
-  if (run) lgStep = 'main';
-  $('lgStepDiff').hidden = lgStep !== 'diff'; $('lgStepMain').hidden = lgStep !== 'main';
-  $('lgTitle').textContent = lgStep === 'diff' ? 'Difficulté' : run ? 'Ligue en cours · ' + DIFFS[run.dk].label : 'Région et équipe · ' + DIFFS[sel.d].label;
-  sel.lgTeam = sel.lgTeam.filter(k => un.has(k));
+  if (run) lgStep = 'main'; else if (!lg.start && !lg.all) lgStep = 'start';
+  $('lgStepStart').hidden = lgStep !== 'start'; $('lgStepDiff').hidden = lgStep !== 'diff'; $('lgStepMain').hidden = lgStep !== 'main';
+  $('lgTitle').textContent = lgStep === 'start' ? 'Pokémon de départ' : lgStep === 'diff' ? 'Difficulté' : run ? 'Ligue en cours · ' + DIFFS[run.dk].label : 'Région et équipe · ' + DIFFS[sel.d].label;
+  if (lgStep === 'start'){ renderStart(); return; }
+  const rt = sel.lgReady && TEAMS.find(t => t.id === sel.lgReady && teamFree(t));   // équipe prête prise en entier
+  if (!rt) sel.lgReady = null;
+  sel.lgTeam = sel.lgTeam.filter(k => un.has(k) || (rt && rt.mons.includes(k)));
   if (run) lgRegion = run.region;
   if (!lgRegion || !regionOpen(LEAGUE.findIndex(r => r.id === lgRegion))) lgRegion = LEAGUE[LEAGUE.reduce((m, r, i) => regionOpen(i) ? i : m, 0)].id;
   $('lgSummary').textContent = `Pokémon débloqués : ${un.size}/${Object.keys(MONS).length}`;
@@ -76,12 +102,14 @@ function renderLeague(){
     return `<div class="team lgt${t.champion ? ' champ' : ''}${inRun && j === run.i ? ' next' : ''}${inRun && j < run.i ? ' done' : ''}">
       <div class="th"><b>${t.name}</b><small>${t.title}${st}</small></div>
       <div class="minis">${t.mons.map(k => `<div class="m">${pic(k,36)}<i>${MONS[k].name}</i></div>`).join('')}</div>
-      ${t.reward.length ? `<small class="rw">${ever ? 'Débloqué' : 'Débloque'} : ${names(t.reward)}</small>` : ''}</div>`; }).join('');
+      ${t.reward.length ? `<small class="rw">${ever ? 'Débloqué' : 'Débloque'} : ${names(t.reward)}${t.team ? ' + l’' + TEAMS.find(x => x.id === t.team).name.replace(/^É/, 'é') + ' (prête)' : ''}</small>` : ''}</div>`; }).join('');
   $('lgChal').innerHTML = R.challenges.length ? '<h3>Défis</h3>' + R.challenges.map(c => `<p class="note">${lg.chal[c.id] ? '✓' : '☆'} ${c.text} → débloque ${names(c.reward)}</p>`).join('') : '';
   const dk = run ? run.dk : sel.d;
   $('lgDiff').innerHTML = diffCards(dk, 'data-lgd');
   $('lgTeamCount').textContent = `${team.length}/6`;
-  $('lgTeam').innerHTML = [...un].sort((a, b) => MONS[a].name.localeCompare(MONS[b].name, 'fr')).map(k => { const i = team.indexOf(k);
+  const freeTeams = TEAMS.filter(t => teamFree(t) || t.mons.every(k => un.has(k)));
+  $('lgReady').innerHTML = run ? '' : `<button class="btn" data-lga="reco">Équipe conseillée pour ${R.name}</button>` + freeTeams.map(t => `<button class="pill" data-lgt="${t.id}" aria-pressed="${sel.lgReady === t.id}">${t.legend ? '★ ' : ''}${t.name}</button>`).join('');
+  $('lgTeam').innerHTML = [...new Set([...un, ...team])].sort((a, b) => MONS[a].name.localeCompare(MONS[b].name, 'fr')).map(k => { const i = team.indexOf(k);
     return `<button class="mon" data-lgm="${k}" aria-pressed="${i >= 0}" ${run ? 'disabled' : ''}>${i >= 0 ? `<span class="num">${i+1}</span>` : ''}${MONS[k].legend ? '<span class="leg">★</span>' : ''}${pic(k,46)}<b>${MONS[k].name}</b><div class="types">${chips(MONS[k].types)}</div></button>`; }).join('');
   $('lgHint').textContent = run ? `Ligue en cours : équipe et difficulté sont fixées jusqu'à la fin. ${(run.retry ?? 1) > 0 ? 'Seconde chance disponible : à la première défaite, tu pourras rejouer le combat.' : 'Seconde chance utilisée : une défaite fait recommencer depuis le début.'}`
     : 'Choisis 6 Pokémon (1 légendaire ★ maximum). Tu as droit à une seconde chance par Ligue ; à la défaite suivante, il faut recommencer depuis le premier membre du Conseil.';
@@ -89,17 +117,34 @@ function renderLeague(){
     : `<button class="btn" data-lga="diff">Difficulté : ${DIFFS[sel.d].label}</button><button class="go" data-lga="start" ${ready ? '' : 'disabled'}>${ready ? 'Commencer la Ligue de ' + R.name : 'Choisis encore ' + (6 - team.length) + ' Pokémon'}</button>`;
   hydrate($('league'));
 }
+// ---------- choix des Pokémon de départ ----------
+function renderStart(){
+  const fixed = lgLegacy() ? LEAGUE_START : [];
+  if (!lgPick.length) lgPick = fixed.slice();
+  const pool = [...new Set([...fixed, ...START_POOL])];
+  $('lgStartNote').textContent = fixed.length ? `Nouveau : tu peux choisir tes Pokémon de départ. Tes ${fixed.length} Pokémon de départ restent ; choisis-en ${START_N - fixed.length} de plus.`
+    : `Choisis tes ${START_N} premiers Pokémon. Les autres se débloquent en battant les membres de la Ligue.`;
+  $('lgStartCount').textContent = `${lgPick.length}/${START_N}`;
+  $('lgStart').innerHTML = pool.map(k => `<button class="mon" data-lgs="${k}" aria-pressed="${lgPick.includes(k)}" ${fixed.includes(k) ? 'disabled' : ''}>${lgPick.includes(k) ? '<span class="num">✓</span>' : ''}${pic(k,46)}<b>${MONS[k].name}</b><div class="types">${chips(MONS[k].types)}</div></button>`).join('');
+  $('lgStartGo').disabled = lgPick.length !== START_N;
+  $('lgStartGo').textContent = lgPick.length === START_N ? 'Valider mes Pokémon' : `Choisis encore ${START_N - lgPick.length} Pokémon`;
+  hydrate($('lgStart'));
+}
+$('lgStartGo').onclick = () => { if (lgPick.length !== START_N) return; lg.start = lgPick.slice(); lgPick = []; lgSave(); lgStep = 'diff'; renderLeague(); renderMenu(); $('league').scrollTop = 0; };
 function openLeague(step){ lgStep = step === 'main' ? 'main' : 'diff'; renderLeague(); $('menu').hidden = true; $('league').hidden = false; $('league').scrollTop = 0; }
 function closeLeague(){ if (lgStep === 'main' && !lgRun()){ lgStep = 'diff'; renderLeague(); $('league').scrollTop = 0; return; }   // retour : régions → difficulté → accueil
   $('league').hidden = true; $('menu').hidden = false; goScreen('home'); }
 addEventListener('keydown', e => { if (e.code === 'Escape' && !$('league').hidden) closeLeague(); });
 $('openLeague').onclick = openLeague; $('closeLeague').onclick = closeLeague;
 $('league').addEventListener('click', e => {
-  const b = e.target.closest('[data-lgr],[data-lgm],[data-lgd],[data-lga]'); if (!b || b.disabled) return; const y = $('league').scrollTop;
+  const b = e.target.closest('[data-lgr],[data-lgm],[data-lgd],[data-lga],[data-lgs],[data-lgt]'); if (!b || b.disabled) return; const y = $('league').scrollTop;
+  if (b.dataset.lgs){ const k = b.dataset.lgs, i = lgPick.indexOf(k); if (i >= 0) lgPick.splice(i, 1); else if (lgPick.length < START_N) lgPick.push(k); renderStart(); $('league').scrollTop = y; return; }
   if (b.dataset.lgr) lgRegion = b.dataset.lgr;
+  else if (b.dataset.lgt){ const t = TEAMS.find(x => x.id === b.dataset.lgt); sel.lgTeam = t.mons.slice(); sel.lgReady = t.id; save(); }
+  else if (b.dataset.lga === 'reco'){ sel.lgTeam = recommendTeam(lgRegion, [...unlockedSet()]); sel.lgReady = null; save(); }
   else if (b.dataset.lgd){ sel.d = b.dataset.lgd; save(); lgStep = 'main'; renderLeague(); $('league').scrollTop = 0; return; }
   else if (b.dataset.lga === 'diff'){ lgStep = 'diff'; renderLeague(); $('league').scrollTop = 0; return; }
-  else if (b.dataset.lgm){ const k = b.dataset.lgm, i = sel.lgTeam.indexOf(k);
+  else if (b.dataset.lgm){ const k = b.dataset.lgm, i = sel.lgTeam.indexOf(k); sel.lgReady = null;
     if (i >= 0) sel.lgTeam.splice(i, 1); else if (MONS[k].legend && sel.lgTeam.some(x => MONS[x].legend)) return; else if (sel.lgTeam.length < 6) sel.lgTeam.push(k); save(); }
   else if (b.dataset.lga === 'start'){ startRun(lgRegion, sel.lgTeam, sel.d); return; }
   else if (b.dataset.lga === 'next'){ fightNext(); return; }
@@ -107,7 +152,7 @@ $('league').addEventListener('click', e => {
   renderLeague(); $('league').scrollTop = y;
 });
 $('lgAll').onclick = () => { if (confirm('Débloquer toutes les régions et tous les Pokémon ?')){ lg.all = true; lgSave(); renderLeague(); } };
-$('lgReset').onclick = () => { if (confirm('Effacer toute ta progression dans la Ligue ?')){ lg = {beaten:{}, chal:{}, all:false}; lgSave(); renderLeague(); } };
+$('lgReset').onclick = () => { if (confirm('Effacer toute ta progression dans la Ligue ?')){ lg = {beaten:{}, chal:{}, all:false}; lgPick = []; lgSave(); renderLeague(); renderMenu(); } };
 
 // fin d'un combat de Ligue : victoire (dresseur suivant, déblocages, défis) ou défaite (la Ligue est à recommencer)
 function leagueResult(win, pAlive){

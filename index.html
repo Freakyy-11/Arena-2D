@@ -89,6 +89,12 @@
 
   <section id="league" class="dex" hidden>
     <header class="scrhead"><button class="back" id="closeLeague" aria-label="Retour">‹</button><div><small>Ligue Pokémon</small><h2 id="lgTitle">Difficulté</h2></div></header>
+    <div id="lgStepStart">
+      <p class="note" id="lgStartNote"></p>
+      <h2>Tes Pokémon de départ <span id="lgStartCount">0/10</span></h2>
+      <div class="grid24" id="lgStart"></div>
+      <div class="startbar"><button class="go" id="lgStartGo">Valider mes Pokémon</button></div>
+    </div>
     <div id="lgStepDiff">
       <p class="note">La difficulté reste fixée jusqu'à la fin de la Ligue.</p>
       <div class="diffs" id="lgDiff"></div>
@@ -100,6 +106,7 @@
       <div id="lgChal"></div>
       <h2>Ton équipe pour la Ligue <span id="lgTeamCount">0/6</span></h2>
       <p class="note" id="lgHint"></p>
+      <div class="row" id="lgReady"></div>
       <div class="grid24" id="lgTeam"></div>
       <div class="row" id="lgActions"></div>
       <div class="row"><button class="btn" id="lgAll">Tout débloquer</button><button class="btn" id="lgReset">Réinitialiser la progression</button></div>
