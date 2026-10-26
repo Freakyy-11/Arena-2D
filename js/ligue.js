@@ -36,6 +36,13 @@ const LEAGUE = [
     {id:'sinnoh-adrien', name:'Adrien', title:'Conseil 4 · Feu', arena:'chateau', mons:['simiabraz','pyroli','arcanin','demolosse','dracaufeu','maganon'], reward:['simiabraz','pyroli','maganon']},
     {id:'sinnoh-lucio', name:'Lucio', title:'Conseil 4 · Psy', arena:'colonnes', mons:['mentali','archeodong','alakazam','gardevoir','metalosse','gallame'], reward:['mentali','archeodong','gallame']},
     {id:'sinnoh-cynthia', name:'Cynthia', title:'Maîtresse de Sinnoh', arena:'stade', champion:1, mons:['spiritomb','roserade','sylveroy','togekiss','lucario','carchacrok'], reward:['spiritomb','roserade','sylveroy']}],
+   challenges:[]},
+  {id:'unys', name:'Unys', trainers:[
+    {id:'unys-anis', name:'Anis', title:'Conseil 4 · Spectre', arena:'chateau', mons:['tutankafer','moyade','golemastoc','momartik','ectoplasma','lugulabre'], reward:['lugulabre','tutankafer','moyade','golemastoc']},
+    {id:'unys-pieris', name:'Pieris', title:'Conseil 4 · Ténèbres', arena:'tourbillon', mons:['baggaid','leopardus','crocorible','absol','demolosse','scalpereur'], reward:['baggaid','leopardus','crocorible']},
+    {id:'unys-percila', name:'Percila', title:'Conseil 4 · Psy', arena:'colonnes', mons:['mushana','cryptero','symbios','mentali','alakazam','siderella'], reward:['siderella','mushana','cryptero','symbios']},
+    {id:'unys-kunz', name:'Kunz', title:'Conseil 4 · Combat', arena:'stade', mons:['judokrak','karaclee','betochef','lucario','mackogneur','kungfouine'], reward:['kungfouine','judokrak','karaclee','betochef']},
+    {id:'unys-iris', name:'Iris', title:"Maîtresse d'Unys", arena:'pilier', champion:1, mons:['trioxhydre','drakkarmin','aeropteryx','galeking','kyogre','tranchodon'], reward:['tranchodon','trioxhydre','drakkarmin','aeropteryx']}],
    challenges:[]}
 ];
 const LG_TRAINER = {}; for (const r of LEAGUE) for (const t of r.trainers) LG_TRAINER[t.id] = {...t, region:r.id};

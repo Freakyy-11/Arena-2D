@@ -246,7 +246,27 @@ const MOVES = {
   papillodanse:{n:'Papillodanse',t:'Bug',c:'st',k:'buff',buff:{spa:1.4,spe:1.2},dur:10,cd:15},
   bourdon:{n:'Bourdon',t:'Bug',c:'sp',p:90,k:'quake',max:160,dur:.45,cd:5,ring:'sound',fx:{spdDown:.2}},
   // Poison
-  doubledard:{n:'Double Dard',t:'Poison',c:'sp',p:55,k:'sig',sig:'doubledard',cd:5.5,range:320,shape:['lane',340,14],anim:'Attack',aiP:120,desc:"Lance un dard (empoisonne à coup sûr) et charge en même temps. Si la charge touche : vole la moitié des dégâts en PV, étourdit 0,5 s, et le lanceur bondit en arrière.",per:1}
+  doubledard:{n:'Double Dard',t:'Poison',c:'sp',p:55,k:'sig',sig:'doubledard',cd:5.5,range:320,shape:['lane',340,14],anim:'Attack',aiP:120,desc:"Lance un dard (empoisonne à coup sûr) et charge en même temps. Si la charge touche : vole la moitié des dégâts en PV, étourdit 0,5 s, et le lanceur bondit en arrière.",per:1},
+  // ---------- Unys (génération 5) ----------
+  ecosphere:{n:'Éco-Sphère',t:'Grass',c:'sp',p:90,k:'proj',spd:400,r:20,life:1.5,cd:3.5,fx:{spdDown:.1}},
+  feudames:{n:"Feu d'Âmes",t:'Ghost',c:'sp',p:100,k:'sig',sig:'feudames',spd:380,r:15,life:2,cd:5,range:420,shape:['self',40],anim:'Charge',aiP:130,fx:{burn:.35},desc:"Trois flammes spectrales tournent autour du lanceur puis partent l'une après l'autre sur l'ennemi (elles le suivent un peu). Peuvent brûler."},
+  piegemental:{n:'Piège Mental',t:'Psychic',c:'sp',p:110,k:'sig',sig:'piegemental',cd:7,range:360,shape:['zone',85],anim:'Shoot',aiP:120,desc:"Zone visée : si l'ennemi est dedans, il ne peut plus en sortir pendant 2 s, puis la zone éclate."},
+  rafalekungfu:{n:'Rafale de Kung-Fu',t:'Fighting',c:'ph',p:120,k:'sig',sig:'rafalekungfu',cd:5,range:200,shape:['lane',200,42],anim:'Attack',close:1,aiP:130,desc:"Avance en enchaînant 4 coups de pied tournoyants (dirigeables) ; le dernier repousse."},
+  guillotine:{n:'Guillotine',t:'Dragon',c:'ph',p:150,k:'sig',sig:'guillotine',cd:6.5,range:150,shape:['wedge',150,.65],anim:'Attack',close:1,aiP:140,desc:"Courte préparation, puis une énorme entaille en croix devant le lanceur. Très puissante ; récupération courte ensuite."},
+  sarcophage:{n:'Malédiction du Sarcophage',t:'Ghost',c:'sp',p:80,k:'sig',sig:'sarcophage',cd:7,range:340,shape:['zone',52],anim:'Shoot',aiP:120,desc:"Après un court délai, enferme l'ennemi de la zone visée dans un sarcophage : il est frappé et immobilisé 1 s."},
+  tentacules:{n:"Tentacules d'Eau",t:'Water',c:'sp',p:90,k:'sig',sig:'tentacules',cd:6,range:270,shape:['lane',270,24],anim:'Shoot',aiP:120,desc:"Des tentacules saisissent l'ennemi dans le couloir et l'attirent, avec 3 coups sur la durée."},
+  coupboulevoyou:{n:'Coup de Boule Voyou',t:'Dark',c:'ph',p:85,k:'sig',sig:'coupboulevoyou',cd:5,range:240,shape:['lane',230,24],anim:'Attack',close:1,aiP:120,desc:"Charge tête la première : repousse et baisse l'Attaque de l'ennemi pendant 5 s."},
+  griffefurtive:{n:'Griffe Furtive',t:'Dark',c:'ph',p:80,k:'sig',sig:'griffefurtive',cd:4.5,range:360,shape:['self',30],anim:'Attack',aiP:120,desc:"Disparaît un instant puis réapparaît derrière l'ennemi (s'il est à portée) et le griffe."},
+  machoiresable:{n:'Mâchoire de Sable',t:'Ground',c:'ph',p:100,k:'sig',sig:'machoiresable',cd:6,range:320,shape:['leap',55],anim:'Attack',close:1,aiP:125,desc:"S'enfouit, file sous le sol (intouchable) et surgit sous la zone visée en mordant ; l'ennemi est projeté en l'air."},
+  brumereve:{n:'Brume de Rêve',t:'Psychic',c:'st',k:'sig',sig:'brumereve',cd:10,range:360,shape:['zone',95],anim:'Shoot',aiP:60,desc:"Nuage rose pendant 3 s : l'ennemi qui y reste près d'une seconde s'endort 1,6 s."},
+  prisme:{n:'Prisme',t:'Psychic',c:'sp',p:85,k:'sig',sig:'prisme',cd:4.5,range:460,shape:['lane',460,14],anim:'Shoot',aiP:120,desc:"Rayon qui se divise en 3 au bout de sa course. Peut toucher deux fois (le second coup à moitié)."},
+  membranepsy:{n:'Membrane Psy',t:'Psychic',c:'sp',p:95,k:'sig',sig:'membranepsy',cd:8,range:110,shape:['self',110],anim:'Charge',aiP:110,desc:"Bulle de 1,2 s qui renvoie les projectiles, puis explose autour du lanceur."},
+  projection:{n:'Projection',t:'Fighting',c:'ph',p:100,k:'sig',sig:'projection',cd:5.5,range:210,shape:['lane',200,24],anim:'Attack',close:1,aiP:125,desc:"Courte charge ; au contact, saisit l'ennemi et le projette loin derrière lui (étourdi à l'atterrissage)."},
+  brisegarde:{n:'Brise-Garde',t:'Fighting',c:'ph',p:95,k:'sig',sig:'brisegarde',cd:3.5,range:160,shape:['lane',160,24],anim:'Attack',close:1,aiP:120,desc:"Coup de karaté rapide qui traverse les boucliers et les poupées (et les détruit)."},
+  piliersbeton:{n:'Piliers de Béton',t:'Fighting',c:'ph',p:120,k:'sig',sig:'piliersbeton',cd:7,range:150,shape:['wedge',150,.5],anim:'Attack',close:1,aiP:120,desc:"Plante deux piliers devant lui (obstacles pour l'ennemi) qui tombent en avant 1,1 s plus tard."},
+  triplesouffle:{n:'Triple Souffle',t:'Dark',c:'sp',p:100,k:'sig',sig:'triplesouffle',spd:420,r:18,life:1.3,cd:4,range:440,shape:['lane',440,40],anim:'Shoot',aiP:125,desc:"Ses trois têtes tirent trois souffles en éventail, l'un après l'autre."},
+  queuerageuse:{n:'Coup de Queue Rageur',t:'Dragon',c:'ph',p:90,k:'sig',sig:'queuerageuse',cd:5,range:130,shape:['wedge',130,1.35],anim:'Attack',close:1,aiP:120,desc:"Grand balayage de queue en arc devant le lanceur ; étourdit 0,5 s."},
+  envolfossile:{n:'Envol Fossile',t:'Rock',c:'ph',p:95,k:'sig',sig:'envolfossile',cd:6,range:320,shape:['lane',320,34],anim:'Attack',aiP:125,desc:"S'envole (intouchable), puis pique en ligne droite en lâchant trois pierres sur son passage."},
 };
 
 // base = [PV, Atq, Déf, AtqSpé, DéfSpé, Vit] (stats officielles)
@@ -342,7 +362,27 @@ const MONS = {
   flamigator:{name:'Flamigator',id:911,types:['Fire','Ghost'],base:[104,75,100,110,75,66],moves:['chantflamboyant','ballombre','telluriforce','paresse']},
   carchacrok:{name:'Carchacrok',id:445,types:['Dragon','Ground'],base:[108,130,95,80,85,102],moves:['colere','seisme','danselames','dracocharge']},
   sinistrail:{name:'Sinistrail',id:781,types:['Grass','Ghost'],base:[70,131,100,86,90,40],moves:['ancrage','megafouet','hantise','seisme']},
-  amphinobi:{name:'Amphinobi',id:658,types:['Water','Dark'],base:[72,95,67,103,71,122],moves:['sheauriken','vibrobscur','laserglace','hydrocanon']}
+  amphinobi:{name:'Amphinobi',id:658,types:['Water','Dark'],base:[72,95,67,103,71,122],moves:['sheauriken','vibrobscur','laserglace','hydrocanon']},
+  // ---------- Unys (génération 5) ----------
+  lugulabre:{name:'Lugulabre',id:609,types:['Ghost','Fire'],base:[60,55,90,145,90,80],moves:['feudames','ballombre','lanceflammes','ecosphere']},
+  siderella:{name:'Sidérella',id:576,types:['Psychic'],base:[70,55,95,95,110,65],moves:['piegemental','ballombre','chocpsy','machination']},
+  kungfouine:{name:'Kungfouine',id:620,types:['Fighting'],base:[65,125,60,95,60,105],moves:['rafalekungfu','closecombat','demitour','piedvoltige']},
+  tranchodon:{name:'Tranchodon',id:612,types:['Dragon'],base:[76,147,90,60,70,97],moves:['guillotine','dansedraco','dracogriffe','seisme']},
+  tutankafer:{name:'Tutankafer',id:563,types:['Ghost'],base:[58,50,145,95,105,30],moves:['sarcophage','ballombre','feufollet','poupeemaudite']},
+  moyade:{name:'Moyade',id:593,types:['Water','Ghost'],base:[100,60,70,85,105,60],moves:['tentacules','surf','ballombre','repos']},
+  golemastoc:{name:'Golemastoc',id:623,types:['Ground','Ghost'],base:[89,124,80,55,80,55],moves:['poingombre','seisme','ballombre','megacorne']},
+  baggaid:{name:'Baggaïd',id:560,types:['Dark','Fighting'],base:[65,90,115,45,115,58],moves:['coupboulevoyou','closecombat','sabotage','coupbas']},
+  leopardus:{name:'Léopardus',id:510,types:['Dark'],base:[64,88,50,88,50,106],moves:['griffefurtive','coupbas','sabotage','ombreportee']},
+  crocorible:{name:'Crocorible',id:553,types:['Ground','Dark'],base:[95,117,80,65,70,92],moves:['machoiresable','seisme','machouille','tunnel']},
+  mushana:{name:'Mushana',id:518,types:['Psychic'],base:[116,55,85,107,95,29],moves:['brumereve','psyko','plenitude','ballombre']},
+  cryptero:{name:'Cryptéro',id:561,types:['Psychic','Flying'],base:[72,58,80,103,80,97],moves:['prisme','lamedair','chocpsy','teleport']},
+  symbios:{name:'Symbios',id:579,types:['Psychic'],base:[110,65,75,125,85,30],moves:['membranepsy','psyko','exploforce','flemme']},
+  judokrak:{name:'Judokrak',id:538,types:['Fighting'],base:[120,100,85,30,85,45],moves:['projection','closecombat','ligotage','repos']},
+  karaclee:{name:'Karaclée',id:539,types:['Fighting'],base:[75,125,75,30,75,85],moves:['brisegarde','closecombat','piedvoltige','sabotage']},
+  betochef:{name:'Bétochef',id:534,types:['Fighting'],base:[105,140,95,55,65,45],moves:['piliersbeton','closecombat','lamederoc','machpunch']},
+  trioxhydre:{name:'Trioxhydre',id:635,types:['Dark','Dragon'],base:[92,105,90,125,90,98],moves:['triplesouffle','vibrobscur','dracosouffle','lanceflammes']},
+  drakkarmin:{name:'Drakkarmin',id:621,types:['Dragon'],base:[77,120,90,60,90,48],moves:['queuerageuse','dracogriffe','seisme','machouille']},
+  aeropteryx:{name:'Aéroptéryx',id:567,types:['Rock','Flying'],base:[75,140,65,112,65,110],moves:['envolfossile','lamederoc','lamedair','demitour']},
 };
 const TEAMS = [
   {id:'dracolosse',name:'Équipe Dracolosse',mons:['dracolosse','lucario','flamigator','leviator','zeraora','metalosse']},

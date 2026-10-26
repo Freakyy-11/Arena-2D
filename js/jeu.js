@@ -503,7 +503,7 @@ function hit(att, def, mv, mult){
   if (!mv.p){ applyStatus(def, fx); burst(def.x, def.y, TYPES[mv.t][1], 8, 100, 3); return; }
   const A = mv.foulPlay ? def.st.atk*def.buff.atk : mv.c === 'ph' ? att.st.atk*att.buff.atk*(att.atkDown > 0 ? .75 : 1) : att.st.spa*att.buff.spa, D = mv.c === 'ph' || mv.vsDef ? def.st.def*(def.defDown > 0 ? .75 : 1) : def.st.spd*(def.spdDown > 0 ? .75 : 1)*(def.buff.spd || 1);   // vsDef : Frappe Psy
   let dmg = ((22*mv.p*A/D)/50 + 2) * (att.d.types.includes(mv.t) || (mv.t2 && att.d.types.includes(mv.t2)) ? STAB : 1) * e * rand(.88,1) * .3 * mult * suddenDeath();
-  if (att.burn > 0 && mv.c === 'ph') dmg *= .5;
+  if (att.burn > 0 && mv.c === 'ph') dmg *= .75;   // brûlure : attaques physiques −25 %
   if (att.isAI) dmg *= game.diff.dmg;   // force de l'IA selon la difficulté
   if (def.shield > 0) dmg *= .5;   // Nuage Doux, Ordre Défense
   if (att.mega && mv.k === 'sig') dmg *= 1.15;   // forme Méga : attaque emblématique renforcée

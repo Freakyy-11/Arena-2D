@@ -16,7 +16,7 @@ function stepFighter(f, ix, iy, dt){
   if (f.buffT <= 0) f.buff = {atk:1,spa:1,spe:1,spd:1};
   if (f.hp > 0 && game.state === 'fight' && (f.burn > 0 || f.poison > 0)){   // en pause pendant un K.O.
     f.dot += dt;
-    if (f.dot >= 1){ f.dot -= 1; const d = Math.max(1, Math.round(f.max*((f.burn>0?.04:0)+(f.poison>0?.05:0))));
+    if (f.dot >= 1){ f.dot -= 1; const d = Math.max(1, Math.round(f.max*((f.burn>0?.04:0)+(f.poison>0?.04:0))));
       damage(f, d); popText(f.x, f.y-30, '-'+d, f.burn>0 ? '#EE8130' : '#c06bd0', 16); }
   }
   if (f.ring > 0 && f.hp > 0){ f.hp = Math.min(f.max, f.hp + f.max*.22/6*dt); if (Math.random() < dt*10) burst(f.x+rand(-18,18), f.y+rand(-18,18), '#8fb4ff', 1, 30, 3); }
