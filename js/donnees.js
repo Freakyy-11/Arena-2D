@@ -159,7 +159,7 @@ const MOVES = {
   // Feu
   lanceflammes:{n:'Lance-Flammes',t:'Fire',c:'sp',p:80,k:'spec',sig:'lanceflammes',beam:1,cd:4,range:560,shape:['lane',560,18],anim:'Shoot',fx:{burn:.3},desc:"Après 0,2 s de visée, jet de flammes à longue portée. 30 % de chance de brûler. Laisse une traînée de flammes au sol pendant 3 s qui peut brûler."},
   deflagration:{n:'Déflagration',t:'Fire',c:'sp',p:120,k:'spec',sig:'deflagration',cd:4.5,range:420,shape:['lane',420,30],anim:'Shoot',fx:{burn:.3},desc:"Un grand pentagramme de flammes avance. Le sol qu'il traverse reste en flammes 3 s : rester dedans peut brûler."},
-  feufollet:{n:'Feu Follet',t:'Fire',c:'st',p:0,k:'homing',cnt:1,spd:200,turn:2.4,r:13,life:3,cd:6,look:'wisp',fx:{burn:1,atkDown:1}},
+  feufollet:{n:'Feu Follet',t:'Fire',c:'st',p:0,k:'homing',cnt:1,spd:240,turn:2.4,r:13,life:1.8,cd:6,look:'wisp',fx:{burn:1,atkDown:1}},
   rafalefeu:{n:'Rafale Feu',t:'Fire',c:'sp',p:140,k:'sig',sig:'rafalefeu',cd:6,range:230,shape:['wedge',240,.55],anim:'Shoot',desc:"Après une courte préparation, énorme cône de feu. Le sol reste en flammes 3 s et brûle ceux qui s'y trouvent."},
   dansedufeu:{n:'Danse du Feu',t:'Fire',c:'sp',p:32,k:'sig',sig:'dansedufeu',cd:5,range:380,shape:['lane',360,32],anim:'Charge',aiP:110,desc:"Tornade de flammes rapide qui file en ligne droite. Au contact, elle l'emporte avec elle (immobilisé) et le frappe 5 fois de suite, puis le relâche. 50 % de chance d'augmenter l'Atq. Spé.",per:1},
   chantflamboyant:{n:'Chant Flamboyant',t:'Fire',c:'sp',p:100,k:'sig',sig:'chantflamboyant',cd:4.5,range:420,shape:['lane',420,46],anim:'Shoot',aiP:130,desc:"Une large vague de flammes et de notes part droit devant (on peut l'esquiver sur le côté). Si elle touche : Atq. Spé. augmentée pendant 6 s."},
@@ -221,7 +221,7 @@ const MOVES = {
   // Glace
   poingglace:{n:'Poing Glace',t:'Ice',c:'ph',p:80,k:'spec',sig:'poingglace',cd:3.5,range:280,shape:['lane',266,24],anim:'Attack',close:1,fx:{slow:.3},desc:"Charge, puis coup de poing glacé à l'impact ou au bout de la course. 30 % de chance de ralentir."},
   crocsgivre:{n:'Crocs Givre',t:'Ice',c:'ph',p:70,k:'melee',reach:58,cd:2,jaw:'ice',fx:{slow:.3}},
-  eclatsglace:{n:'Éclats Glace',t:'Ice',c:'ph',p:55,k:'homing',cnt:1,spd:360,turn:2.6,r:11,life:1.7,cd:3,look:'diamond',fx:{slow:1,slowT:.5}},
+  eclatsglace:{n:'Éclats Glace',t:'Ice',c:'ph',p:55,k:'homing',cnt:1,spd:360,turn:2.6,r:11,life:1.3,cd:3,look:'diamond',fx:{slow:1,slowT:.5}},
   laserglace:{n:'Laser Glace',t:'Ice',c:'sp',p:80,k:'spec',sig:'laserglace',beam:1,cd:4,range:560,shape:['lane',560,18],anim:'Shoot',fx:{slow:1},desc:"Après 0,2 s de visée, laser à longue portée. Ralentit à coup sûr, 10 % de chance d'immobiliser 1 s. Laisse une traînée de givre au sol pendant 3 s qui ralentit."},
   chuteglace:{n:'Chute Glace',t:'Ice',c:'ph',p:40,k:'sig',sig:'chuteglace',cd:5,range:380,shape:['zone',80],anim:'Shoot',aiP:135,desc:"5 stalactites tombent l'une après l'autre : la 1re sur la zone visée, les suivantes sur la position de l'ennemi (elles le suivent). La dernière, plus grosse, immobilise 0,4 s et reste plantée : la prochaine attaque du lanceur la fait exploser.",per:1},
   cavalerielourde:{n:'Cavalerie Lourde',t:'Ground',c:'ph',p:95,k:'spec',sig:'cavalerielourde',cd:4.5,range:280,shape:['lane',280,26],anim:'Attack',close:1,aiP:115,desc:"Charge, puis au bout de la course un petit bond en avant écrase une zone en cercle : l'ennemi touché est immobilisé 0,35 s."},
@@ -249,7 +249,7 @@ const MOVES = {
   doubledard:{n:'Double Dard',t:'Poison',c:'sp',p:55,k:'sig',sig:'doubledard',cd:5.5,range:320,shape:['lane',340,14],anim:'Attack',aiP:120,desc:"Lance un dard (empoisonne à coup sûr) et charge en même temps. Si la charge touche : vole la moitié des dégâts en PV, étourdit 0,5 s, et le lanceur bondit en arrière.",per:1},
   // ---------- Unys (génération 5) ----------
   ecosphere:{n:'Éco-Sphère',t:'Grass',c:'sp',p:90,k:'proj',spd:400,r:20,life:1.5,cd:3.5,fx:{spdDown:.1}},
-  feudames:{n:"Feu d'Âmes",t:'Ghost',c:'sp',p:85,k:'sig',sig:'feudames',spd:380,r:15,life:2,cd:5,range:420,shape:['self',40],anim:'Charge',aiP:130,fx:{burn:.35},desc:"Trois flammes spectrales tournent autour du lanceur puis partent l'une après l'autre sur l'ennemi (elles le suivent un peu). Peuvent brûler."},
+  feudames:{n:"Feu d'Âmes",t:'Ghost',c:'sp',p:85,k:'sig',sig:'feudames',spd:380,r:15,life:1.4,cd:5,range:420,shape:['self',40],anim:'Charge',aiP:130,fx:{burn:.35},desc:"Trois flammes spectrales tournent autour du lanceur puis partent l'une après l'autre sur l'ennemi (elles le suivent un peu). Peuvent brûler."},
   piegemental:{n:'Piège Mental',t:'Psychic',c:'sp',p:110,k:'sig',sig:'piegemental',cd:7,range:360,shape:['zone',85],anim:'Shoot',aiP:120,desc:"Zone visée : si l'ennemi est dedans, il ne peut plus en sortir pendant 2 s, puis la zone éclate."},
   rafalekungfu:{n:'Rafale de Kung-Fu',t:'Fighting',c:'ph',p:120,k:'sig',sig:'rafalekungfu',cd:5,range:200,shape:['lane',200,42],anim:'Attack',close:1,aiP:130,desc:"Avance en enchaînant 4 coups de pied tournoyants (dirigeables) ; le dernier repousse."},
   guillotine:{n:'Guillotine',t:'Dragon',c:'ph',p:150,k:'sig',sig:'guillotine',cd:6.5,range:150,shape:['wedge',150,.65],anim:'Attack',close:1,aiP:140,desc:"Courte préparation, puis une énorme entaille en croix devant le lanceur. Très puissante ; récupération courte ensuite."},
@@ -513,7 +513,7 @@ const TEAMS = [
 const DIFFS = {
   facile:{label:'Facile',react:.2,think:.85,lead:.1,noise:.5,mirror:false,sw:.1,dash:.08,aimErr:.33,dmg:.72},
   normal:{label:'Normal',react:.36,think:.62,lead:.28,noise:.34,mirror:true,sw:.3,dash:.2,aimErr:.22,dmg:.82},
-  champion:{label:'Champion',react:.52,think:.52,lead:.45,noise:.23,mirror:true,sw:.45,dash:.34,aimErr:.14,dmg:.9},
+  champion:{label:'Champion',react:.57,think:.49,lead:.52,noise:.2,mirror:true,sw:.5,dash:.4,aimErr:.115,dmg:.92},
   enfer:{label:'Enfer',react:.92,think:.32,lead:.9,noise:.06,mirror:true,sw:.85,dash:.85,aimErr:.02,dmg:1.25}   // réagit presque toujours, anticipe tes déplacements, frappe plus fort
 };
 const ARENA_LIST = [['stade','Stade Pokémon'],['pilier','Pilier Céleste'],['colonnes','Colonnes Lance'],['couronne','Mont Couronné'],['chateau','Château de Ghetsis'],['tourbillon','Îles Tourbillon']];

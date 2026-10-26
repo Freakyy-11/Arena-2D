@@ -174,7 +174,7 @@ $('megaBtn').addEventListener('pointerdown', e => { e.preventDefault(); if (game
 function hpColor(r){ return r > .5 ? 'var(--hp)' : r > .2 ? 'var(--hp-mid)' : 'var(--hp-low)'; }
 function updateHUD(){
   const mb = $('megaBtn'), can = !game.spectate && canMega(game.ps); if (mb.hidden === can){ mb.hidden = !can; if (can) mb.innerHTML = 'Méga<span class="k">' + (inputMode === 'pad' ? '↑' : inputMode === 'touch' ? '' : 'R') + '</span>'; }
-  for (const sd of [game.ps, game.es]) if (sd.swSel != null && ((sd.swSelT -= 1/60) <= 0 || sd.swSel === sd.active || sd.team[sd.swSel].hp <= 0)) sd.swSel = null;
+  for (const sd of [game.ps, game.es]) if (sd.swSel != null && (sd.swSel === sd.active || sd.team[sd.swSel].hp <= 0)) keepPreselect(sd);
   for (const side of [game.ps, game.es]){
     const f = side.team[side.active], r = f.hp / f.max, h = side.hud;
     h.bar.style.transform = `scaleX(${r})`; h.bar.style.background = hpColor(r);
@@ -301,13 +301,19 @@ function readSticks(P, gp){
     P.aimOn = true; P.aimHold = PAD_AIM_HOLD;
   } else if (P.aimOn && rk < PAD_AIM_ON*.6 && (P.aimHold -= dt) <= 0) P.aimOn = false;
 }
+// présélection (manette) : une fois choisie, elle reste jusqu'au changement et ne revient jamais sur le Pokémon en jeu ;
+// après un changement, elle passe sur celui qui vient de sortir (pour revenir vite), sinon sur le premier autre Pokémon vivant
+function keepPreselect(side, prefer){
+  const al = aliveIdx(side).filter(i => i !== side.active);
+  side.swSel = !al.length ? null : prefer != null && al.includes(prefer) ? prefer : al.includes(side.swSel) ? side.swSel : al[0];
+}
+function switchPreselected(side){ const old = side.active; if (side.swSel != null && trySwitch(side, side.swSel)) keepPreselect(side, old); }
 // flèches gauche/droite : présélection du prochain Pokémon vivant de la barre d'équipe
 function preselect(side, right){
   const al = aliveIdx(side).filter(i => i !== side.active); if (!al.length) return;
   const from = side.swSel != null ? side.swSel : side.active, n = side.team.length;
   side.swSel = right ? al.reduce((best,i) => ((i-from+n)%n || n) < ((best-from+n)%n || n) ? i : best)
                      : al.reduce((best,i) => ((from-i+n)%n || n) < ((from-best+n)%n || n) ? i : best);
-  side.swSelT = 3;
 }
 // 2 joueurs : avec deux manettes, la 1re est au joueur 1 ; avec une seule, elle est au joueur 2 (le joueur 1 garde clavier, souris ou tactile)
 function pollPad(){
@@ -339,7 +345,7 @@ function pollPad(){
   // flèches gauche/droite : présélection d'un Pokémon de la barre d'équipe ; Triangle : changement
   if (down(14) || down(15) || down(2) || down(1)) preselect(g.ps, down(15) || down(1));   // flèches, ou Carré (gauche) / Rond (droite)
   if (down(12)) tryMega(g.ps);   // flèche du haut : Méga-évolution
-  if (down(3) && g.ps.swSel != null && trySwitch(g.ps, g.ps.swSel)) g.ps.swSel = null;
+  if (down(3)) switchPreselected(g.ps);
   pad.prev = b;
 }
 // manette du joueur 2 : mêmes boutons que le joueur 1
@@ -355,7 +361,7 @@ function pollPad2(gp){
   if (down(0)) tryRoll(g.e, pad2.lx, pad2.ly);
   if (down(14) || down(15) || down(2) || down(1)) preselect(g.es, down(15) || down(1));
   if (down(12)) tryMega(g.es);
-  if (down(3) && g.es.swSel != null && trySwitch(g.es, g.es.swSel)) g.es.swSel = null;
+  if (down(3)) switchPreselected(g.es);
 }
 const playerInput2 = () => [pad2.lx, pad2.ly];
 // vibration pour le joueur dont le Pokémon encaisse (en 2 joueurs, seulement sa manette)

@@ -713,7 +713,7 @@ const SIG = {
   // Lucario : plus on maintient, plus la sphère est grosse et puissante
   aurasphere(f, mv, a, tx, ty, o){
     const c = Math.max(0, Math.min(1, (o.charge || 0)/1.1));
-    spawnProj(f, sub(mv, {p:mv.p + 50*c, r:11 + 13*c, spd:340 - 60*c, life:2.6, turn:2.4, look:'aura'}), a, 1, foeOf(f));
+    spawnProj(f, sub(mv, {p:mv.p + 50*c, r:11 + 13*c, spd:340 - 60*c, life:1.8, turn:2.4, look:'aura'}), a, 1, foeOf(f));
     if (c > .6){ shake(6); screenFlash('#8fc0ff', .2, .2); shockRing(f.x, f.y, 70, '#a8d4ff', .3, 8); }
   },
   // Dracolosse : traverse l'adversaire en un éclair
@@ -839,7 +839,7 @@ const SIG = {
   },
   // Lanssorien : lance deux Fantyrm qui suivent l'adversaire
   dracofleches(f, mv, a){
-    const m = sub(mv, {spd:430, r:11, life:1.6, turn:2.7, look:'dreepy'});
+    const m = sub(mv, {spd:430, r:11, life:1.2, turn:2.7, look:'dreepy'});
     spawnProj(f, m, a - .35, 1, foeOf(f));
     spawnFx({update(){ if (this.t >= .14){ spawnProj(f, m, a + .35, 1, foeOf(f)); return false; } return true; }});
   },
