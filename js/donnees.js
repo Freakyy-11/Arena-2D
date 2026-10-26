@@ -249,7 +249,7 @@ const MOVES = {
   doubledard:{n:'Double Dard',t:'Poison',c:'sp',p:55,k:'sig',sig:'doubledard',cd:5.5,range:320,shape:['lane',340,14],anim:'Attack',aiP:120,desc:"Lance un dard (empoisonne à coup sûr) et charge en même temps. Si la charge touche : vole la moitié des dégâts en PV, étourdit 0,5 s, et le lanceur bondit en arrière.",per:1},
   // ---------- Unys (génération 5) ----------
   ecosphere:{n:'Éco-Sphère',t:'Grass',c:'sp',p:90,k:'proj',spd:400,r:20,life:1.5,cd:3.5,fx:{spdDown:.1}},
-  feudames:{n:"Feu d'Âmes",t:'Ghost',c:'sp',p:100,k:'sig',sig:'feudames',spd:380,r:15,life:2,cd:5,range:420,shape:['self',40],anim:'Charge',aiP:130,fx:{burn:.35},desc:"Trois flammes spectrales tournent autour du lanceur puis partent l'une après l'autre sur l'ennemi (elles le suivent un peu). Peuvent brûler."},
+  feudames:{n:"Feu d'Âmes",t:'Ghost',c:'sp',p:85,k:'sig',sig:'feudames',spd:380,r:15,life:2,cd:5,range:420,shape:['self',40],anim:'Charge',aiP:130,fx:{burn:.35},desc:"Trois flammes spectrales tournent autour du lanceur puis partent l'une après l'autre sur l'ennemi (elles le suivent un peu). Peuvent brûler."},
   piegemental:{n:'Piège Mental',t:'Psychic',c:'sp',p:110,k:'sig',sig:'piegemental',cd:7,range:360,shape:['zone',85],anim:'Shoot',aiP:120,desc:"Zone visée : si l'ennemi est dedans, il ne peut plus en sortir pendant 2 s, puis la zone éclate."},
   rafalekungfu:{n:'Rafale de Kung-Fu',t:'Fighting',c:'ph',p:120,k:'sig',sig:'rafalekungfu',cd:5,range:200,shape:['lane',200,42],anim:'Attack',close:1,aiP:130,desc:"Avance en enchaînant 4 coups de pied tournoyants (dirigeables) ; le dernier repousse."},
   guillotine:{n:'Guillotine',t:'Dragon',c:'ph',p:150,k:'sig',sig:'guillotine',cd:6.5,range:150,shape:['wedge',150,.65],anim:'Attack',close:1,aiP:140,desc:"Courte préparation, puis une énorme entaille en croix devant le lanceur. Très puissante ; récupération courte ensuite."},
@@ -267,6 +267,59 @@ const MOVES = {
   triplesouffle:{n:'Triple Souffle',t:'Dark',c:'sp',p:100,k:'sig',sig:'triplesouffle',spd:420,r:18,life:1.3,cd:4,range:440,shape:['lane',440,40],anim:'Shoot',aiP:125,desc:"Ses trois têtes tirent trois souffles en éventail, l'un après l'autre."},
   queuerageuse:{n:'Coup de Queue Rageur',t:'Dragon',c:'ph',p:90,k:'sig',sig:'queuerageuse',cd:5,range:130,shape:['wedge',130,1.35],anim:'Attack',close:1,aiP:120,desc:"Grand balayage de queue en arc devant le lanceur ; étourdit 0,5 s."},
   envolfossile:{n:'Envol Fossile',t:'Rock',c:'ph',p:95,k:'sig',sig:'envolfossile',cd:6,range:320,shape:['lane',320,34],anim:'Attack',aiP:125,desc:"S'envole (intouchable), puis pique en ligne droite en lâchant trois pierres sur son passage."},
+  // ---------- Kalos (génération 6) ----------
+  rapaceenflamme:{n:"Rapace Enflammé",t:'Fire',c:'ph',p:120,k:'sig',sig:'rapaceenflamme',fx:{recoil:.15},cd:6,range:330,shape:['lane',330,30],anim:'Attack',aiP:125,desc:"S'élève (intouchable) puis pique en flammes en ligne droite, en laissant une traînée de feu. Le lanceur subit un peu de recul."},
+  poingsmultiples:{n:"Poings Multiples",t:'Rock',c:'ph',p:120,k:'sig',sig:'poingsmultiples',close:1,cd:5,range:105,shape:['wedge',120,.8],anim:'Attack',aiP:125,desc:"Ses bras frappent en rafale devant lui (6 coups) ; le dernier, en pierre, repousse."},
+  bouclierroyal:{n:"Bouclier Royal",t:'Steel',c:'ph',p:130,k:'sig',sig:'bouclierroyal',close:1,cd:7,range:150,shape:['wedge',150,.7],anim:'Attack',aiP:125,desc:"Forme bouclier 0,8 s (dégâts reçus réduits de moitié, l'ennemi qui s'approche perd de l'Attaque), puis forme lame : grand coup d'épée devant lui."},
+  ultrasondragon:{n:"Ultrason Dragon",t:'Dragon',c:'sp',p:90,k:'sig',sig:'ultrasondragon',cd:5,range:240,shape:['wedge',240,.5],anim:'Attack',aiP:125,desc:"Onde sonore en cône qui étourdit brièvement (0,4 s) et repousse."},
+  rugissementardent:{n:"Rugissement Ardent",t:'Fire',c:'sp',p:85,k:'sig',sig:'rugissementardent',cd:5,range:200,shape:['wedge',200,.6],anim:'Attack',aiP:125,desc:"Rugissement en cône qui brûle (50 %) et repousse."},
+  eruption:{n:"Éruption",t:'Fire',c:'sp',p:150,k:'sig',sig:'eruption',cd:7,range:180,shape:['self',180],anim:'Attack',aiP:125,desc:"Fait jaillir 7 colonnes de lave tout autour (une sous l'ennemi s'il est proche). Plus puissante quand le lanceur a tous ses PV."},
+  canonpince:{n:"Canon Pince",t:'Water',c:'sp',p:110,k:'sig',sig:'canonpince',cd:6,range:520,shape:['lane',520,30],anim:'Attack',aiP:125,desc:"Après une courte charge, énorme jet d'eau depuis sa pince, très long, qui repousse."},
+  etoilefilante:{n:"Étoile Filante",t:'Water',c:'sp',p:110,k:'sig',sig:'etoilefilante',cd:6,range:400,shape:['lane',400,30],anim:'Attack',aiP:125,desc:"Tourne en toupie et file en ricochant sur les murs pendant 0,9 s ; peut toucher plusieurs fois."},
+  trousseau:{n:"Trousseau",t:'Steel',c:'sp',p:60,k:'sig',sig:'trousseau',cd:7,range:420,shape:['lane',420,16],anim:'Attack',aiP:125,desc:"Lance ses clés : l'ennemi touché ne peut plus attaquer pendant 2 s."},
+  aimantgeant:{n:"Aimant Géant",t:'Steel',c:'sp',p:90,k:'sig',sig:'aimantgeant',cd:6,range:300,shape:['self',300],anim:'Attack',aiP:125,desc:"Attire l'ennemi vers lui pendant 0,6 s, puis le frappe s'il est au contact (et l'étourdit un instant)."},
+  jettoxique:{n:"Jet Toxique",t:'Poison',c:'sp',p:90,k:'sig',sig:'jettoxique',cd:4.5,range:460,shape:['lane',460,14],anim:'Attack',aiP:125,desc:"Jet de poison draconique, suivi d'un second plus faible : empoisonne et ralentit 2 s."},
+  mucusdragon:{n:"Mucus Dragon",t:'Dragon',c:'sp',p:70,k:'sig',sig:'mucusdragon',cd:8,range:360,shape:['zone',95],anim:'Attack',aiP:125,desc:"Flaque visqueuse 3,5 s qui ralentit fortement ; le lanceur encaisse deux fois moins pendant 2 s."},
+  crocsroyaux:{n:"Crocs Royaux",t:'Dragon',c:'ph',p:110,k:'sig',sig:'crocsroyaux',close:1,cd:5.5,range:240,shape:['lane',230,24],anim:'Attack',aiP:125,desc:"Charge puis énorme morsure qui retient l'ennemi (immobilisé 0,6 s)."},
+  aurorefossile:{n:"Aurore Fossile",t:'Ice',c:'sp',p:60,k:'sig',sig:'aurorefossile',cd:12,range:130,shape:['self',130],anim:'Attack',aiP:125,desc:"Voile d'aurore : dégâts reçus réduits de moitié pendant 4 s ; gèle le sol autour (dégâts et ralentit)."},
+  priseaerienne:{n:"Prise Aérienne",t:'Fighting',c:'ph',p:110,k:'sig',sig:'priseaerienne',close:1,cd:5.5,range:300,shape:['leap',55],anim:'Attack',aiP:125,desc:"Bondit sur la zone visée depuis les airs et plaque l'ennemi au sol (immobilisé 0,6 s)."},
+  citrouillehantee:{n:"Citrouille Hantée",t:'Ghost',c:'sp',p:110,k:'sig',sig:'citrouillehantee',cd:5.5,range:360,shape:['zone',70],anim:'Attack',aiP:125,desc:"Lance 3 citrouilles en cloche qui explosent en flammes spectrales ; peuvent brûler."},
+  // ---------- Alola (génération 7) ----------
+  poingglacegeant:{n:"Poing Glacé Géant",t:'Ice',c:'ph',p:130,k:'sig',sig:'poingglacegeant',close:1,cd:7,range:160,shape:['zone',70],anim:'Attack',aiP:125,desc:"Après une courte préparation, un énorme poing gelé s'abat devant lui : gèle le sol et immobilise 1 s."},
+  crocderoc:{n:"Croc de Roc",t:'Rock',c:'ph',p:100,k:'sig',sig:'crocderoc',close:1,cd:5.5,range:300,shape:['leap',50],anim:'Attack',aiP:125,desc:"Bondit sur l'ennemi (s'il est à portée), le mord, et des pierres jaillissent tout autour."},
+  chateausable:{n:"Château de Sable",t:'Ghost',c:'sp',p:100,k:'sig',sig:'chateausable',cd:9,range:150,shape:['self',150],anim:'Attack',aiP:125,desc:"Engloutit la zone autour de lui dans le sable pendant 2,5 s : ralentit, et chaque coup vole des PV."},
+  beccanon:{n:"Bec-Canon",t:'Normal',c:'ph',p:140,k:'sig',sig:'beccanon',cd:7,range:480,shape:['lane',480,30],anim:'Attack',aiP:125,desc:"Charge son bec 1 s (l'ennemi qui le touche est brûlé), puis tire une rafale qui explose au contact ou en fin de course."},
+  tisseombre:{n:"Tisse-Ombre",t:'Ghost',c:'ph',p:90,k:'sig',sig:'tisseombre',cd:5,range:560,shape:['lane',560,12],anim:'Attack',aiP:125,desc:"Flèche d'ombre rapide qui traverse et cloue l'ennemi sur place (il ne peut plus bouger pendant 1,5 s)."},
+  pousseesumo:{n:"Poussée Sumo",t:'Fighting',c:'ph',p:100,k:'sig',sig:'pousseesumo',close:1,cd:6,range:220,shape:['lane',210,26],anim:'Attack',aiP:125,desc:"Courte charge ; au contact, pousse l'ennemi devant lui. S'il heurte un mur, le coup est 50 % plus fort."},
+  furiesimiesque:{n:"Furie Simiesque",t:'Fighting',c:'ph',p:130,k:'sig',sig:'furiesimiesque',close:1,cd:6,range:105,shape:['wedge',120,.8],anim:'Attack',aiP:125,desc:"Cinq coups de plus en plus forts (dirigeables), puis s'épuise 0,8 s."},
+  etreinteours:{n:"Étreinte d'Ours",t:'Fighting',c:'ph',p:110,k:'sig',sig:'etreinteours',close:1,cd:6.5,range:210,shape:['lane',200,24],anim:'Attack',aiP:125,desc:"Courte charge ; au contact, serre l'ennemi dans ses bras : immobilisé 1,2 s et 4 coups."},
+  tourbillondeau:{n:"Tourbillon d'Eau",t:'Water',c:'sp',p:100,k:'sig',sig:'tourbillondeau',cd:7,range:360,shape:['zone',110],anim:'Attack',aiP:125,desc:"Tourbillon qui aspire l'ennemi vers son centre pendant 1,5 s, puis jaillit."},
+  diamanteclat:{n:"Diamant Éclat",t:'Rock',c:'sp',p:110,k:'sig',sig:'diamanteclat',spd:480,r:12,life:1,cd:4,range:420,shape:['lane',420,40],anim:'Attack',aiP:125,desc:"Cinq éclats de diamant volent en éventail."},
+  rocheelectrique:{n:"Roche Électrique",t:'Rock',c:'ph',p:110,k:'sig',sig:'rocheelectrique',cd:6,range:360,shape:['zone',55],anim:'Attack',aiP:125,desc:"Lance un rocher chargé en cloche ; la zone d'impact reste électrisée 2 s (petits coups qui peuvent étourdir)."},
+  ballonhante:{n:"Ballon Hanté",t:'Ghost',c:'sp',p:100,k:'sig',sig:'ballonhante',cd:6.5,range:240,shape:['lane',230,24],anim:'Attack',aiP:125,desc:"Courte charge ; au contact, emporte l'ennemi dans les airs. Il est étourdi 0,6 s en retombant."},
+  danseeveil:{n:"Danse Éveil",t:'Fire',c:'sp',p:100,k:'sig',sig:'danseeveil',spd:420,r:12,life:.8,cd:6,range:200,shape:['self',160],anim:'Attack',aiP:125,desc:"Danse un instant, puis envoie 10 plumes enflammées tout autour ; peuvent brûler."},
+  piquecharognard:{n:"Piqué Charognard",t:'Dark',c:'ph',p:80,k:'sig',sig:'piquecharognard',cd:5.5,range:320,shape:['lane',320,30],anim:'Attack',aiP:125,desc:"S'élève puis pique sur l'ennemi : jusqu'à deux fois plus fort s'il est blessé."},
+  voileaurore:{n:"Voile Aurore",t:'Ice',c:'sp',p:70,k:'sig',sig:'voileaurore',cd:15,range:160,shape:['self',160],anim:'Attack',aiP:120,desc:"Blizzard autour d'elle (dégâts), puis dégâts reçus réduits de moitié pendant 5 s ; la neige autour d'elle ralentit l'ennemi."},
+  chargeheroique:{n:"Charge Héroïque",t:'Normal',c:'ph',p:140,k:'sig',sig:'chargeheroique',fx:{recoil:.25},cd:6,range:330,shape:['lane',330,30],anim:'Attack',aiP:125,desc:"Charge aérienne très puissante qui repousse ; le lanceur subit du recul."},
+  champmagnetique:{n:"Champ Magnétique",t:'Electric',c:'sp',p:110,k:'sig',sig:'champmagnetique',cd:7,range:380,shape:['zone',120],anim:'Attack',aiP:125,desc:"Zone qui attire l'ennemi vers son centre pendant 1,2 s, puis l'électrise (étourdi 0,4 s)."},
+  // ---------- Paldea (génération 9) ----------
+  marecagetoxique:{n:"Marécage Toxique",t:'Poison',c:'ph',p:90,k:'sig',sig:'marecagetoxique',cd:10,range:140,shape:['self',140],anim:'Attack',aiP:125,desc:"Transforme la zone autour de lui en boue toxique pendant 4 s : ralentit, empoisonne, et frappe chaque seconde."},
+  marteaugigaton:{n:"Marteau Gigaton",t:'Steel',c:'ph',p:160,k:'sig',sig:'marteaugigaton',close:1,cd:8,range:160,shape:['zone',78],anim:'Attack',aiP:125,desc:"Après une préparation de 0,5 s, énorme coup de marteau sur la zone devant elle. Longue recharge."},
+  piedvoltigeaerien:{n:"Pied Voltige Aérien",t:'Fighting',c:'ph',p:110,k:'sig',sig:'piedvoltigeaerien',close:1,cd:5,range:300,shape:['leap',52],anim:'Attack',aiP:125,desc:"Bond aérien sur la zone visée et coup de pied qui repousse très loin."},
+  lamesglacees:{n:"Lames Glacées",t:'Ice',c:'ph',p:120,k:'sig',sig:'lamesglacees',cd:6,range:260,shape:['wedge',260,.4],anim:'Attack',aiP:125,desc:"Tire ses 3 lames glacées en éventail ; elles reviennent comme des boomerangs (chacune peut toucher à l'aller et au retour)."},
+  eclatstoxiques:{n:"Éclats Toxiques",t:'Poison',c:'sp',p:100,k:'sig',sig:'eclatstoxiques',cd:8,range:170,shape:['self',170],anim:'Attack',aiP:125,desc:"Fait pleuvoir 6 cristaux toxiques autour d'elle ; ils restent 4 s au sol comme pièges qui empoisonnent."},
+  seismeaquatique:{n:"Séisme Aquatique",t:'Water',c:'ph',p:100,k:'sig',sig:'seismeaquatique',cd:6,range:150,shape:['self',150],anim:'Attack',aiP:125,desc:"Fait trembler le sol tout autour et jaillir de l'eau."},
+  tunneltriple:{n:"Tunnel Triple",t:'Ground',c:'ph',p:120,k:'sig',sig:'tunneltriple',cd:7,range:9999,shape:['self',30],anim:'Attack',aiP:125,desc:"S'enfouit (intouchable) et surgit 3 fois sous l'ennemi, en le suivant."},
+  trompeacier:{n:"Trompe d'Acier",t:'Steel',c:'ph',p:110,k:'sig',sig:'trompeacier',close:1,cd:5.5,range:140,shape:['wedge',140,1.1],anim:'Attack',aiP:125,desc:"Grand coup de trompe en arc qui repousse."},
+  becacier:{n:"Bec Acier",t:'Steel',c:'ph',p:95,k:'sig',sig:'becacier',cd:5.5,range:320,shape:['lane',320,30],anim:'Attack',aiP:125,desc:"S'élève puis pique en ligne droite ; s'il touche, encaisse deux fois moins pendant 2 s."},
+  bananes:{n:"Bananes",t:'Grass',c:'sp',p:90,k:'sig',sig:'bananes',cd:7,range:360,shape:['zone',70],anim:'Attack',aiP:125,desc:"Lance 3 bananes en cloche ; celles qui ratent restent au sol et soignent Tropius de 8 % s'il les ramasse."},
+  pommeacide:{n:"Pomme Acide",t:'Grass',c:'sp',p:80,k:'sig',sig:'pommeacide',cd:4.5,range:380,shape:['zone',50],anim:'Attack',aiP:125,desc:"Lance une pomme acide en cloche qui baisse la Déf. Spé. de l'ennemi."},
+  lumierelunaire:{n:"Lumière Lunaire",t:'Psychic',c:'sp',p:120,k:'sig',sig:'lumierelunaire',cd:6,range:480,shape:['lane',480,12],anim:'Attack',aiP:125,desc:"Cinq rayons psy pendant 1 s, qui suivent la visée."},
+  chargecornue:{n:"Charge Cornue",t:'Grass',c:'ph',p:100,k:'sig',sig:'chargecornue',close:1,cd:5,range:280,shape:['lane',270,26],anim:'Attack',aiP:125,desc:"Charge en ligne qui repousse ; vole la moitié des dégâts en PV."},
+  iceberg:{n:"Iceberg",t:'Ice',c:'ph',p:120,k:'sig',sig:'iceberg',cd:8,range:120,shape:['self',120],anim:'Attack',aiP:125,desc:"Se transforme en iceberg 1,2 s (dégâts reçus réduits de moitié, presque immobile), puis écrase tout autour."},
+  // ---------- légendaires d'Alola et de Paldea ----------
+  meteorayon:{n:'Météorayon',t:'Steel',c:'ph',p:130,k:'sig',sig:'meteorayon',close:1,cd:6,range:360,shape:['lane',360,30],anim:'Attack',aiP:140,desc:"Se charge un instant, puis fonce comme une comète d'acier en ligne droite : traverse et détruit boucliers et poupées, et explose à l'impact."},
+  chocfrontal:{n:'Choc Frontal',t:'Fighting',c:'ph',p:140,k:'sig',sig:'chocfrontal',close:1,cd:6,range:340,shape:['lane',330,30],anim:'Attack',aiP:140,desc:"Charge très puissante qui repousse loin ; 30 % plus forte si l'attaque est super efficace. Courte récupération ensuite."},
 };
 
 // base = [PV, Atq, Déf, AtqSpé, DéfSpé, Vit] (stats officielles)
@@ -383,6 +436,61 @@ const MONS = {
   trioxhydre:{name:'Trioxhydre',id:635,types:['Dark','Dragon'],base:[92,105,90,125,90,98],moves:['triplesouffle','vibrobscur','dracosouffle','lanceflammes']},
   drakkarmin:{name:'Drakkarmin',id:621,types:['Dragon'],base:[77,120,90,60,90,48],moves:['queuerageuse','dracogriffe','seisme','machouille']},
   aeropteryx:{name:'Aéroptéryx',id:567,types:['Rock','Flying'],base:[75,140,65,112,65,110],moves:['envolfossile','lamederoc','lamedair','demitour']},
+  // ---------- Kalos (génération 6) ----------
+  flambusard:{name:"Flambusard",id:663,types:['Fire','Flying'],base:[78,81,71,74,69,126],moves:['rapaceenflamme','lamedair','boutefeu','atterrissage']},
+  golgopathe:{name:"Golgopathe",id:689,types:['Rock','Water'],base:[72,105,115,54,86,68],moves:['poingsmultiples','lamederoc','aquajet','danselames']},
+  exagide:{name:"Exagide",id:681,types:['Steel','Ghost'],base:[60,50,140,50,140,60],moves:['bouclierroyal','ballombre','tetedefer','coupepsyko']},
+  bruyverne:{name:"Bruyverne",id:715,types:['Flying','Dragon'],base:[85,70,80,97,80,123],moves:['ultrasondragon','lamedair','dracosouffle','demitour']},
+  nemelios:{name:"Némélios",id:668,types:['Fire','Normal'],base:[86,68,72,109,66,106],moves:['rugissementardent','lanceflammes','machination','machouille']},
+  chartor:{name:"Chartor",id:324,types:['Fire'],base:[70,85,140,85,70,20],moves:['eruption','lanceflammes','seisme','repos']},
+  gamblast:{name:"Gamblast",id:693,types:['Water'],base:[71,73,88,120,89,59],moves:['canonpince','vibraqua','hydrocanon','aurasphere']},
+  staross:{name:"Staross",id:121,types:['Water','Psychic'],base:[60,75,85,100,85,115],moves:['etoilefilante','surf','psyko','tonnerre']},
+  trousselin:{name:"Trousselin",id:707,types:['Steel','Fairy'],base:[57,80,91,80,87,75],moves:['trousseau','eclatmagique','tetedefer','picots']},
+  tarinorme:{name:"Tarinorme",id:476,types:['Rock','Steel'],base:[60,55,145,75,150,40],moves:['aimantgeant','lamederoc','tetedefer','tonnerre']},
+  kravarech:{name:"Kravarech",id:691,types:['Poison','Dragon'],base:[65,75,90,97,123,44],moves:['jettoxique','dracosouffle','bombebeurk','hydrocanon']},
+  muplodocus:{name:"Muplodocus",id:706,types:['Dragon'],base:[90,100,70,110,150,80],moves:['mucusdragon','dracosouffle','surf','tonnerre']},
+  rexillius:{name:"Rexillius",id:697,types:['Rock','Dragon'],base:[82,121,119,69,59,71],moves:['crocsroyaux','lamederoc','dracogriffe','seisme']},
+  amagara:{name:"Amagara",id:699,types:['Rock','Ice'],base:[123,77,72,99,92,58],moves:['aurorefossile','blizzard','pouvoirantique','laserglace']},
+  brutalibre:{name:"Brutalibré",id:701,types:['Fighting','Flying'],base:[78,92,75,74,63,118],moves:['priseaerienne','closecombat','rapace','demitour']},
+  banshitrouye:{name:"Banshitrouye",id:711,types:['Ghost','Grass'],base:[65,90,122,58,75,84],moves:['citrouillehantee','ballombre','vampigraine','feufollet']},
+  // ---------- Alola (génération 7) ----------
+  crabominable:{name:"Crabominable",id:740,types:['Fighting','Ice'],base:[97,132,77,62,67,43],moves:['poingglacegeant','closecombat','poingglace','avalanche']},
+  lougaroc:{name:"Lougaroc",id:745,types:['Rock'],base:[75,115,65,55,65,112],moves:['crocderoc','lamederoc','machouille','coupbas']},
+  trepassable:{name:"Trépassable",id:770,types:['Ghost','Ground'],base:[85,75,110,100,75,35],moves:['chateausable','ballombre','telluriforce','poupeemaudite']},
+  bazoucan:{name:"Bazoucan",id:733,types:['Normal','Flying'],base:[80,120,75,75,75,60],moves:['beccanon','rapace','lamedair','roulade']},
+  archeduc:{name:"Archéduc",id:724,types:['Grass','Ghost'],base:[78,107,75,100,100,70],moves:['tisseombre','lamedair','megafouet','ballombre']},
+  hariyama:{name:"Hariyama",id:297,types:['Fighting'],base:[144,120,60,40,60,50],moves:['pousseesumo','closecombat','machpunch','repos']},
+  colossinge:{name:"Colossinge",id:766,types:['Fighting'],base:[100,120,90,40,60,80],moves:['furiesimiesque','closecombat','demitour','sabotage']},
+  chelours:{name:"Chelours",id:760,types:['Normal','Fighting'],base:[120,125,80,55,60,60],moves:['etreinteours','closecombat','plaquage','danselames']},
+  tartard:{name:"Tartard",id:62,types:['Water','Fighting'],base:[90,95,95,70,90,70],moves:['tourbillondeau','closecombat','hydrocanon','repos']},
+  strassie:{name:"Strassie",id:703,types:['Rock','Fairy'],base:[50,50,150,50,150,50],moves:['diamanteclat','pouvoirantique','eclatmagique','picots']},
+  grolemalola:{name:"Grolem d'Alola",id:10111,pmd:'0076/0001',ab:'GRA',types:['Rock','Electric'],base:[80,120,130,55,65,45],moves:['rocheelectrique','roulade','tonnerre','seisme']},
+  grodrive:{name:"Grodrive",id:426,types:['Ghost','Flying'],base:[150,80,44,90,54,80],moves:['ballonhante','ballombre','lamedair','ventarriere']},
+  plumeline:{name:"Plumeline",id:741,types:['Fire','Flying'],base:[75,70,70,98,70,93],moves:['danseeveil','lamedair','lanceflammes','dansepapillon']},
+  vaututrice:{name:"Vaututrice",id:630,types:['Dark','Flying'],base:[110,65,105,55,95,80],moves:['piquecharognard','rapace','vibrobscur','atterrissage']},
+  feunardalola:{name:"Feunard d'Alola",id:10104,pmd:'0038/0001',ab:'FEA',types:['Ice','Fairy'],base:[73,67,75,81,100,109],moves:['voileaurore','blizzard','eclatmagique','laserglace']},
+  gueriaigle:{name:"Gueriaigle",id:628,types:['Normal','Flying'],base:[100,123,75,57,75,80],moves:['chargeheroique','rapace','closecombat','demitour']},
+  magnezone:{name:"Magnézone",id:462,types:['Electric','Steel'],base:[70,70,115,130,90,60],moves:['champmagnetique','tonnerre','luminocanon','fatalfoudre']},
+  // ---------- Paldea (génération 9) ----------
+  terraiste:{name:"Terraiste",id:980,types:['Poison','Ground'],base:[130,75,60,45,100,20],moves:['marecagetoxique','seisme','bombebeurk','repos']},
+  forgelina:{name:"Forgelina",id:959,types:['Fairy','Steel'],base:[85,75,77,70,105,94],moves:['marteaugigaton','eclatmagique','tetedefer','danselames']},
+  flamenroule:{name:"Flamenroule",id:973,types:['Flying','Fighting'],base:[82,115,74,75,64,90],moves:['piedvoltigeaerien','closecombat','rapace','demitour']},
+  glaivodo:{name:"Glaivodo",id:998,types:['Dragon','Ice'],base:[115,145,92,75,86,87],moves:['lamesglacees','dansedraco','crocsgivre','seisme']},
+  floreclat:{name:"Floréclat",id:970,types:['Rock','Poison'],base:[83,55,90,130,81,86],moves:['eclatstoxiques','pouvoirantique','bombebeurk','pikstoxik']},
+  barbicha:{name:"Barbicha",id:340,types:['Water','Ground'],base:[110,78,73,76,71,60],moves:['seismeaquatique','seisme','surf','repos']},
+  camerupt:{name:"Camérupt",id:323,types:['Fire','Ground'],base:[70,100,70,105,75,40],moves:['eruption','telluriforce','lanceflammes','seisme']},
+  donphan:{name:"Donphan",id:232,types:['Ground'],base:[90,120,120,60,60,50],moves:['roulade','seisme','lamederoc','megacorne']},
+  triopikeur:{name:"Triopikeur",id:51,types:['Ground'],base:[35,100,50,50,70,120],moves:['tunneltriple','seisme','lamederoc','coupbas']},
+  pachyradjah:{name:"Pachyradjah",id:879,types:['Steel'],base:[122,130,69,80,69,30],moves:['trompeacier','tetedefer','seisme','closecombat']},
+  corvaillus:{name:"Corvaillus",id:823,types:['Flying','Steel'],base:[98,87,105,53,85,67],moves:['becacier','rapace','ailedacier','atterrissage']},
+  tropius:{name:"Tropius",id:357,types:['Grass','Flying'],base:[99,68,83,72,87,51],moves:['bananes','lamedair','gigasangsue','tempeteverte']},
+  etouraptor:{name:"Étouraptor",id:398,types:['Normal','Flying'],base:[85,120,70,50,60,100],moves:['rapace','closecombat','demitour','lamedair']},
+  pomdrapi:{name:"Pomdrapi",id:841,types:['Grass','Dragon'],base:[70,110,80,95,60,70],moves:['pommeacide','dracosouffle','lamedair','gigasangsue']},
+  cleopsytra:{name:"Cléopsytra",id:956,types:['Psychic'],base:[95,60,60,101,60,105],moves:['lumierelunaire','psyko','eclatmagique','machination']},
+  chevroum:{name:"Chevroum",id:673,types:['Grass'],base:[123,100,62,97,81,68],moves:['chargecornue','megafouet','seisme','lamederoc']},
+  seracrawl:{name:"Séracrawl",id:713,types:['Ice'],base:[95,117,184,44,46,28],moves:['iceberg','avalanche','seisme','repos']},
+  solgaleo:{name:'Solgaleo',id:791,legend:1,types:['Psychic','Steel'],base:[137,137,107,113,89,97],moves:['meteorayon','psykoudboul','seisme','machouille']},
+  koraidon:{name:'Koraidon',id:1007,legend:1,types:['Fighting','Dragon'],base:[100,135,115,85,100,135],moves:['chocfrontal','dracogriffe','boutefeu','demitour']},
 };
 const TEAMS = [
   {id:'dracolosse',name:'Équipe Dracolosse',mons:['dracolosse','lucario','flamigator','leviator','zeraora','metalosse']},
@@ -395,7 +503,9 @@ const TEAMS = [
   {id:'leg-kyogre',name:'Équipe Kyogre',legend:1,mons:['kyogre','carchacrok','amphinobi','milobellus','zeraora','naganadel']},
   {id:'leg-shifours',name:'Équipe Shifours',legend:1,mons:['shifours','leviator','tyranocif','scalpereur','minotaupe','dracolosse']},
   {id:'leg-sylveroy',name:'Équipe Sylveroy Effroi',legend:1,mons:['sylveroy','momartik','sinistrail','lanssorien','mammochon','ronflex']},
-  {id:'leg-electhorgalar',name:'Équipe Électhor Galar',legend:1,mons:['electhorgalar','mammochon','togekiss','pyrax','gorythmic','metalosse']}
+  {id:'leg-electhorgalar',name:'Équipe Électhor Galar',legend:1,mons:['electhorgalar','mammochon','togekiss','pyrax','gorythmic','metalosse']},
+  {id:'leg-solgaleo',name:'Équipe Solgaleo',legend:1,mons:['solgaleo','archeduc','crabominable','nemelios','tartard','lougaroc']},
+  {id:'leg-koraidon',name:'Équipe Koraidon',legend:1,mons:['koraidon','floreclat','forgelina','cleopsytra','barbicha','flambusard']}
 ];
 // Difficultés de l'IA, en paliers réguliers : react = chance de réagir (esquiver, contrer), think = délai entre deux décisions (s),
 // lead = anticipation des déplacements, noise = hasard dans le choix des attaques, sw = changements de Pokémon,
@@ -448,8 +558,9 @@ const MEGA = {
 // (×0,9 à ×1,35) ; la Vitesse reste officielle (elle règle les déplacements). baseOfficial garde les stats d'origine.
 const BST_TARGET = 540;
 // corrections au cas par cas, d'après les simulations IA contre IA (total visé)
-const BST_ADJUST = {arcanin:490, maganon:470, foretress:690, archeodong:660, arbok:580, noadkoko:575, zeraora:620, libegon:610, kicklee:565, naganadel:500};
-for (const k in MONS){ const m = MONS[k]; m.baseOfficial = m.base.slice(); if (m.legend) continue;
+const BST_ADJUST = {arcanin:490, maganon:470, foretress:820, archeodong:750, arbok:705, noadkoko:610, zeraora:655, libegon:610, kicklee:565, naganadel:500, gardevoir:510, lucario:580, dracolosse:580, ronflex:465, gorythmic:570, lokhlass:570, xatu:585, nostenfer:595, kaimorse:500, drascore:585, gallame:575, crustabri:650, lippoutou:600, lamantine:495, rhinoferos:470, flagadoss:435, grotadmorv:570, migalos:590, kapoera:570, corboss:515, tengalice:590, cacturne:615, colhomard:570, tenefix:510, oniglali:650, airmure:465, galeking:515, kaorine:665, vacilys:600, scarhino:500, charmillon:575, hippodocus:575, scorvol:570, simiabraz:615, pyroli:580, roserade:600, milobellus:510, minotaupe:470, momartik:580, flamigator:455, carchacrok:515, amphinobi:610, lugulabre:445, kungfouine:690, tranchodon:640, moyade:430, baggaid:565, leopardus:580, crocorible:515, mushana:570, cryptero:510, trioxhydre:515, drakkarmin:585, golgopathe:570, nemelios:570, gamblast:515, trousselin:565, amagara:655, brutalibre:580, banshitrouye:570, colossinge:575, chelours:500, tartard:585, strassie:650, grolemalola:665, feunardalola:690, magnezone:485, forgelina:630, glaivodo:700, floreclat:570, barbicha:510, triopikeur:585, corvaillus:485, tropius:565, pomdrapi:650, cleopsytra:575, seracrawl:590};   // cibles ajustées par simulations IA contre IA (chaque Pokémon contre un panel de 24)
+const LEGEND_ADJ = {mewtwo:0.979, groudon:0.919, kyogre:0.944, shifours:1.107, solgaleo:1.056, koraidon:1.072};   // légendaires : stats (hors Vitesse) multipliées
+for (const k in MONS){ const m = MONS[k]; m.baseOfficial = m.base.slice(); if (m.legend){ const g = LEGEND_ADJ[k]; if (g){ m.base = m.base.map((v, i) => i === 5 ? v : Math.round(v*g)); if (MEGA[k]) MEGA[k].base = MEGA[k].base.map((v, i) => i === 5 ? v : Math.round(v*g)); } continue; }
   const bst = m.base.reduce((a,b)=>a+b,0), f = Math.max(.85, Math.min(1.5, (BST_ADJUST[k] || BST_TARGET)/bst));
   m.base = m.base.map((v, i) => i === 5 ? v : Math.round(v*f));
   if (MEGA[k]) MEGA[k].base = MEGA[k].base.map((v, i) => i === 5 ? v : Math.round(v*f)); }

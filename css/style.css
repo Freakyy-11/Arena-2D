@@ -70,6 +70,10 @@ button:disabled{cursor:default}
 .row{display:flex;flex-wrap:wrap;gap:6px}
 .pill{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-size:13px;font-weight:600}
 .pill[aria-pressed="true"]{background:var(--gold);color:var(--gold-ink);border-color:var(--gold)}
+.vol{display:flex;align-items:center;gap:10px;width:100%;max-width:360px;font-size:13px;font-weight:600}
+.vol span{min-width:104px}
+.vol input{flex:1;accent-color:var(--gold);min-width:0}
+.vol b{min-width:42px;text-align:right;font-variant-numeric:tabular-nums;color:var(--mute)}
 .teams{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:8px}
 .teamsHead{grid-column:1/-1;margin-top:8px;font-family:var(--font-d);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);display:flex;gap:10px;align-items:baseline}
 .teamsHead small{color:var(--mute);letter-spacing:0;text-transform:none;font-family:var(--font-b);font-size:12px}

@@ -17,8 +17,8 @@ Le jeu s'installe comme une appli (icône sur l'écran d'accueil, plein écran) 
 
 ## Contenu
 
-- **Ligue Pokémon** : Kanto, Johto, Hoenn, Sinnoh et Unys, chacune avec son Conseil 4 et son Maître, à affronter d'affilée avec la difficulté de ton choix : une seconde chance par Ligue, puis une défaite fait recommencer la Ligue. Chaque victoire débloque des Pokémon jouables dans tous les modes, des défis bonus débloquent des légendaires ; on choisit ses 10 Pokémon de départ. Progression gardée sur l'appareil (bouton « Tout débloquer » pour tester).
-- 111 Pokémon avec leurs stats officielles et 4 attaques chacun, dont 6 légendaires ★ (Mewtwo, Groudon, Kyogre, Shifours Style Poing Final, Sylveroy Cavalier d'Effroi, Électhor de Galar) : 1 au maximum dans une équipe composée.
+- **Ligue Pokémon** : Kanto, Johto, Hoenn, Sinnoh, Unys, Kalos, Alola et Paldea, chacune avec son Conseil 4 et son Maître, à affronter d'affilée avec la difficulté de ton choix : une seconde chance par Ligue, puis une défaite fait recommencer la Ligue. Chaque victoire débloque des Pokémon jouables dans tous les modes, des défis bonus débloquent des légendaires ; on choisit ses 10 Pokémon de départ. Progression gardée sur l'appareil (bouton « Tout débloquer » pour tester).
+- 163 Pokémon avec leurs stats officielles et 4 attaques chacun, dont 8 légendaires ★ (Mewtwo, Groudon, Kyogre, Shifours Style Poing Final, Sylveroy Cavalier d'Effroi, Électhor de Galar, Solgaleo, Koraidon) : 1 au maximum dans une équipe composée.
 - Une attaque emblématique ★ par Pokémon, avec son propre effet (Rafale Feu, Pouvoir Lunaire, Génusection, Poing Plasma, Tunnel, Surf…), et un rendu propre à chaque type pour les autres attaques.
 - Effets de combat : tremblement et éclair d'écran, écran électrisé ou givré, gel d'image à l'impact, marques au sol, adversaire soulevé ou projeté en l'air.
 - 4 équipes prêtes classiques (Dracolosse, Carchacrok, Lanssorien, Naganadel) et 6 équipes légendaires (une par légendaire), ou équipe composée ; avec « Aléatoire », l'adversaire est tiré dans la même catégorie que ton équipe ; le bouton « Attaques des Pokémon » du menu détaille les 4 attaques de chacun (puissance, recharge, effet).
@@ -35,6 +35,11 @@ Le jeu s'installe comme une appli (icône sur l'écran d'accueil, plein écran) 
 ## Crédits
 
 - Sprites animés en combat : [PMD SpriteCollab](https://sprites.pmdcollab.org), licence CC BY-NC 4.0 (crédits par sprite sur le site).
+- Musique du menu : [« Boss Theme » par remaxim](https://opengameart.org/content/boss-theme), licence CC BY-SA 3.0 (OpenGameArt).
+- Musique des combats : [« Battle Theme A » par cynicmusic (The Cynic Project)](https://opengameart.org/content/battle-theme-a), domaine public (CC0, OpenGameArt).
+- Musiques des combats : [« JRPG Music Pack #5 [Action] » par Juhani Junkala](https://opengameart.org/content/jrpg-pack-5-action), domaine public (CC0, OpenGameArt).
+- Musique des combats : [« JRPG Epic Rock Battle Theme #1 » par HydroGene](https://opengameart.org/content/jrpg-epic-rock-battle-theme-1), domaine public (CC0, OpenGameArt).
+- Bruitages : [Kenney](https://kenney.nl) (Impact Sounds, RPG Audio, Interface Sounds) et [« 80 CC0 RPG SFX » par rubberduck](https://opengameart.org/content/80-cc0-rpg-sfx), domaine public (CC0).
 - Portraits du menu et de la barre d'équipe : [PokéAPI](https://github.com/PokeAPI/sprites).
 
 ## Code

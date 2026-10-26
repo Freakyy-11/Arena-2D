@@ -20,7 +20,7 @@ function makeFighter(key, side){
   const hp = Math.floor((2*b[0]+31)/2)+60;
   return { key, d, side, isAI: side === 'e', x:CX, y:CY, vx:0, vy:0, kx:0, ky:0, r:24, hp, max:hp,
     st:{atk:s(b[1]),def:s(b[2]),spa:s(b[3]),spd:s(b[4])},
-    cds:[0,0,0,0], burn:0, poison:0, slow:0, stun:0, sleep:0, dot:0, mirror:0, ring:0, dash:null, recharge:0, inv:0,
+    cds:[0,0,0,0], shield:0, doll:0, vanish:0, gyro:0, burn:0, poison:0, slow:0, stun:0, sleep:0, dot:0, mirror:0, ring:0, dash:null, recharge:0, inv:0,
     buff:{atk:1,spa:1,spe:1,spd:1}, buffT:0, busy:0, flash:0, face:1, bob:Math.random()*6, dead:0, koShown:false,
     act:null, hurtT:0, aimA:0, seed:Math.random()*600, roll:null, script:null, air:null, h:0, buried:false, root:0, slowF:.55, ghosts:[], ghT:0, holdT:[0,0,0,0], iceSpike:null, defDown:0, spdDown:0, atkDown:0, grounded:0, healT:0, healRate:0, recast:[0,0,0,0], recastN:[0,0,0,0], lastDir:{x:0, y: side === 'p' ? -1 : 1},
     held:[false,false,false,false], ai:{think:1, strafe:1, strafeT:0, swT:2} };
@@ -54,11 +54,11 @@ function startMatch(m){
   $('menu').hidden = true; $('battle').hidden = false;
   for (const o of ['ovEnd','ovPause','ovChoose']) $(o).hidden = true;
   $('battle').classList.toggle('spectate', game.spectate);
-  resize(); AUDIO.music(game.arena); AUDIO.duck(false);
+  resize(); AUDIO.music('combat'); AUDIO.duck(false);   // un morceau au hasard à chaque combat
 }
 $('start').onclick = () => { if (!$('start').disabled) startMatch(resolveTeams()); };
 $('again').onclick = () => lastMatch.league ? leagueAgain() : startMatch(sel.e === 'random' ? {...resolveTeams(), pk:lastMatch.pk, arena:lastMatch.arena} : lastMatch);   // la revanche garde l'arène
-const toMenu = () => { const lgBack = game && game.league; if (lgBack && game.state !== 'end') leagueAbandon(); game = null; AUDIO.stopMusic(); $('battle').hidden = true; $('menu').hidden = false; if (lgBack) openLeague('main'); else goScreen('team'); };   // Ligue : retour à l'écran de la Ligue, sinon au choix de l'équipe ; quitter un combat en cours = abandonner la Ligue
+const toMenu = () => { const lgBack = game && game.league; if (lgBack && game.state !== 'end') leagueAbandon(); game = null; AUDIO.music('menu'); $('battle').hidden = true; $('menu').hidden = false; if (lgBack) openLeague('main'); else goScreen('team'); };   // Ligue : retour à l'écran de la Ligue, sinon au choix de l'équipe ; quitter un combat en cours = abandonner la Ligue
 $('toMenu').onclick = toMenu; $('quit').onclick = toMenu;
 $('pauseBtn').onclick = () => setPause(true);
 $('resume').onclick = () => setPause(false);
@@ -86,7 +86,7 @@ const canMega = side => !!(game && game.state === 'fight' && !side.megaUsed && s
 function tryMega(side){
   if (!canMega(side)) return false;
   const f = side.team[side.active], M = MEGA[f.key], b = M.base, s = v => Math.floor((2*v+31)/2)+5, ratio = f.hp/f.max;
-  side.megaUsed = true; f.mega = true; f.pmdKey = M.pmd ? 'mega-' + f.key : null;
+  side.megaUsed = true; f.mega = true; AUDIO.mega(); f.pmdKey = M.pmd ? 'mega-' + f.key : null;
   f.d = {...f.d, name:M.name, types:M.types, base:b};
   f.max = Math.floor((2*b[0]+31)/2)+60; f.hp = Math.max(1, Math.round(f.max*ratio)); f.st = {atk:s(b[1]), def:s(b[2]), spa:s(b[3]), spd:s(b[4])};
   f.inv = Math.max(f.inv, .5); popText(f.x, f.y - 70, M.name + ' !', '#ffe08a', 18, 1.5);

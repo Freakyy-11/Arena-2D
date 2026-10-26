@@ -43,7 +43,28 @@ const LEAGUE = [
     {id:'unys-percila', name:'Percila', title:'Conseil 4 · Psy', arena:'colonnes', mons:['mushana','cryptero','symbios','mentali','alakazam','siderella'], reward:['siderella','mushana','cryptero','symbios']},
     {id:'unys-kunz', name:'Kunz', title:'Conseil 4 · Combat', arena:'stade', mons:['judokrak','karaclee','betochef','lucario','mackogneur','kungfouine'], reward:['kungfouine','judokrak','karaclee','betochef']},
     {id:'unys-iris', name:'Iris', title:"Maîtresse d'Unys", arena:'pilier', champion:1, mons:['trioxhydre','drakkarmin','aeropteryx','galeking','kyogre','tranchodon'], reward:['tranchodon','trioxhydre','drakkarmin','aeropteryx']}],
-   challenges:[]}
+   challenges:[]},
+  {id:'kalos', name:'Kalos', trainers:[
+    {id:'kalos-malva', name:"Malva", title:"Conseil 4 · Feu", arena:'chateau', mons:['nemelios','chartor','lugulabre','maganon','arcanin','flambusard'], reward:['flambusard','nemelios','chartor']},
+    {id:'kalos-narcisse', name:"Narcisse", title:"Conseil 4 · Eau", arena:'tourbillon', mons:['gamblast','staross','leviator','milobellus','tortank','golgopathe'], reward:['golgopathe','gamblast','staross']},
+    {id:'kalos-thymeo', name:"Thyméo", title:"Conseil 4 · Acier", arena:'colonnes', mons:['trousselin','tarinorme','cizayox','metalosse','airmure','exagide'], reward:['exagide','trousselin','tarinorme']},
+    {id:'kalos-dracena', name:"Dracéna", title:"Conseil 4 · Dragon", arena:'pilier', mons:['kravarech','drakkarmin','altaria','hyporoi','libegon','bruyverne'], reward:['bruyverne','kravarech']},
+    {id:'kalos-diantha', name:"Dianthéa", title:"Maîtresse de Kalos", arena:'stade', champion:1, mons:['rexillius','amagara','banshitrouye','muplodocus','shifours','gardevoir'], reward:['rexillius','amagara','banshitrouye','muplodocus','brutalibre']}],
+   challenges:[]},
+  {id:'alola', name:'Alola', trainers:[
+    {id:'alola-pectorius', name:"Pectorius", title:"Conseil 4 · Combat", arena:'stade', mons:['hariyama','colossinge','chelours','tartard','kapoera','crabominable'], reward:['crabominable','hariyama','colossinge','chelours','tartard']},
+    {id:'alola-alyxia', name:"Alyxia", title:"Conseil 4 · Roche", arena:'couronne', mons:['strassie','grolemalola','tarinorme','tyranocif','rhinastoc','lougaroc'], reward:['lougaroc','strassie','grolemalola']},
+    {id:'alola-margie', name:"Margie", title:"Conseil 4 · Spectre", arena:'chateau', mons:['grodrive','tenefix','sinistrail','momartik','noctunoir','trepassable'], reward:['trepassable','grodrive']},
+    {id:'alola-kahili', name:"Kahili", title:"Conseil 4 · Vol", arena:'pilier', mons:['plumeline','vaututrice','airmure','nostenfer','togekiss','bazoucan'], reward:['bazoucan','plumeline','vaututrice']},
+    {id:'alola-euphorbe', name:"Euphorbe", title:"Maître d'Alola", arena:'tourbillon', champion:1, mons:['feunardalola','gueriaigle','magnezone','ronflex','solgaleo','archeduc'], reward:['archeduc','feunardalola','gueriaigle','magnezone']}],
+   challenges:[{id:'alola-def', trainer:'alola-euphorbe', text:'Battre Euphorbe en perdant au plus 2 Pokémon', test:r => r.lost <= 2, reward:['solgaleo']}]},
+  {id:'paldea', name:'Paldea', trainers:[
+    {id:'paldea-rika', name:"Rika", title:"Conseil 4 · Sol", arena:'couronne', mons:['barbicha','camerupt','donphan','triopikeur','hippodocus','terraiste'], reward:['terraiste','barbicha','camerupt','donphan','triopikeur']},
+    {id:'paldea-popi', name:"Popi", title:"Conseil 4 · Acier", arena:'colonnes', mons:['pachyradjah','magnezone','corvaillus','archeodong','steelix','forgelina'], reward:['forgelina','pachyradjah','corvaillus']},
+    {id:'paldea-okuba', name:"Okuba", title:"Conseil 4 · Vol", arena:'pilier', mons:['tropius','plumeline','etouraptor','altaria','roucarnage','flamenroule'], reward:['flamenroule','tropius','etouraptor']},
+    {id:'paldea-hassel', name:"Hassel", title:"Conseil 4 · Dragon", arena:'tourbillon', mons:['bruyverne','kravarech','pomdrapi','tranchodon','drattak','glaivodo'], reward:['glaivodo','pomdrapi']},
+    {id:'paldea-alisma', name:"Alisma", title:"Maîtresse de Paldea", arena:'stade', champion:1, mons:['cleopsytra','chevroum','seracrawl','scalpereur','koraidon','floreclat'], reward:['floreclat','cleopsytra','chevroum','seracrawl']}],
+   challenges:[{id:'paldea-def', trainer:'paldea-alisma', text:'Battre Alisma en moins de 4 minutes', test:r => r.time < 240, reward:['koraidon']}]}
 ];
 const LG_TRAINER = {}; for (const r of LEAGUE) for (const t of r.trainers) LG_TRAINER[t.id] = {...t, region:r.id};
 
@@ -182,3 +203,4 @@ function leagueResult(win, pAlive){
 function leagueAgain(){ if (lgNext === 'next') fightNext(); else if (lgNext && lgNext.region) startRun(lgNext.region, lgNext.team, lgNext.dk); else toMenu(); }
 
 renderMenu();   // le menu dépend des Pokémon débloqués : rendu une fois la Ligue chargée
+AUDIO.music('menu');   // démarre au premier geste du joueur (règle des navigateurs)
