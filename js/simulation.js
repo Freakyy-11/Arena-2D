@@ -5,7 +5,7 @@ function stepFighter(f, ix, iy, dt){
   // recharges en pause pendant un K.O. et pendant le choix du Pokémon suivant (l'adversaire ne profite pas de ce temps)
   const frozen = game.state === 'ko' || game.state === 'choose';
   if (!frozen) for (let i=0;i<4;i++) f.cds[i] = Math.max(0, f.cds[i]-dt);
-  for (const k of ['burn','poison','slow','stun','sleep','mirror','ring','recharge','flash','inv','buffT','hurtT','root','defDown','spdDown','atkDown','grounded','busy','doll','shield','gyro']) f[k] = Math.max(0, f[k]-dt);
+  for (const k of ['burn','poison','slow','stun','sleep','mirror','ring','recharge','flash','inv','buffT','hurtT','root','defDown','spdDown','atkDown','grounded','busy','doll','shield','gyro','enterT']) f[k] = Math.max(0, f[k]-dt);
   if (f.healT > 0 && f.hp > 0){ const st = Math.min(dt, f.healT); f.healT -= st; f.hp = Math.min(f.max, f.hp + f.healRate*st); }
   // Change Éclair : fenêtre de 2 s pour la 2e charge ; si elle n'est pas utilisée, la recharge démarre
   if (!frozen) for (let i=0;i<4;i++) if (f.recast[i] > 0 && (f.recast[i] -= dt) <= 0){ f.recast[i] = 0; f.cds[i] = Math.max(f.cds[i], MOVES[f.d.moves[i]].cd - 2); }
@@ -151,7 +151,7 @@ function update(dt){
     g.state = 'ko'; g.koT = 1.1; g.p.held.fill(false); g.e.held.fill(false);
     for (const f of [g.p, g.e]) if (f.hp <= 0 && !f.koShown){ f.koShown = true; f.dash = null;
       // ses projectiles et zones en cours disparaissent (l'adversaire ne peut plus bouger pour les esquiver)
-      g.projs = g.projs.filter(p => p.owner !== f); g.zones = g.zones.filter(z => z.owner !== f); g.rings = g.rings.filter(r => r.owner !== f); AUDIO.ko(); if (!f.isAI) rumbleFor(f, 1, 260); burst(f.x, f.y, '#fff', 30, 240, 6); shake(14); popText(f.x, f.y - 60, 'K.O. !', '#e6b84c', 28, 1.3); }
+      g.projs = g.projs.filter(p => p.owner !== f); g.zones = g.zones.filter(z => z.owner !== f); g.rings = g.rings.filter(r => r.owner !== f); AUDIO.ko(); zoomPunch(.06); if (!f.isAI) rumbleFor(f, 1, 260); burst(f.x, f.y, '#fff', 30, 240, 6); shake(14); popText(f.x, f.y - 60, 'K.O. !', '#e6b84c', 28, 1.3); }
   }
 }
 
@@ -197,7 +197,9 @@ function showEnd(pAlive, eAlive){
   $('again').textContent = 'Revanche';
   if (game.league){ const r = leagueResult(win, pAlive); if (r.msg) $('endS').textContent += ' ' + r.msg; $('again').textContent = r.label; }
   if (game.tour){ const r = tourResult(win); $('endS').textContent += ' ' + r.msg; if (r.label) $('again').textContent = r.label; $('again').hidden = !r.label; }
-  $('toMenu').textContent = game.league ? 'Retour à la Ligue' : game.tour ? 'Quitter la Tour' : "Changer d'équipe";
+  if (game.defi){ $('endS').textContent += ' ' + defiResult(win, pAlive); $('again').textContent = 'Rejouer le défi'; }
+  succesAfterMatch(win, pAlive);
+  $('toMenu').textContent = game.league ? 'Retour à la Ligue' : game.tour ? 'Quitter la Tour' : game.defi ? 'Menu' : "Changer d'équipe";
   $('ovEnd').hidden = false;
   game.p.held.fill(false); AUDIO.stopMusic(); AUDIO.end(win);
 }

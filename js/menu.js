@@ -29,7 +29,7 @@ const DIFF_DESC = {facile:"L'IA réagit lentement et vise mal : idéal pour déc
 const diffCards = (cur, attr) => Object.keys(DIFFS).map(k => `<button class="dc d-${k}" ${attr}="${k}" aria-pressed="${cur === k}"><b>${DIFFS[k].label}</b><small>${DIFF_DESC[k] || ''}</small></button>`).join('');
 let curScr = 'home';
 function goScreen(name){
-  curScr = name; for (const n of ['home', 'diff', 'team', 'foe', 'tour']) $('scr' + n[0].toUpperCase() + n.slice(1)).hidden = n !== name;
+  curScr = name; for (const n of ['home', 'diff', 'team', 'foe', 'tour', 'succes']) $('scr' + n[0].toUpperCase() + n.slice(1)).hidden = n !== name;
   renderMenu(); $('menu').scrollTop = 0;
   const first = $('scr' + name[0].toUpperCase() + name.slice(1)).querySelector(name === 'diff' ? '[aria-pressed="true"]' : 'button'); if (first && name !== 'home') first.focus({preventScroll:true});
 }

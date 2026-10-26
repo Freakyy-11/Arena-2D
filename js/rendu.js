@@ -25,7 +25,7 @@ function drawFloor(){
     ctx.imageSmoothingEnabled = img.width >= W; ctx.imageSmoothingQuality = 'high'; ctx.drawImage(img, 0, H - dh, W, dh); }
   else { ctx.imageSmoothingEnabled = false; ctx.drawImage(arenaBg(key), 0, -BACKDROP, W, H + BACKDROP); A.anim(game.t); }
   const shade = img && ARENA_IMAGES[key] && ARENA_IMAGES[key].shade;
-  if (shade){ ctx.fillStyle = `rgba(24,14,48,${shade})`; ctx.fillRect(0, 0, W, H); }
+  if (shade){ ctx.fillStyle = `rgba(24,14,48,${shade})`; if (ARENA_IMAGES[key].shadeAll) ctx.fillRect(0, -BACKDROP, W, H + BACKDROP); else ctx.fillRect(0, 0, W, H); }   // shadeAll : voile aussi sur le décor du haut
   drawAmbience(key, game.t, !!img);
   if (!img){ ctx.globalAlpha = .45; ctx.strokeStyle = A.line; ctx.lineWidth = 2; ctx.strokeRect(WALL, WALL, W-WALL*2, H-WALL*2); ctx.globalAlpha = 1; }   // une image a déjà ses propres bords
 }
@@ -81,6 +81,13 @@ function drawPmd(f, pm, fy, x = f.x){
   return fy - (ref.fh*.5 + 4)*S;
 }
 function drawFighter(f){
+  if (!(f.enterT > 0)) return drawFighterBody(f);
+  const k = 1 - f.enterT/.45, sc = k < 1 ? 1 + 2.70158*Math.pow(k - 1, 3) + 1.70158*Math.pow(k - 1, 2) : 1, fy = f.y + f.r*.75;   // easeOutBack
+  ctx.save(); ctx.globalAlpha = (1 - k)*.8; ctx.fillStyle = '#ffffff'; ctx.fillRect(f.x - 6*(1 - k), fy - 160, 12*(1 - k), 160); ctx.restore();   // rayon d'apparition
+  drawGlow(f.x, f.y - 10, 40*(1 - k) + 10, '#ffffff', .8*(1 - k));
+  ctx.save(); ctx.translate(f.x, fy); ctx.scale(Math.max(.05, sc), Math.max(.05, sc)); ctx.translate(-f.x, -fy); drawFighterBody(f); ctx.restore();
+}
+function drawFighterBody(f){
   if (f.vanish > 0) return;   // disparu (Coupe Fatale)
   const alpha = f.hp > 0 ? 1 : Math.max(0, 1 - f.dead*1.2);
   if (alpha <= 0) return;

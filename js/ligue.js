@@ -11,23 +11,23 @@ const START_POOL = ['dracaufeu','demolosse','flamigator','tortank','leviator','a
 const LEAGUE = [
   {id:'kanto', name:'Kanto', trainers:[
     {id:'kanto-olga', team:'dracolosse', name:'Olga', title:'Conseil 4 · Glace', arena:'couronne', mons:['crustabri','lippoutou','lamantine','momartik','mammochon','lokhlass'], reward:['mammochon','lamantine','lokhlass']},
-    {id:'kanto-aldo', team:'carchacrok', name:'Aldo', title:'Conseil 4 · Combat', arena:'stade', mons:['kicklee','tygnon','grolem','lucario','tyranocif','mackogneur'], reward:['tyranocif','mackogneur']},
+    {id:'kanto-aldo', team:'carchacrok', name:'Aldo', title:'Conseil 4 · Combat', arena:'stade', mons:['kicklee','tygnon','grolem','lucario','tyranocif','mackogneur'], reward:['mackogneur','tygnon']},
     {id:'kanto-agatha', team:'lanssorien', name:'Agatha', title:'Conseil 4 · Spectre', arena:'chateau', mons:['arbok','sinistrail','flamigator','momartik','naganadel','ectoplasma'], reward:['sinistrail','arbok','ectoplasma']},
-    {id:'kanto-peter', team:'naganadel', name:'Peter', title:'Conseil 4 · Dragon', arena:'pilier', mons:['ptera','leviator','carchacrok','lanssorien','dracaufeu','dracolosse'], reward:['ptera','dracolosse']},
+    {id:'kanto-peter', team:'naganadel', name:'Peter', title:'Conseil 4 · Dragon', arena:'pilier', mons:['ptera','leviator','carchacrok','lanssorien','dracaufeu','dracolosse'], reward:['ptera','hyporoi']},
     {id:'kanto-blue', name:'Blue', title:'Maître de Kanto', arena:'stade', champion:1, mons:['roucarnage','alakazam','rhinoferos','arcanin','mewtwo','tortank'], reward:['alakazam','arcanin','tortank','mewtwo']}],
    challenges:[{id:'kanto-def', trainer:'kanto-blue', text:'Battre Blue sans perdre un seul Pokémon', test:r => r.lost === 0, reward:['electhorgalar']}]},
   {id:'johto', name:'Johto', trainers:[
-    {id:'johto-clement', name:'Clément', title:'Conseil 4 · Psy', arena:'colonnes', mons:['lippoutou','flagadoss','noadkoko','alakazam','gardevoir','xatu'], reward:['metalosse','lippoutou','noadkoko','xatu']},
+    {id:'johto-clement', name:'Clément', title:'Conseil 4 · Psy', arena:'colonnes', mons:['lippoutou','flagadoss','noadkoko','alakazam','gardevoir','xatu'], reward:['lippoutou','noadkoko','xatu']},
     {id:'johto-koga', name:'Koga', title:'Conseil 4 · Poison', arena:'tourbillon', mons:['migalos','foretress','grotadmorv','amphinobi','naganadel','nostenfer'], reward:['naganadel','grotadmorv','migalos','foretress','nostenfer']},
-    {id:'johto-aldo', name:'Aldo', title:'Conseil 4 · Combat', arena:'stade', mons:['kapoera','steelix','tygnon','kicklee','lucario','mackogneur'], reward:['minotaupe','tygnon','kicklee','kapoera','steelix']},
+    {id:'johto-aldo', name:'Aldo', title:'Conseil 4 · Combat', arena:'stade', mons:['kapoera','steelix','tygnon','kicklee','lucario','mackogneur'], reward:['minotaupe','kicklee','kapoera','steelix']},
     {id:'johto-marion', name:'Marion', title:'Conseil 4 · Ténèbres', arena:'chateau', mons:['noctali','corboss','tyranocif','scalpereur','ectoplasma','demolosse'], reward:['amphinobi','noctali','corboss','demolosse']},
-    {id:'johto-peter', name:'Peter', title:'Maître de Johto', arena:'pilier', champion:1, mons:['ptera','hyporoi','carchacrok','electhorgalar','leviator','dracolosse'], reward:['carchacrok','roucarnage','hyporoi']}],
+    {id:'johto-peter', name:'Peter', title:'Maître de Johto', arena:'pilier', champion:1, mons:['ptera','hyporoi','carchacrok','electhorgalar','leviator','dracolosse'], reward:['roucarnage']}],
    challenges:[{id:'johto-def', trainer:'johto-peter', text:'Battre Peter en moins de 3 minutes', test:r => r.time < 180, reward:['shifours']}]},
   {id:'hoenn', name:'Hoenn', trainers:[
     {id:'hoenn-damien', name:'Damien', title:'Conseil 4 · Ténèbres', arena:'chateau', mons:['tengalice','cacturne','colhomard','grahyena','tyranocif','absol'], reward:['scalpereur','tengalice','cacturne','colhomard','grahyena','absol']},
     {id:'hoenn-spectra', name:'Spectra', title:'Conseil 4 · Spectre', arena:'colonnes', mons:['branette','tenefix','momartik','sinistrail','flamigator','noctunoir'], reward:['flamigator','branette','tenefix','noctunoir']},
     {id:'hoenn-glacia', name:'Glacia', title:'Conseil 4 · Glace', arena:'couronne', mons:['oniglali','crustabri','lamantine','lokhlass','mammochon','kaimorse'], reward:['momartik','crustabri','oniglali','kaimorse']},
-    {id:'hoenn-aragon', name:'Aragon', title:'Conseil 4 · Dragon', arena:'pilier', mons:['libegon','altaria','carchacrok','dracolosse','lanssorien','drattak'], reward:['lanssorien','libegon','altaria','drattak']},
+    {id:'hoenn-aragon', name:'Aragon', title:'Conseil 4 · Dragon', arena:'pilier', mons:['libegon','altaria','carchacrok','dracolosse','lanssorien','drattak'], reward:['libegon','altaria']},
     {id:'hoenn-pierre', name:'Pierre Rochard', title:'Maître de Hoenn', arena:'tourbillon', champion:1, mons:['airmure','galeking','kaorine','armaldo','groudon','metalosse'], reward:['milobellus','flagadoss','airmure','galeking','kaorine','vacilys','armaldo','kyogre']}],
    challenges:[{id:'hoenn-def', trainer:'hoenn-pierre', text:'Battre Pierre Rochard en perdant au plus 1 Pokémon', test:r => r.lost <= 1, reward:['groudon']}]},
   {id:'sinnoh', name:'Sinnoh', trainers:[
@@ -38,32 +38,32 @@ const LEAGUE = [
     {id:'sinnoh-cynthia', name:'Cynthia', title:'Maîtresse de Sinnoh', arena:'stade', champion:1, mons:['spiritomb','roserade','sylveroy','togekiss','lucario','carchacrok'], reward:['spiritomb','roserade','sylveroy']}],
    challenges:[]},
   {id:'unys', name:'Unys', trainers:[
-    {id:'unys-anis', name:'Anis', title:'Conseil 4 · Spectre', arena:'chateau', mons:['tutankafer','moyade','golemastoc','momartik','ectoplasma','lugulabre'], reward:['lugulabre','tutankafer','moyade','golemastoc']},
-    {id:'unys-pieris', name:'Pieris', title:'Conseil 4 · Ténèbres', arena:'tourbillon', mons:['baggaid','leopardus','crocorible','absol','demolosse','scalpereur'], reward:['baggaid','leopardus','crocorible']},
-    {id:'unys-percila', name:'Percila', title:'Conseil 4 · Psy', arena:'colonnes', mons:['mushana','cryptero','symbios','mentali','alakazam','siderella'], reward:['siderella','mushana','cryptero','symbios']},
-    {id:'unys-kunz', name:'Kunz', title:'Conseil 4 · Combat', arena:'stade', mons:['judokrak','karaclee','betochef','lucario','mackogneur','kungfouine'], reward:['kungfouine','judokrak','karaclee','betochef']},
-    {id:'unys-iris', name:'Iris', title:"Maîtresse d'Unys", arena:'pilier', champion:1, mons:['trioxhydre','drakkarmin','aeropteryx','galeking','kyogre','tranchodon'], reward:['tranchodon','trioxhydre','drakkarmin','aeropteryx']}],
+    {id:'unys-anis', name:'Anis', title:'Conseil 4 · Spectre', arena:'unys', mons:['tutankafer','moyade','golemastoc','momartik','ectoplasma','lugulabre'], reward:['lugulabre','tutankafer','moyade','golemastoc']},
+    {id:'unys-pieris', name:'Pieris', title:'Conseil 4 · Ténèbres', arena:'unys', mons:['baggaid','leopardus','crocorible','absol','demolosse','scalpereur'], reward:['baggaid','leopardus','crocorible']},
+    {id:'unys-percila', name:'Percila', title:'Conseil 4 · Psy', arena:'unys', mons:['mushana','cryptero','symbios','mentali','alakazam','siderella'], reward:['siderella','mushana','cryptero','symbios']},
+    {id:'unys-kunz', name:'Kunz', title:'Conseil 4 · Combat', arena:'unys', mons:['judokrak','karaclee','betochef','lucario','mackogneur','kungfouine'], reward:['kungfouine','judokrak','karaclee','betochef']},
+    {id:'unys-iris', name:'Iris', title:"Maîtresse d'Unys", arena:'unys', champion:1, mons:['trioxhydre','drakkarmin','aeropteryx','galeking','kyogre','tranchodon'], reward:['tranchodon','drakkarmin','aeropteryx']}],
    challenges:[]},
   {id:'kalos', name:'Kalos', trainers:[
-    {id:'kalos-malva', name:"Malva", title:"Conseil 4 · Feu", arena:'chateau', mons:['nemelios','chartor','lugulabre','maganon','arcanin','flambusard'], reward:['flambusard','nemelios','chartor']},
-    {id:'kalos-narcisse', name:"Narcisse", title:"Conseil 4 · Eau", arena:'tourbillon', mons:['gamblast','staross','leviator','milobellus','tortank','golgopathe'], reward:['golgopathe','gamblast','staross']},
-    {id:'kalos-thymeo', name:"Thyméo", title:"Conseil 4 · Acier", arena:'colonnes', mons:['trousselin','tarinorme','cizayox','metalosse','airmure','exagide'], reward:['exagide','trousselin','tarinorme']},
-    {id:'kalos-dracena', name:"Dracéna", title:"Conseil 4 · Dragon", arena:'pilier', mons:['kravarech','drakkarmin','altaria','hyporoi','libegon','bruyverne'], reward:['bruyverne','kravarech']},
-    {id:'kalos-diantha', name:"Dianthéa", title:"Maîtresse de Kalos", arena:'stade', champion:1, mons:['rexillius','amagara','banshitrouye','muplodocus','shifours','gardevoir'], reward:['rexillius','amagara','banshitrouye','muplodocus','brutalibre']}],
+    {id:'kalos-malva', name:"Malva", title:"Conseil 4 · Feu", arena:'kalos', mons:['nemelios','chartor','lugulabre','maganon','arcanin','flambusard'], reward:['flambusard','nemelios','chartor']},
+    {id:'kalos-narcisse', name:"Narcisse", title:"Conseil 4 · Eau", arena:'kalos', mons:['gamblast','staross','leviator','milobellus','tortank','golgopathe'], reward:['golgopathe','gamblast','staross']},
+    {id:'kalos-thymeo', name:"Thyméo", title:"Conseil 4 · Acier", arena:'kalos', mons:['trousselin','tarinorme','cizayox','metalosse','airmure','exagide'], reward:['exagide','trousselin','tarinorme']},
+    {id:'kalos-dracena', name:"Dracéna", title:"Conseil 4 · Dragon", arena:'kalos', mons:['kravarech','drakkarmin','altaria','hyporoi','libegon','bruyverne'], reward:['bruyverne','kravarech']},
+    {id:'kalos-diantha', name:"Dianthéa", title:"Maîtresse de Kalos", arena:'kalos', champion:1, mons:['rexillius','amagara','banshitrouye','muplodocus','shifours','gardevoir'], reward:['rexillius','amagara','banshitrouye','brutalibre']}],
    challenges:[]},
   {id:'alola', name:'Alola', trainers:[
-    {id:'alola-pectorius', name:"Pectorius", title:"Conseil 4 · Combat", arena:'stade', mons:['hariyama','colossinge','chelours','tartard','kapoera','crabominable'], reward:['crabominable','hariyama','colossinge','chelours','tartard']},
-    {id:'alola-alyxia', name:"Alyxia", title:"Conseil 4 · Roche", arena:'couronne', mons:['strassie','grolemalola','tarinorme','tyranocif','rhinastoc','lougaroc'], reward:['lougaroc','strassie','grolemalola']},
-    {id:'alola-margie', name:"Margie", title:"Conseil 4 · Spectre", arena:'chateau', mons:['grodrive','tenefix','sinistrail','momartik','noctunoir','trepassable'], reward:['trepassable','grodrive']},
-    {id:'alola-kahili', name:"Kahili", title:"Conseil 4 · Vol", arena:'pilier', mons:['plumeline','vaututrice','airmure','nostenfer','togekiss','bazoucan'], reward:['bazoucan','plumeline','vaututrice']},
-    {id:'alola-euphorbe', name:"Euphorbe", title:"Maître d'Alola", arena:'tourbillon', champion:1, mons:['feunardalola','gueriaigle','magnezone','ronflex','solgaleo','archeduc'], reward:['archeduc','feunardalola','gueriaigle','magnezone']}],
+    {id:'alola-pectorius', name:"Pectorius", title:"Conseil 4 · Combat", arena:'alola', mons:['hariyama','colossinge','chelours','tartard','kapoera','crabominable'], reward:['crabominable','hariyama','colossinge','chelours','tartard']},
+    {id:'alola-alyxia', name:"Alyxia", title:"Conseil 4 · Roche", arena:'alola', mons:['strassie','grolemalola','tarinorme','tyranocif','rhinastoc','lougaroc'], reward:['lougaroc','strassie','grolemalola']},
+    {id:'alola-margie', name:"Margie", title:"Conseil 4 · Spectre", arena:'alola', mons:['grodrive','tenefix','sinistrail','momartik','noctunoir','trepassable'], reward:['trepassable','grodrive']},
+    {id:'alola-kahili', name:"Kahili", title:"Conseil 4 · Vol", arena:'alola', mons:['plumeline','vaututrice','airmure','nostenfer','togekiss','bazoucan'], reward:['bazoucan','plumeline','vaututrice']},
+    {id:'alola-euphorbe', name:"Euphorbe", title:"Maître d'Alola", arena:'alola', champion:1, mons:['feunardalola','gueriaigle','magnezone','ronflex','solgaleo','archeduc'], reward:['archeduc','feunardalola','gueriaigle','magnezone']}],
    challenges:[{id:'alola-def', trainer:'alola-euphorbe', text:'Battre Euphorbe en perdant au plus 2 Pokémon', test:r => r.lost <= 2, reward:['solgaleo']}]},
   {id:'paldea', name:'Paldea', trainers:[
-    {id:'paldea-rika', name:"Rika", title:"Conseil 4 · Sol", arena:'couronne', mons:['barbicha','camerupt','donphan','triopikeur','hippodocus','terraiste'], reward:['terraiste','barbicha','camerupt','donphan','triopikeur']},
-    {id:'paldea-popi', name:"Popi", title:"Conseil 4 · Acier", arena:'colonnes', mons:['pachyradjah','magnezone','corvaillus','archeodong','steelix','forgelina'], reward:['forgelina','pachyradjah','corvaillus']},
-    {id:'paldea-okuba', name:"Okuba", title:"Conseil 4 · Vol", arena:'pilier', mons:['tropius','plumeline','etouraptor','altaria','roucarnage','flamenroule'], reward:['flamenroule','tropius','etouraptor']},
-    {id:'paldea-hassel', name:"Hassel", title:"Conseil 4 · Dragon", arena:'tourbillon', mons:['bruyverne','kravarech','pomdrapi','tranchodon','drattak','glaivodo'], reward:['glaivodo','pomdrapi']},
-    {id:'paldea-alisma', name:"Alisma", title:"Maîtresse de Paldea", arena:'stade', champion:1, mons:['cleopsytra','chevroum','seracrawl','scalpereur','koraidon','floreclat'], reward:['floreclat','cleopsytra','chevroum','seracrawl']}],
+    {id:'paldea-rika', name:"Rika", title:"Conseil 4 · Sol", arena:'paldea', mons:['barbicha','camerupt','donphan','triopikeur','hippodocus','terraiste'], reward:['terraiste','barbicha','camerupt','donphan','triopikeur']},
+    {id:'paldea-popi', name:"Popi", title:"Conseil 4 · Acier", arena:'paldea', mons:['pachyradjah','magnezone','corvaillus','archeodong','steelix','forgelina'], reward:['forgelina','pachyradjah','corvaillus']},
+    {id:'paldea-okuba', name:"Okuba", title:"Conseil 4 · Vol", arena:'paldea', mons:['tropius','plumeline','etouraptor','altaria','roucarnage','flamenroule'], reward:['flamenroule','tropius','etouraptor']},
+    {id:'paldea-hassel', name:"Hassel", title:"Conseil 4 · Dragon", arena:'paldea', mons:['bruyverne','kravarech','pomdrapi','tranchodon','drattak','glaivodo'], reward:['pomdrapi']},
+    {id:'paldea-alisma', name:"Alisma", title:"Maîtresse de Paldea", arena:'paldea', champion:1, mons:['cleopsytra','chevroum','seracrawl','scalpereur','koraidon','floreclat'], reward:['floreclat','cleopsytra','chevroum','seracrawl']}],
    challenges:[{id:'paldea-def', trainer:'paldea-alisma', text:'Battre Alisma en moins de 4 minutes', test:r => r.time < 240, reward:['koraidon']}]}
 ];
 const LG_TRAINER = {}; for (const r of LEAGUE) for (const t of r.trainers) LG_TRAINER[t.id] = {...t, region:r.id};
@@ -71,10 +71,13 @@ const LG_TRAINER = {}; for (const r of LEAGUE) for (const t of r.trainers) LG_TR
 // progression gardée sur l'appareil
 let lg = {beaten:{}, chal:{}, all:false};
 try { Object.assign(lg, JSON.parse(localStorage.getItem('arene-ligue') || '{}')); } catch(e){}
+const OLD_REWARDS = {'kanto-aldo':['tyranocif'], 'kanto-peter':['dracolosse'], 'johto-clement':['metalosse'], 'johto-peter':['carchacrok'], 'hoenn-aragon':['lanssorien','drattak'], 'unys-iris':['trioxhydre'], 'kalos-diantha':['muplodocus'], 'paldea-hassel':['glaivodo']};
+if (!lg.kept){ lg.kept = []; for (const [t, ks] of Object.entries(OLD_REWARDS)) if (lg.beaten[t]) lg.kept.push(...ks); try { localStorage.setItem('arene-ligue', JSON.stringify(lg)); } catch(e){} }
 const lgSave = () => { try { localStorage.setItem('arene-ligue', JSON.stringify(lg)); } catch(e){} };
 function unlockedSet(){
   if (lg.all) return new Set(Object.keys(MONS));
-  const s = new Set(lg.start || LEAGUE_START);
+  const s = new Set([...(lg.start || LEAGUE_START), ...(lg.kept || [])]);
+  if (typeof SUCCES !== 'undefined') for (const a of SUCCES) if (succ[a.id] && a.reward) a.reward.forEach(k => s.add(k));   // Pokémon gagnés par les succès
   for (const r of LEAGUE){ for (const t of r.trainers) if (lg.beaten[t.id]) t.reward.forEach(k => s.add(k)); for (const c of r.challenges) if (lg.chal[c.id]) c.reward.forEach(k => s.add(k)); }
   return s;
 }
@@ -107,6 +110,20 @@ function fightNext(){ const run = lgRun(), t = LEAGUE.find(r => r.id === run.reg
   startMatch({pk:run.team.slice(), ek:t.mons.slice(), eName:t.name, dk:run.dk, arena:t.arena, vs2:false, league:{id:t.id, name:t.name}}); }
 function startRun(region, team, dk){ lg.run = {region, i:0, team:team.slice(), dk, retry:1}; lgSave(); fightNext(); }
 function leagueAbandon(){ lg.run = null; lgSave(); }
+
+// ---------- fiche du prochain combat : types adverses, tes atouts, tes points faibles ----------
+const dmgTypes = k => [...new Set(MONS[k].moves.map(m => MOVES[m]).filter(m => m.p).map(m => m.t))];
+function matchupHTML(team, foes, name){
+  const types = [...new Set(foes.flatMap(k => MONS[k].types))];
+  const beats = k => foes.filter(f => dmgTypes(k).some(t => effMult(t, MONS[f].types) > 1)).length;   // adversaires qu'il touche en super efficace
+  const fears = k => foes.filter(f => dmgTypes(f).some(t => effMult(t, MONS[k].types) > 1)).length;  // adversaires qui le touchent en super efficace
+  const best = team.map(k => [k, beats(k)]).filter(x => x[1] > 0).sort((a, b) => b[1] - a[1]).slice(0, 3);
+  const risk = team.map(k => [k, fears(k)]).filter(x => x[1] >= Math.ceil(foes.length/2)).sort((a, b) => b[1] - a[1]).slice(0, 3);
+  const list = arr => arr.map(([k, n]) => `${MONS[k].name} (${n}/${foes.length})`).join(', ');
+  return `<h3>Prochain combat : ${name}</h3><div class="types">${chips(types)}</div>`
+    + `<p class="note">${best.length ? '<b>Tes atouts :</b> ' + list(best) + ' : super efficaces contre ces adversaires.' : "<b>Aucun de tes Pokémon n'est super efficace</b> contre cette équipe."}</p>`
+    + (risk.length ? `<p class="note"><b>Attention :</b> ${list(risk)} : vulnérables à beaucoup de ses attaques.</p>` : '');
+}
 
 // ---------- écran de la Ligue ----------
 let lgRegion = null, lgNext = null, lgStep = 'diff', lgPick = [];   // lgStep : départ (une seule fois), difficulté, puis régions et équipe
@@ -141,6 +158,8 @@ function renderLeague(){
     return `<button class="mon" data-lgm="${k}" aria-pressed="${i >= 0}" ${run ? 'disabled' : ''}>${i >= 0 ? `<span class="num">${i+1}</span>` : ''}${MONS[k].legend ? '<span class="leg">★</span>' : ''}${pic(k,46)}<b>${MONS[k].name}</b><div class="types">${chips(MONS[k].types)}</div></button>`; }).join('');
   $('lgHint').textContent = run ? `Ligue en cours : équipe et difficulté sont fixées jusqu'à la fin. ${(run.retry ?? 1) > 0 ? 'Seconde chance disponible : à la première défaite, tu pourras rejouer le combat.' : 'Seconde chance utilisée : une défaite fait recommencer depuis le début.'}`
     : 'Choisis 6 Pokémon (1 légendaire ★ maximum). Tu as droit à une seconde chance par Ligue ; à la défaite suivante, il faut recommencer depuis le premier membre du Conseil.';
+  const nextT = R.trainers[inRun ? run.i : 0];
+  $('lgMatch').innerHTML = ready && nextT ? matchupHTML(team, nextT.mons, nextT.name) : '';
   $('lgActions').innerHTML = inRun ? `<button class="go" data-lga="next">Affronter ${R.trainers[run.i].name} (${run.i + 1}/${R.trainers.length})${(run.retry ?? 1) > 0 ? ' · ♥ 1 seconde chance' : ''}</button><button class="btn" data-lga="quit">Abandonner la Ligue</button>`
     : `<button class="btn" data-lga="diff">Difficulté : ${DIFFS[sel.d].label}</button><button class="go" data-lga="start" ${ready ? '' : 'disabled'}>${ready ? 'Commencer la Ligue de ' + R.name : 'Choisis encore ' + (6 - team.length) + ' Pokémon'}</button>`;
   hydrate($('league'));
@@ -180,7 +199,7 @@ $('league').addEventListener('click', e => {
   renderLeague(); $('league').scrollTop = y;
 });
 $('lgAll').onclick = () => { if (confirm('Débloquer toutes les régions et tous les Pokémon ?')){ lg.all = true; lgSave(); renderLeague(); } };
-$('lgReset').onclick = () => { if (confirm('Effacer toute ta progression dans la Ligue ?')){ lg = {beaten:{}, chal:{}, all:false}; lgPick = []; lgSave(); renderLeague(); renderMenu(); } };
+$('lgReset').onclick = () => { if (confirm('Effacer toute ta progression dans la Ligue ?')){ lg = {beaten:{}, chal:{}, all:false, kept:[]}; lgPick = []; lgSave(); renderLeague(); renderMenu(); } };
 
 // fin d'un combat de Ligue : victoire (dresseur suivant, déblocages, défis) ou défaite (la Ligue est à recommencer)
 function leagueResult(win, pAlive){

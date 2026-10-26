@@ -44,12 +44,12 @@ function startMatch(m){
   const es = {team: m.ek.map(k => makeFighter(k,'e')), active:0, swCd:0, dashN:DASH_MAX, dashT:0, spawn:{x:CX,y:140}, name:m.eName};
   if (m.vs2) es.team.forEach(f => f.isAI = false);   // 2 joueurs : le joueur 2 remplace l'IA
   if (m.spec) ps.team.forEach(f => f.isAI = true);    // IA contre IA : ton équipe est jouée par l'IA, tu regardes
-  game = { ps, es, p:ps.team[0], e:es.team[0], diff: DIFFS[m.dk], arena: m.arena || 'stade', vs2: !!m.vs2, spectate: !!m.spec, league: m.league || null,
+  game = { ps, es, p:ps.team[0], e:es.team[0], diff: DIFFS[m.dk], arena: m.arena || 'stade', vs2: !!m.vs2, spectate: !!m.spec, league: m.league || null, defi: m.defi || null,
     projs:[], zones:[], rings:[], parts:[], texts:[], slashes:[], ents:[], decals:[], dangers:[], shake:0, t:0, fightT:0,
     sflash:null, elec:0, frost:0, dim:0, zoom:1, hitstop:0,
     state:'intro', introT:2.6, introBig:true, koT:0, paused:false,
     rocks:[] };   // seuls obstacles : ceux créés par les attaques (piliers de Lame de Roc)
-  Object.assign(game.p, ps.spawn); Object.assign(game.e, es.spawn);
+  Object.assign(game.p, ps.spawn); Object.assign(game.e, es.spawn); game.p.enterT = game.e.enterT = .45;
   buildHUD(); buildMoves(); buildBench();
   $('menu').hidden = true; $('battle').hidden = false;
   for (const o of ['ovEnd','ovPause','ovChoose','tourPick']) $(o).hidden = true;
@@ -58,8 +58,8 @@ function startMatch(m){
   resize(); AUDIO.music('combat'); AUDIO.duck(false);   // un morceau au hasard à chaque combat
 }
 $('start').onclick = () => { if (!$('start').disabled) startMatch(resolveTeams()); };
-$('again').onclick = () => lastMatch.tuto ? (toMenu(), openLeague()) : lastMatch.tour ? (toMenu(), goScreen('tour'), rollTourDraft()) : lastMatch.league ? leagueAgain() : startMatch(sel.e === 'random' ? {...resolveTeams(), pk:lastMatch.pk, arena:lastMatch.arena} : lastMatch);   // la revanche garde l'arène
-const toMenu = () => { const lgBack = game && game.league; if (lgBack && game.state !== 'end') leagueAbandon(); game = null; AUDIO.music('menu'); $('battle').hidden = true; $('menu').hidden = false; $('tutoBox').hidden = true; if (lgBack) openLeague('main'); else goScreen(lastMatch && (lastMatch.tour || lastMatch.tuto) ? 'home' : 'team'); renderTourInfo(); };   // Ligue : retour à l'écran de la Ligue, sinon au choix de l'équipe ; quitter un combat en cours = abandonner la Ligue
+$('again').onclick = () => lastMatch.defi ? startMatch(lastMatch) : lastMatch.tuto ? (toMenu(), openLeague()) : lastMatch.tour ? (toMenu(), goScreen('tour'), rollTourDraft()) : lastMatch.league ? leagueAgain() : startMatch(sel.e === 'random' ? {...resolveTeams(), pk:lastMatch.pk, arena:lastMatch.arena} : lastMatch);   // la revanche garde l'arène
+const toMenu = () => { const lgBack = game && game.league; if (lgBack && game.state !== 'end') leagueAbandon(); game = null; AUDIO.music('menu'); $('battle').hidden = true; $('menu').hidden = false; $('tutoBox').hidden = true; if (lgBack) openLeague('main'); else goScreen(lastMatch && (lastMatch.tour || lastMatch.tuto || lastMatch.defi) ? 'home' : 'team'); renderTourInfo(); renderDefiInfo(); renderSuccesBadge(); };   // Ligue : retour à l'écran de la Ligue, sinon au choix de l'équipe ; quitter un combat en cours = abandonner la Ligue
 $('toMenu').onclick = toMenu; $('quit').onclick = toMenu;
 $('pauseBtn').onclick = () => setPause(true);
 $('resume').onclick = () => setPause(false);
@@ -74,7 +74,7 @@ function sendIn(side, idx, announce=true){
   f.vx = f.vy = f.kx = f.ky = 0; f.dash = null; f.roll = null; f.script = null; f.air = null; f.h = 0; f.buried = false; f.root = 0; f.act = null; f.hurtT = 0; f.stun = 0; f.recharge = 0; f.mirror = 0; f.ring = 0; f.slow = 0;
   f.buff = {atk:1,spa:1,spe:1,spd:1}; f.buffT = 0; f.busy = 0; f.vanish = 0; f.doll = 0; f.shield = 0; f.inv = INV_ON_SWITCH; f.held.fill(false); f.defDown = f.spdDown = f.atkDown = f.grounded = f.healT = f.gyro = 0; f.recast.fill(0); f.recastN.fill(0);
   if (alive){ old.dash = null; old.roll = null; old.script = null; old.air = null; old.h = 0; old.buried = false; old.buff = {atk:1,spa:1,spe:1,spd:1}; old.buffT = 0; old.mirror = 0; old.ring = 0; old.held.fill(false); }
-  side.active = idx;
+  side.active = idx; f.enterT = .45; AUDIO.cry(f.d.id);   // entrée en scène
   if (side === game.ps){ game.p = f; buildMoves(); } else game.e = f;
   for (const p of game.projs) if (p.target === old) p.target = f;
   buildCard(side === game.ps ? 'p' : 'e');
@@ -181,7 +181,8 @@ function updateHUD(){
     if (r >= h.lagR){ h.lagR = r; h.lagT = 0; } else if ((h.lagT += 1/60) > .45) h.lagR = Math.max(r, h.lagR - .9/60);
     h.lag.style.transform = `scaleX(${h.lagR})`;
     h.hpn.textContent = `${Math.ceil(f.hp)}/${f.max}`;
-    const s = Object.keys(STATUS).filter(k => f[k] > 0).map(k => `<span class="st" style="background:${STATUS[k][1]}">${STATUS[k][0]}</span>`).join('');
+    const active = Object.keys(STATUS).filter(k => f[k] > 0); if (!game.spectate && active.length) statusTips(active);
+    const s = active.map(k => `<span class="st" style="background:${STATUS[k][1]}">${STATUS[k][0]}</span>`).join('');
     if (s !== h.last){ h.sts.innerHTML = s; h.last = s; }
     const b = side.team.map(x => x.hp > 0 ? '1' : '0').join('');
     if (b !== h.lastB){ h.balls.innerHTML = side.team.map(x => `<i class="${x.hp>0?'':'ko'}"></i>`).join(''); h.lastB = b; }
@@ -437,7 +438,7 @@ function use(f, i, aim, opts){
   const a = Math.atan2(ty - f.y, tx - f.x);
   const an = mv.sig ? (mv.anim || 'Attack') : (ACT_ANIM[mv.k] || 'Attack');
   f.aimA = a; f.act = {n:an, t:0, dur: mv.k === 'dash' ? mv.dur + .15 : ACT_DUR[an]};
-  AUDIO.cast(mv);
+  AUDIO.cast(mv); if (mv.k === 'sig') zoomPunch(.025);   // léger zoom sur les ★
   switch (mv.k){
     case 'sig': case 'spec': SIG[mv.sig](f, mv, a, tx, ty, {...(opts || {}), slot:i, manual:!!aim}); break;
     case 'proj': spawnProj(f, mv, a, 1); break;
@@ -514,11 +515,13 @@ function hit(att, def, mv, mult){
   if (att.mega && mv.k === 'sig') dmg *= 1.15;   // forme Méga : attaque emblématique renforcée
   dmg = Math.max(1, Math.round(dmg));
   const before = def.hp; damage(def, dmg);
-  att.dmgDone = (att.dmgDone || 0) + before - def.hp; att.hits = (att.hits || 0) + 1; if (e > 1) att.seHits = (att.seHits || 0) + 1; if (before > 0 && def.hp <= 0) att.kos = (att.kos || 0) + 1;   // statistiques de fin de combat
+  att.dmgDone = (att.dmgDone || 0) + before - def.hp; att.hits = (att.hits || 0) + 1; if (e > 1) att.seHits = (att.seHits || 0) + 1; if (before > 0 && def.hp <= 0){ att.kos = (att.kos || 0) + 1; if (mv.k === 'sig') att.sigKos = (att.sigKos || 0) + 1; }   // statistiques de fin de combat
   AUDIO.hit(mv.t, dmg, e); if (!def.isAI) rumbleFor(def, .25 + dmg/50, 40 + Math.min(120, dmg*2));
   def.flash = .22; def.hurtT = .3;
   if (def.sleep > 0){ def.sleep = 0; }
-  popText(def.x + rand(-10,10), def.y - 30, '-' + dmg, '#fff', 22);
+  const se = e > 1, weak = e < 1;   // dégâts colorés selon l'efficacité, et le mot une fois de temps en temps
+  popText(def.x + rand(-10,10), def.y - 30, '-' + dmg, se ? '#ffd23a' : weak ? '#a8a8c0' : '#fff', se ? 26 : weak ? 18 : 22);
+  if ((se || weak) && !(def.effT > game.t)){ def.effT = game.t + .9; popText(def.x, def.y - 60, se ? 'Super efficace !' : e < .5 ? 'Presque sans effet…' : 'Pas très efficace…', se ? '#ffd23a' : '#a8a8c0', 14, .8); }
   if (e > 1) popText(def.x, def.y - 58, 'Super efficace !', '#e6b84c', 15, 1.1);
   else if (e < 1) popText(def.x, def.y - 58, raw === 0 ? 'Très peu efficace…' : 'Pas très efficace…', '#a39bd0', 13, 1.1);
   burst(def.x, def.y, TYPES[mv.t][1], 14, 180, 5);

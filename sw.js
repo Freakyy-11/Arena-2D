@@ -1,9 +1,9 @@
 // Mode hors ligne : les fichiers du jeu passent d'abord par le réseau (pour avoir la dernière version), le cache sert hors ligne.
 // Les sprites et polices (sites externes) sont gardés en cache dès leur premier chargement.
-const VERSION = 'arene-3';
+const VERSION = 'arene-5';
 const CORE = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'css/style.css',
-  ...['donnees', 'menu', 'jeu', 'attaques', 'ia', 'simulation', 'audio', 'arenes', 'rendu', 'ligue', 'modes'].map(n => 'js/' + n + '.js'),
-  'arenes/stade.webp', 'arenes/pilier.jpg', 'arenes/colonnes.jpg', 'arenes/couronne.webp', 'arenes/chateau.jpg', 'arenes/tourbillon.jpg'];
+  ...['donnees', 'menu', 'jeu', 'attaques', 'ia', 'simulation', 'audio', 'arenes', 'rendu', 'ligue', 'modes', 'succes'].map(n => 'js/' + n + '.js'),
+  'arenes/stade.webp', 'arenes/pilier.jpg', 'arenes/colonnes.jpg', 'arenes/couronne.webp', 'arenes/chateau.jpg', 'arenes/tourbillon.jpg', 'arenes/unys.webp', 'arenes/paldea.webp', 'arenes/kalos.webp', 'arenes/alola.webp'];
 
 self.addEventListener('install', e => { e.waitUntil(caches.open(VERSION).then(c => c.addAll(CORE)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => {

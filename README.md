@@ -20,6 +20,8 @@ Le jeu s'installe comme une appli (icône sur l'écran d'accueil, plein écran) 
 - **Ligue Pokémon** : Kanto, Johto, Hoenn, Sinnoh, Unys, Kalos, Alola et Paldea, chacune avec son Conseil 4 et son Maître, à affronter d'affilée avec la difficulté de ton choix : une seconde chance par Ligue, puis une défaite fait recommencer la Ligue. Chaque victoire débloque des Pokémon jouables dans tous les modes, des défis bonus débloquent des légendaires ; on choisit ses 10 Pokémon de départ. Progression gardée sur l'appareil (bouton « Tout débloquer » pour tester).
 - **Tour de combat** (25 étages) : on commence en 2 contre 2 avec 2 Pokémon tirés au sort, dans la difficulté choisie pour toute la Tour ; tous les 5 étages, un gardien légendaire, puis un nouveau Pokémon à recruter (jusqu'à 6) ; le dernier étage est le Maître de la Tour, avec deux légendaires. Les PV sont gardés d'un étage à l'autre ; les dégâts rapportent de l'argent : un bonus gratuit après chaque étage, les autres s'achètent, de plus en plus cher. Record et Tours terminées (par difficulté) gardés sur l'appareil.
 - **Tutoriel** guidé (déplacement, attaques, Dash, ★, changement, Méga-évolution), et un écran de fin avec les statistiques du combat et le meilleur Pokémon.
+- **Défi du jour** : une équipe imposée et une règle (même défi pour tout le monde ce jour-là) ; **21 succès** à débloquer (victoires, K.O., Ligues, Tour, défis…), dont beaucoup donnent un Pokémon : les pseudo-légendaires (Dracolosse, Tyranocif, Drattak, Métalosse, Carchacrok, Lanssorien, Trioxhydre, Muplodocus, Glaivodo) ne s'obtiennent que par les succès.
+- Lisibilité : dégâts colorés selon l'efficacité, explication de chaque statut la première fois qu'il apparaît, fiche du prochain combat de Ligue (types adverses, atouts et points faibles de ton équipe) ; entrée en scène des Pokémon avec leur cri.
 - 163 Pokémon avec leurs stats officielles et 4 attaques chacun, dont 8 légendaires ★ (Mewtwo, Groudon, Kyogre, Shifours Style Poing Final, Sylveroy Cavalier d'Effroi, Électhor de Galar, Solgaleo, Koraidon) : 1 au maximum dans une équipe composée.
 - Une attaque emblématique ★ par Pokémon, avec son propre effet (Rafale Feu, Pouvoir Lunaire, Génusection, Poing Plasma, Tunnel, Surf…), et un rendu propre à chaque type pour les autres attaques.
 - Effets de combat : tremblement et éclair d'écran, écran électrisé ou givré, gel d'image à l'impact, marques au sol, adversaire soulevé ou projeté en l'air.
@@ -43,6 +45,7 @@ Le jeu s'installe comme une appli (icône sur l'écran d'accueil, plein écran) 
 - Musique des combats : [« JRPG Epic Rock Battle Theme #1 » par HydroGene](https://opengameart.org/content/jrpg-epic-rock-battle-theme-1), domaine public (CC0, OpenGameArt).
 - Bruitages : [Kenney](https://kenney.nl) (Impact Sounds, RPG Audio, Interface Sounds) et [« 80 CC0 RPG SFX » par rubberduck](https://opengameart.org/content/80-cc0-rpg-sfx), domaine public (CC0).
 - Portraits du menu et de la barre d'équipe : [PokéAPI](https://github.com/PokeAPI/sprites).
+- Cris des Pokémon : [PokéAPI cries](https://github.com/PokeAPI/cries).
 
 ## Code
 

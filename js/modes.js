@@ -62,7 +62,7 @@ function tutoEnd(){
   $('endT').textContent = 'Tutoriel terminé !'; $('endT').style.color = 'var(--gold)';
   $('endS').textContent = "Tu connais les bases : déplacement, attaques, Dash, ★, changement et Méga-évolution. Prochaine étape : la Ligue Pokémon !";
   $('endStats').innerHTML = ''; $('again').textContent = 'Commencer la Ligue'; $('again').hidden = false; $('toMenu').textContent = 'Menu';
-  $('ovEnd').hidden = false; AUDIO.stopMusic(); AUDIO.end(true);
+  $('ovEnd').hidden = false; AUDIO.stopMusic(); AUDIO.end(true); checkSucces();
 }
 $('tutoSkip').onclick = tutoEnd;
 $('openTuto').onclick = startTuto;

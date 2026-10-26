@@ -337,7 +337,8 @@ const BACKDROPS = {
 // ajustée à la largeur de l'arène et calée en bas (son carré du bas est l'arène).
 // backdrop (facultatif) = hauteur du décor de fond affiché au-dessus de l'arène (110 par défaut), pour montrer plus du haut de l'image.
 // shade (facultatif, 0 à 1) = voile sombre sur l'arène et ses murs, pour qu'un sol très clair laisse les attaques lisibles. Voir arenes/LISEZMOI.md.
-const ARENA_IMAGES = {pilier:{file:'pilier.jpg', frame:[130, 556, 636, 1086]}, colonnes:{file:'colonnes.jpg', frame:[130, 556, 636, 1088], shade:.35}, chateau:{file:'chateau.jpg', frame:[94, 494, 754, 1189], backdrop:300}, tourbillon:{file:'tourbillon.jpg', frame:[168, 628, 602, 1080], backdrop:500, top:250}, couronne:{file:'couronne.webp', frame:[92, 427, 478, 808], backdrop:680}, stade:{file:'stade.webp', frame:[55, 375, 520, 905], shade:.25, backdrop:400}};
+ARENAS.unys = Object.assign({}, ARENAS.chateau, {name:"Ligue d'Unys", line:'#9fd8ff'}); ARENAS.paldea = Object.assign({}, ARENAS.stade, {name:'Ligue de Paldea', line:'#fff0d0'}); ARENAS.kalos = Object.assign({}, ARENAS.chateau, {name:'Ligue de Kalos', line:'#f0d890'}); ARENAS.alola = Object.assign({}, ARENAS.couronne, {name:"Ligue d'Alola", line:'#ffe0c0'});   // arènes des nouvelles régions : dessin de secours (celui du château) tant que l'image n'est pas chargée
+const ARENA_IMAGES = {pilier:{file:'pilier.jpg', frame:[130, 556, 636, 1086]}, colonnes:{file:'colonnes.jpg', frame:[130, 556, 636, 1088], shade:.35}, chateau:{file:'chateau.jpg', frame:[94, 494, 754, 1189], backdrop:300}, tourbillon:{file:'tourbillon.jpg', frame:[168, 628, 602, 1080], backdrop:500, top:250}, couronne:{file:'couronne.webp', frame:[92, 427, 478, 808], backdrop:680}, stade:{file:'stade.webp', frame:[55, 375, 520, 905], shade:.25, backdrop:400}, unys:{file:'unys.webp', frame:[80, 413, 491, 822], backdrop:600}, paldea:{file:'paldea.webp', frame:[100, 356, 586, 850], shade:.3, backdrop:480}, kalos:{file:'kalos.webp', frame:[60, 368, 511, 950], shade:.34, shadeAll:true, backdrop:520}, alola:{file:'alola.webp', frame:[80, 398, 505, 852], backdrop:600}};
 const ARENA_FRAME = Object.fromEntries(Object.entries(ARENA_IMAGES).filter(([k, v]) => v.frame).map(([k, v]) => [k, v.frame]));
 const ARENA_IMG = {};
 for (const [k, v] of Object.entries(ARENA_IMAGES)){ const img = new Image(); img.onload = () => { ARENA_IMG[k] = img; }; img.src = 'arenes/' + v.file; }
@@ -349,7 +350,11 @@ const AMBIENCE = {
   colonnes:{vignette:.35, kind:'rise', col:['#ffc8f0','#c8e0ff'], n:26},
   couronne:{vignette:.3, kind:'snow', col:['#ffffff'], n:80, fog:true},
   chateau:{vignette:.42, kind:'motes', col:['#f0d890'], n:22},
-  tourbillon:{vignette:.38, kind:'mist', col:['#cfe6ff'], n:16, fog:true}
+  tourbillon:{vignette:.38, kind:'mist', col:['#cfe6ff'], n:16, fog:true},
+  unys:{vignette:.4, kind:'motes', col:['#9fd8ff'], n:18},
+  paldea:{vignette:.2, kind:'motes', col:['#fff4c0'], n:12},
+  kalos:{vignette:.25, kind:'motes', col:['#fff0b0'], n:16},
+  alola:{vignette:.3, kind:'snow', col:['#ffffff'], n:45}
 };
 function drawAmbience(key, t, imageMode){
   const A = AMBIENCE[key]; if (!A) return;

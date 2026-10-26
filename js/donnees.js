@@ -516,7 +516,7 @@ const DIFFS = {
   champion:{label:'Champion',react:.57,think:.49,lead:.52,noise:.2,mirror:true,sw:.5,dash:.4,aimErr:.115,dmg:.92},
   enfer:{label:'Enfer',react:.92,think:.32,lead:.9,noise:.06,mirror:true,sw:.85,dash:.85,aimErr:.02,dmg:1.25}   // réagit presque toujours, anticipe tes déplacements, frappe plus fort
 };
-const ARENA_LIST = [['stade','Stade Pokémon'],['pilier','Pilier Céleste'],['colonnes','Colonnes Lance'],['couronne','Mont Couronné'],['chateau','Château de Ghetsis'],['tourbillon','Îles Tourbillon']];
+const ARENA_LIST = [['stade','Stade Pokémon'],['pilier','Pilier Céleste'],['colonnes','Colonnes Lance'],['couronne','Mont Couronné'],['chateau','Château de Ghetsis'],['tourbillon','Îles Tourbillon'],['unys',"Ligue d'Unys"],['kalos','Ligue de Kalos'],['alola',"Ligue d'Alola"],['paldea','Ligue de Paldea']];
 const STATUS = {atkDown:['Atq −','#c9a08a'],grounded:['Au sol','#E2BF65'],defDown:['Déf −','#c98a8a'],spdDown:['D.Spé −','#8a9ac9'],burn:['Brûlé','#EE8130'],poison:['Empois.','#A33EA1'],slow:['Ralenti','#96D9D6'],stun:['Étourdi','#F7D02C'],sleep:['Endormi','#a39bd0'],ring:['Anneau','#6390F0'],mirror:['Miroir','#F95587'],buffT:['Boost','#e6b84c']};
 const SWITCH_CD = 4, INV_ON_SWITCH = .8;
 // Dash : charges partagées par l'équipe, rechargées une par une

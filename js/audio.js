@@ -93,6 +93,10 @@ const AUDIO = (() => {
     dash(){ if (on() && gate('dash', 40) && !snd(['dash-1','dash-2'], .7, 1.25)) noise({dur:.18, vol:.2, freq:500, freq2:2400, type:'bandpass', q:1.8}); },
     swap(){ if (!on()) return; if (!snd('echange', .6)){ tone({f:660, dur:.08, type:'square', vol:.08}); tone({f:990, dur:.12, type:'square', vol:.08, at:.07}); } },
     ko(){ if (!on()) return; const a = snd('ko-choc', .9), b = snd('ko-cri', .6, 1, .08); if (!a || !b){ tone({f:520, f2:70, dur:.7, type:'square', vol:.12}); noise({dur:.5, vol:.3, freq:800, freq2:100}); } },
+    cry(id){ if (!on() || !id) return; const k = 'cri' + id;
+      if (SND[k]) return snd(k, .32);
+      if (SND[k] === undefined){ SND[k] = null; fetch('https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/' + id + '.ogg').then(r => r.ok ? r.arrayBuffer() : Promise.reject())
+        .then(b => ac.decodeAudioData(b)).then(buf => { SND[k] = buf; snd(k, .32); }).catch(() => {}); } },
     mega(){ if (!on()) return; snd('mega', .7); snd('rugissement', .6, 1, .15) || tone({f:330, f2:990, dur:.6, type:'sawtooth', vol:.1}); },
     count(go){ if (!on()) return; if (!go && snd('decompte', .6)) return; tone({f:go ? 1047 : 523, dur:go ? .35 : .12, type:'square', vol:.1}); if (go) tone({f:1568, dur:.3, type:'square', vol:.05, at:.02}); },
     ui(kind){ if (on() && gate('ui', 40) && !snd({back:'ui-retour', ok:'ui-valider', pick:'ui-choix', err:'erreur'}[kind] || 'ui-clic', .5)) tone({f:900, dur:.04, type:'square', vol:.05}); },
