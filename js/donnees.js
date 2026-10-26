@@ -512,8 +512,8 @@ const TEAMS = [
 // dash = usage du Dash pour esquiver, aimErr = erreur de visée, dmg = force de ses attaques
 const DIFFS = {
   facile:{label:'Facile',react:.2,think:.85,lead:.1,noise:.5,mirror:false,sw:.1,dash:.08,aimErr:.33,dmg:.72},
-  normal:{label:'Normal',react:.48,think:.52,lead:.42,noise:.27,mirror:true,sw:.38,dash:.32,aimErr:.16,dmg:.88},
-  champion:{label:'Champion',react:.64,think:.46,lead:.6,noise:.17,mirror:true,sw:.55,dash:.48,aimErr:.09,dmg:.95},
+  normal:{label:'Normal',react:.36,think:.62,lead:.28,noise:.34,mirror:true,sw:.3,dash:.2,aimErr:.22,dmg:.82},
+  champion:{label:'Champion',react:.52,think:.52,lead:.45,noise:.23,mirror:true,sw:.45,dash:.34,aimErr:.14,dmg:.9},
   enfer:{label:'Enfer',react:.92,think:.32,lead:.9,noise:.06,mirror:true,sw:.85,dash:.85,aimErr:.02,dmg:1.25}   // réagit presque toujours, anticipe tes déplacements, frappe plus fort
 };
 const ARENA_LIST = [['stade','Stade Pokémon'],['pilier','Pilier Céleste'],['colonnes','Colonnes Lance'],['couronne','Mont Couronné'],['chateau','Château de Ghetsis'],['tourbillon','Îles Tourbillon']];
