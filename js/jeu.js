@@ -64,6 +64,8 @@ $('toMenu').onclick = toMenu; $('quit').onclick = toMenu;
 $('pauseBtn').onclick = () => setPause(true);
 $('resume').onclick = () => setPause(false);
 function setPause(v){ if (!game || game.state === 'end' || game.state === 'choose') return; game.paused = v; $('ovPause').hidden = !v; AUDIO.duck(v); if (v){ game.p.held.fill(false); game.e.held.fill(false); touchAim = null; } }
+// iPhone : Safari ignore « user-scalable=no » ; on bloque le pincement et le double toucher pendant le combat
+for (const ev of ['gesturestart', 'dblclick']) document.addEventListener(ev, e => { if (!$('battle').hidden) e.preventDefault(); }, {passive:false});
 document.addEventListener('visibilitychange', () => { if (document.hidden && game && game.state === 'fight') setPause(true); });
 
 // ---------- Changements de Pokémon ----------
