@@ -24,7 +24,12 @@ const AUDIO = (() => {
       noiseBuf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate); const d = noiseBuf.getChannelData(0); for (let i=0;i<d.length;i++) d[i] = Math.random()*2 - 1;
       loadSounds();
     }
-    if (ac.state === 'suspended') ac.resume();
+    // iOS : le moteur peut être « interrupted » (dès sa création sur iOS 27, ou après un appel), pas seulement « suspended ».
+    // On le relance dans tous les cas, et on démarre un son muet pendant le geste : c'est ce qui réveille la sortie audio d'iOS.
+    if (ac.state !== 'running' && ac.state !== 'closed'){
+      try { const s = ac.createBufferSource(); s.buffer = ac.createBuffer(1, 1, ac.sampleRate); s.connect(ac.destination); s.start(0); } catch(e){}
+      ac.resume().catch(() => {});
+    }
     if (wantMusic && !mus) startMusic(wantMusic);
   }
   for (const ev of ['pointerdown', 'keydown', 'touchend']) addEventListener(ev, unlock, {capture:true, passive:true});
