@@ -8,6 +8,9 @@
   color-scheme:dark;
 }
 html,body{height:100%;margin:0}
+/* téléphone : pas de zoom au double toucher (menus encore défilables), et en combat ni zoom ni défilement ; pas de loupe ni de menu à l'appui long */
+html{touch-action:manipulation}
+#battle{touch-action:none;-webkit-touch-callout:none}
 [hidden]{display:none!important}
 body{background:var(--bg);color:var(--fg);font-family:var(--font-b);overflow:hidden;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
 .app{height:100vh;height:100dvh;max-width:760px;margin:0 auto;box-sizing:border-box;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:10px;position:relative}
